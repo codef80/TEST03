@@ -807,16 +807,32 @@
     }
 
     async function initPage(){
-      await Promise.all([
-        loadFinanceSummary(),
-        loadExpensesData(),
-        loadBookingExpenses(1),
-        loadProjectsForFinance(),
-        loadTargetsData()
-      ]);
-      await loadProjectExpensesDetailedData();
-      await loadProjectReport();
+  const tasks = await Promise.allSettled([
+    loadFinanceSummary(),
+    loadExpensesData(),
+    loadBookingExpenses(1),
+    loadProjectsForFinance(),
+    loadTargetsData()
+  ]);
+
+  tasks.forEach((r, i) => {
+    if (r.status === "rejected") {
+      console.error("Finance init task failed:", i, r.reason);
     }
+  });
+
+  try {
+    await loadProjectExpensesDetailedData();
+  } catch (e) {
+    console.error("loadProjectExpensesDetailedData failed", e);
+  }
+
+  try {
+    await loadProjectReport();
+  } catch (e) {
+    console.error("loadProjectReport failed", e);
+  }
+}
 
     function num(v){ return Number(v || 0) || 0; }
     function fmt(v){ return new Intl.NumberFormat("en-US", { maximumFractionDigits: 2 }).format(num(v)); }
