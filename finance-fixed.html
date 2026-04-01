@@ -769,23 +769,26 @@
     }
 
     function renderTopPageNav(){
-      const nav = document.getElementById("topPageNav");
-      const pages = [
-        { id: "dashboard", text: "لوحة التحكم", icon: "fa-gauge-high", href: APP_CONFIG.PAGES.dashboard },
-        { id: "bookings",  text: "الحجوزات", icon: "fa-calendar-check", href: (APP_CONFIG.PAGES.bookings || 'bookings.html') },
-        { id: "finance",   text: "المالية",      icon: "fa-wallet",     href: APP_CONFIG.PAGES.finance },
-        { id: "projects",  text: "المشاريع",     icon: "fa-diagram-project", href: APP_CONFIG.PAGES.projects },
-        { id: "settings",  text: "الإعدادات",    icon: "fa-gear", href: APP_CONFIG.PAGES.settings }
-      ];
+  const nav = document.getElementById("topPageNav");
+  const pages = [
+    { id: "dashboard", text: "لوحة التحكم", icon: "fa-gauge-high", href: "index.html" },
+    { id: "bookings",  text: "الحجوزات", icon: "fa-calendar-check", href: "index.html" },
+    { id: "finance",   text: "المالية",      icon: "fa-wallet",     href: "index.html" },
+    { id: "projects",  text: "المشاريع",     icon: "fa-diagram-project", href: "index.html" },
+    { id: "settings",  text: "الإعدادات",    icon: "fa-gear", href: "index.html" }
+  ];
 
-      const allowed = pages.filter(p => !Session.canAccess || Session.canAccess(p.id));
-      nav.innerHTML = allowed.map(p => `
-        <a class="top-link ${p.id === 'finance' ? 'active' : ''}" href="${p.href}">
-          <i class="fa-solid ${p.icon}"></i>
-          <span>${p.text}</span>
-        </a>
-      `).join("");
-    }
+  const currentPageId = document.title === "المالية والمصروفات" ? "finance" : 
+                         (document.title === "الإعدادات" ? "settings" : "dashboard");
+
+  const allowed = pages.filter(p => !Session.canAccess || Session.canAccess(p.id));
+  nav.innerHTML = allowed.map(p => `
+    <a class="top-link ${p.id === currentPageId ? 'active' : ''}" href="${p.href}">
+      <i class="fa-solid ${p.icon}"></i>
+      <span>${p.text}</span>
+    </a>
+  `).join("");
+}
 
     function wireEvents(){
       document.getElementById("expenseSearch").addEventListener("input", () => renderExpensesPage(1));
