@@ -22,7 +22,7 @@ const APP_CONFIG = {
     bookings:  "bookings.html",
     finance:   "finance-fixed.html",
     projects:  "projects.html",
-    settings:  "settings-fixed.html",
+    settings:  "index.html?page=settings",
     public:    "public.html",
     search:    "search.html",
   },
