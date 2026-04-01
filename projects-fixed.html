@@ -280,22 +280,6 @@
     function esc(t){ return String(t ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#039;'); }
     function num(v){ return Number(v || 0) || 0; }
 
-    function buildTopNav(){
-      const nav = document.getElementById('topPageNav');
-      const pages = [
-        { id:'dashboard', label:'لوحة التحكم', icon:'fa-gauge', href:'dashboard.html' },
-        { id:'bookings', label:'الحجوزات', icon:'fa-calendar-check', href:'bookings.html' },
-        { id:'finance', label:'المالية', icon:'fa-wallet', href:'finance.html' },
-        { id:'projects', label:'المشاريع', icon:'fa-diagram-project', href:'projects.html', active:true },
-        { id:'settings', label:'الإعدادات', icon:'fa-gear', href:'settings.html' }
-      ];
-      nav.innerHTML = pages.map(p => `
-        <a class="top-link ${p.active ? 'active' : ''}" href="${p.href}">
-          <i class="fa-solid ${p.icon}"></i> ${p.label}
-        </a>
-      `).join('');
-    }
-
     function getProjectName(p){
       return String(p?.['اسم_المشروع'] ?? p?.['اسم المشروع'] ?? p?.name ?? '');
     }
@@ -330,7 +314,6 @@
     }
 
     async function initPage(){
-      buildTopNav();
       projectModal = new bootstrap.Modal(document.getElementById('projectModal'));
 
       const session = Session.get ? Session.get() : {};
