@@ -16,16 +16,16 @@ const APP_CONFIG = {
   APP_LOGO:    "https://i.ibb.co/N6TXzy3q/image.png",
 
   /* ── مسارات الصفحات ── */
-  PAGES: {
-    index:     "index.html",
-    dashboard: "dashboard.html",
-    bookings:  "bookings.html",
-    finance:   "finance-fixed.html",
-    projects:  "projects.html",
-    settings:  "index.html?page=settings",
-    public:    "public.html",
-    search:    "search.html",
-  },
+PAGES: {
+  index:     "index.html",
+  dashboard: "dashboard-fixed.html",
+  bookings:  "bookings-fixed2.html",
+  finance:   "finance-fixed.html",
+  projects:  "projects-fixed.html",
+  settings:  "settings-fixed.html",
+  public:    "public.html",
+  search:    "search.html",
+},
 
   /* ── مفاتيح localStorage ── */
   STORAGE: {
