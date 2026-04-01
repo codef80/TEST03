@@ -1,0 +1,783 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>وكالة ميديا — تسجيل الدخول</title>
+
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.rtl.min.css" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;800;900&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+  <style>
+    :root {
+      --primary: #014979;
+      --primary-dark: #013560;
+      --primary-light: #e8f4fd;
+      --gold: #c6a43f;
+      --gold-light: #f8efcf;
+      --gold-dark: #a68a2e;
+      --success: #059669;
+      --danger: #dc2626;
+      --warning: #f97316;
+      --info: #0ea5e9;
+      --purple: #7e3af2;
+
+      --bg: #f0f4f8;
+      --card-bg: #ffffff;
+      --border: rgba(15,23,42,.08);
+      --text: #0f172a;
+      --text-muted: #64748b;
+      --shadow-sm: 0 2px 8px rgba(15,23,42,.06);
+      --shadow-md: 0 8px 24px rgba(15,23,42,.10);
+      --shadow-lg: 0 20px 48px rgba(15,23,42,.14);
+      --radius-sm: .65rem;
+      --radius-md: 1rem;
+      --radius-lg: 1.5rem;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Tajawal', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+    }
+
+    #loginPage {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background:
+        radial-gradient(ellipse at 20% 50%, rgba(1,73,121,.18) 0%, transparent 60%),
+        radial-gradient(ellipse at 80% 20%, rgba(198,164,63,.12) 0%, transparent 50%),
+        linear-gradient(135deg, #00243f 0%, #014979 50%, #026aa7 100%);
+      padding: 1rem;
+      position: relative;
+      overflow: hidden;
+    }
+
+    #loginPage::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background-image:
+        radial-gradient(circle at 15% 85%, rgba(198,164,63,.08) 0%, transparent 40%),
+        radial-gradient(circle at 85% 15%, rgba(255,255,255,.04) 0%, transparent 40%);
+      pointer-events: none;
+    }
+
+    .login-card {
+      background: rgba(255,255,255,.97);
+      border-radius: var(--radius-lg);
+      padding: 2.5rem 2rem;
+      width: 100%;
+      max-width: 400px;
+      box-shadow: var(--shadow-lg), 0 0 0 1px rgba(255,255,255,.2);
+      position: relative;
+      z-index: 1;
+      backdrop-filter: blur(20px);
+    }
+
+    .login-card::before {
+      content: "";
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 4px;
+      background: linear-gradient(90deg, var(--gold-dark), var(--gold), var(--gold-dark));
+      border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+    }
+
+    .login-logo-wrap {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: .75rem;
+      margin-bottom: 2rem;
+    }
+
+    .login-logo {
+      width: 68px;
+      height: 68px;
+      border-radius: 1.2rem;
+      object-fit: cover;
+      box-shadow: 0 12px 28px rgba(1,73,121,.2);
+      border: 2px solid var(--gold-light);
+    }
+
+    .login-title {
+      font-size: 1.5rem;
+      font-weight: 800;
+      color: var(--primary);
+      text-align: center;
+    }
+
+    .login-subtitle {
+      font-size: .85rem;
+      color: var(--text-muted);
+      text-align: center;
+      margin-top: .2rem;
+    }
+
+    .login-field label {
+      font-weight: 700;
+      font-size: .85rem;
+      color: var(--text);
+      margin-bottom: .45rem;
+      display: block;
+    }
+
+    .login-input {
+      width: 100%;
+      padding: .8rem 1rem;
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius-sm);
+      font-family: 'Tajawal', sans-serif;
+      font-size: 1rem;
+      background: #f8fafc;
+      color: var(--text);
+      transition: all .2s;
+      letter-spacing: .1em;
+    }
+
+    .login-input:focus {
+      outline: none;
+      border-color: var(--primary);
+      background: #fff;
+      box-shadow: 0 0 0 3px rgba(1,73,121,.1);
+    }
+
+    .login-input::placeholder {
+      letter-spacing: normal;
+      color: #94a3b8;
+    }
+
+    .login-btn {
+      width: 100%;
+      padding: .85rem;
+      background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+      color: #fff;
+      border: none;
+      border-radius: var(--radius-sm);
+      font-family: 'Tajawal', sans-serif;
+      font-size: 1rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all .2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: .5rem;
+      margin-top: 1.25rem;
+      box-shadow: 0 4px 16px rgba(1,73,121,.3);
+    }
+
+    .login-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(1,73,121,.4);
+    }
+
+    .login-btn:active { transform: none; }
+    .login-btn:disabled {
+      opacity: .7;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .login-error {
+      background: #fef2f2;
+      border: 1px solid #fca5a5;
+      color: var(--danger);
+      border-radius: var(--radius-sm);
+      padding: .65rem .9rem;
+      font-size: .85rem;
+      font-weight: 600;
+      display: none;
+      align-items: center;
+      gap: .5rem;
+      margin-bottom: 1rem;
+    }
+
+    .login-error.show { display: flex; }
+
+    .login-footer {
+      text-align: center;
+      margin-top: 1.5rem;
+      padding-top: 1.25rem;
+      border-top: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      font-size: .78rem;
+      color: var(--text-muted);
+    }
+
+    #mainApp {
+      display: none;
+      flex-direction: column;
+      min-height: 100vh;
+    }
+
+    #mainApp.visible { display: flex; }
+
+    .app-header {
+      background: linear-gradient(135deg, #00243f 0%, #014979 60%, #026aa7 100%);
+      padding: .9rem 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      box-shadow: 0 4px 20px rgba(0,0,0,.2);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .header-brand {
+      display: flex;
+      align-items: center;
+      gap: .75rem;
+    }
+
+    .header-logo {
+      width: 44px;
+      height: 44px;
+      border-radius: .85rem;
+      object-fit: cover;
+      border: 1.5px solid rgba(255,255,255,.25);
+      box-shadow: 0 4px 12px rgba(0,0,0,.2);
+      flex-shrink: 0;
+    }
+
+    .header-title {
+      font-size: 1.1rem;
+      font-weight: 800;
+      color: #fff;
+      line-height: 1.2;
+    }
+
+    .header-sub {
+      font-size: .72rem;
+      color: rgba(255,255,255,.72);
+    }
+
+    .header-user {
+      display: flex;
+      align-items: center;
+      gap: .75rem;
+    }
+
+    .user-name-badge {
+      font-size: .82rem;
+      color: rgba(255,255,255,.88);
+      font-weight: 600;
+      display: none;
+    }
+
+    @media (min-width: 576px) {
+      .user-name-badge { display: block; }
+    }
+
+    .logout-btn {
+      background: rgba(255,255,255,.12);
+      border: 1px solid rgba(255,255,255,.2);
+      color: #fff;
+      width: 38px;
+      height: 38px;
+      border-radius: .65rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all .2s;
+      font-size: .95rem;
+    }
+
+    .logout-btn:hover {
+      background: rgba(220,38,38,.5);
+      border-color: transparent;
+    }
+
+    .bottom-nav {
+      position: fixed;
+      bottom: 0; left: 0; right: 0;
+      background: #fff;
+      border-top: 1px solid var(--border);
+      display: flex;
+      z-index: 99;
+      box-shadow: 0 -4px 20px rgba(15,23,42,.08);
+      padding-bottom: env(safe-area-inset-bottom, 0);
+    }
+
+    .bottom-nav-item {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: .55rem .25rem;
+      gap: .25rem;
+      cursor: pointer;
+      color: var(--text-muted);
+      font-size: .65rem;
+      font-weight: 600;
+      transition: all .2s;
+      border: none;
+      background: none;
+      font-family: 'Tajawal', sans-serif;
+      text-decoration: none;
+      position: relative;
+    }
+
+    .bottom-nav-item i { font-size: 1.15rem; }
+
+    .bottom-nav-item.active { color: var(--primary); }
+
+    .bottom-nav-item.active::before {
+      content: "";
+      position: absolute;
+      top: 0; left: 20%; right: 20%;
+      height: 2.5px;
+      background: linear-gradient(90deg, var(--primary), var(--gold));
+      border-radius: 0 0 4px 4px;
+    }
+
+    .sidebar {
+      width: 220px;
+      min-height: calc(100vh - 62px);
+      background: #fff;
+      border-left: 1px solid var(--border);
+      padding: 1.25rem .75rem;
+      display: flex;
+      flex-direction: column;
+      gap: .25rem;
+      flex-shrink: 0;
+    }
+
+    .sidebar-item {
+      display: flex;
+      align-items: center;
+      gap: .7rem;
+      padding: .65rem .9rem;
+      border-radius: var(--radius-sm);
+      color: var(--text-muted);
+      font-size: .88rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all .18s;
+      border: none;
+      background: none;
+      font-family: 'Tajawal', sans-serif;
+      text-decoration: none;
+      width: 100%;
+      text-align: right;
+    }
+
+    .sidebar-item i {
+      width: 18px;
+      text-align: center;
+      font-size: .95rem;
+    }
+
+    .sidebar-item:hover {
+      background: var(--primary-light);
+      color: var(--primary);
+    }
+
+    .sidebar-item.active {
+      background: linear-gradient(135deg, var(--primary) 0%, #026aa7 100%);
+      color: #fff;
+      box-shadow: 0 4px 12px rgba(1,73,121,.3);
+    }
+
+    .app-layout {
+      display: flex;
+      flex: 1;
+      overflow: hidden;
+    }
+
+    .page-content {
+      flex: 1;
+      overflow-y: auto;
+      padding: 1.25rem;
+      padding-bottom: 5rem;
+    }
+
+    @media (min-width: 992px) {
+      .sidebar { display: flex; }
+      .bottom-nav { display: none; }
+      .page-content { padding-bottom: 1.25rem; }
+    }
+
+    @media (max-width: 991px) {
+      .sidebar { display: none; }
+    }
+
+    .page-frame {
+      width: 100%;
+      height: 100%;
+      border: none;
+      display: none;
+    }
+
+    .page-frame.active { display: block; }
+
+    .page-loader {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 300px;
+      gap: 1rem;
+      color: var(--text-muted);
+    }
+
+    .page-loader .spinner-border {
+      color: var(--primary);
+      width: 2.5rem;
+      height: 2.5rem;
+    }
+
+    .btn {
+      font-family: 'Tajawal', sans-serif;
+      font-weight: 600;
+    }
+
+    .form-control, .form-select {
+      font-family: 'Tajawal', sans-serif;
+      border-color: var(--border);
+    }
+
+    .form-control:focus, .form-select:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 .2rem rgba(1,73,121,.15);
+    }
+
+    .modal-content {
+      border-radius: var(--radius-lg);
+      border: none;
+    }
+
+    .modal-header {
+      border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+    }
+  </style>
+</head>
+<body>
+
+<div id="loginPage">
+  <div class="login-card">
+    <div class="login-logo-wrap">
+      <img id="loginLogo" src="https://i.ibb.co/N6TXzy3q/image.png" alt="شعار الوكالة" class="login-logo">
+      <div>
+        <div class="login-title" id="loginAppName">وكالة ميديا</div>
+        <div class="login-subtitle">جميع أعمالك في واجهة واحدة</div>
+      </div>
+    </div>
+
+    <div class="login-error" id="loginError">
+      <i class="fas fa-exclamation-triangle"></i>
+      <span id="loginErrorText"></span>
+    </div>
+
+    <div class="login-field mb-3">
+      <label for="loginCode">
+        <i class="fas fa-lock me-1" style="color:var(--primary)"></i>
+        رمز الدخول
+      </label>
+      <input
+        type="password"
+        id="loginCode"
+        class="login-input"
+        placeholder="• • • • • • • •"
+        autocomplete="current-password"
+      >
+    </div>
+
+    <button class="login-btn" id="loginBtn" onclick="doLogin()">
+      <i class="fas fa-sign-in-alt"></i>
+      دخول
+    </button>
+
+    <div class="login-footer">
+      <span>النسخة 4.0</span>
+      <span id="loginStatus">جاهز</span>
+    </div>
+  </div>
+</div>
+
+<div id="mainApp">
+  <header class="app-header">
+    <div class="header-brand">
+      <img id="headerLogo" src="https://i.ibb.co/N6TXzy3q/image.png" alt="" class="header-logo">
+      <div>
+        <div class="header-title" id="headerTitle">وكالة ميديا</div>
+        <div class="header-sub">لوحة الإدارة</div>
+      </div>
+    </div>
+    <div class="header-user">
+      <span class="user-name-badge">
+        مرحباً <span id="headerUserName">—</span>
+      </span>
+      <button class="logout-btn" onclick="doLogout()" title="تسجيل الخروج">
+        <i class="fas fa-right-from-bracket"></i>
+      </button>
+    </div>
+  </header>
+
+  <div class="app-layout">
+    <nav class="sidebar" id="sidebar"></nav>
+
+    <main class="page-content" id="pageContent">
+      <div class="page-loader" id="pageLoader">
+        <div class="spinner-border"></div>
+        <span>جاري التحميل...</span>
+      </div>
+
+      <iframe id="frame-dashboard" class="page-frame" src="" title="لوحة التحكم"></iframe>
+      <iframe id="frame-bookings" class="page-frame" src="" title="الحجوزات"></iframe>
+      <iframe id="frame-finance" class="page-frame" src="" title="المصروفات"></iframe>
+      <iframe id="frame-projects" class="page-frame" src="" title="المشاريع"></iframe>
+      <iframe id="frame-settings" class="page-frame" src="" title="الإعدادات"></iframe>
+    </main>
+  </div>
+
+  <nav class="bottom-nav" id="bottomNav"></nav>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="config-fixed.js"></script>
+
+<script>
+const NAV_PAGES = [
+  { id: "dashboard", label: "لوحة التحكم", icon: "fas fa-gauge", frame: "dashboard-fixed.html" },
+  { id: "bookings", label: "الحجوزات", icon: "fas fa-calendar-check", frame: "bookings-fixed2.html" },
+  { id: "finance", label: "المصروفات والمالية", icon: "fas fa-chart-line", frame: "finance-fixed.html" },
+  { id: "projects", label: "المشاريع", icon: "fas fa-diagram-project", frame: "projects-fixed.html" },
+  { id: "settings", label: "الإعدادات", icon: "fas fa-gear", frame: "settings-fixed.html" }
+];
+
+let currentPage = "dashboard";
+
+document.getElementById("loginCode").addEventListener("keydown", e => {
+  if (e.key === "Enter") doLogin();
+});
+
+async function doLogin() {
+  const code = document.getElementById("loginCode").value.trim();
+  const btn  = document.getElementById("loginBtn");
+  const err  = document.getElementById("loginError");
+
+  if (!code) {
+    showLoginError("الرجاء إدخال رمز الدخول");
+    return;
+  }
+
+  err.classList.remove("show");
+  btn.disabled = true;
+  btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> جاري التحقق...';
+  document.getElementById("loginStatus").textContent = "جاري التحقق...";
+
+  try {
+    const result = await API.run("verifyLoginCodeV2", code);
+
+    if (result && result.success) {
+      Session.save(result);
+      showMainApp();
+    } else {
+      showLoginError(result?.message || "رمز الدخول غير صحيح");
+    }
+  } catch (e) {
+    showLoginError("تعذر الاتصال بالخادم");
+    console.error(e);
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = '<i class="fas fa-sign-in-alt"></i> دخول';
+    document.getElementById("loginStatus").textContent = "جاهز";
+  }
+}
+
+function showLoginError(msg) {
+  const err = document.getElementById("loginError");
+  document.getElementById("loginErrorText").textContent = msg;
+  err.classList.add("show");
+  setTimeout(() => err.classList.remove("show"), 5000);
+}
+
+function showMainApp() {
+  document.getElementById("loginPage").style.display = "none";
+  document.getElementById("mainApp").classList.add("visible");
+
+  const session = Session.get();
+  document.getElementById("headerUserName").textContent = session.userName || "—";
+
+  buildNav();
+  preloadSystemCaches();
+  preloadCorePages();
+  loadInitialPage();
+}
+
+function getAllowedPages() {
+  return NAV_PAGES.filter(page => !Session.canAccess || Session.canAccess(page.id));
+}
+
+function updateNavActive() {
+  document.querySelectorAll(".sidebar-item[data-page-id], .bottom-nav-item[data-page-id]").forEach(el => {
+    el.classList.toggle("active", el.dataset.pageId === currentPage);
+  });
+}
+
+function navigateTo(pageId) {
+  openPage(pageId);
+}
+
+function buildNav() {
+  const sidebar = document.getElementById("sidebar");
+  const bottomNav = document.getElementById("bottomNav");
+
+  sidebar.innerHTML = "";
+  bottomNav.innerHTML = "";
+
+  const allowedPages = getAllowedPages();
+
+  allowedPages.forEach(page => {
+    sidebar.insertAdjacentHTML("beforeend", `
+      <button type="button" class="sidebar-item" data-page-id="${page.id}">
+        <i class="${page.icon}"></i>
+        <span>${page.label}</span>
+      </button>
+    `);
+
+    bottomNav.insertAdjacentHTML("beforeend", `
+      <button type="button" class="bottom-nav-item" data-page-id="${page.id}">
+        <i class="${page.icon}"></i>
+        <span>${page.label}</span>
+      </button>
+    `);
+  });
+
+  sidebar.querySelectorAll("[data-page-id]").forEach(btn => {
+    btn.addEventListener("click", () => openPage(btn.dataset.pageId));
+  });
+
+  bottomNav.querySelectorAll("[data-page-id]").forEach(btn => {
+    btn.addEventListener("click", () => openPage(btn.dataset.pageId));
+  });
+
+  updateNavActive();
+}
+
+async function preloadSystemCaches() {
+  try {
+    const cfg = await API.run("getSystemSettings");
+    if (cfg) {
+      localStorage.setItem(APP_CONFIG.STORAGE.systemCfg, JSON.stringify(cfg));
+      if (cfg.templates && typeof cfg.templates === "object") {
+        localStorage.setItem(APP_CONFIG.STORAGE.templates, JSON.stringify(cfg.templates));
+      }
+    }
+  } catch (e) {
+    console.warn("preloadSystemCaches failed", e);
+  }
+}
+
+function preloadCorePages() {
+  ["dashboard", "bookings"].forEach(pageId => {
+    const page = NAV_PAGES.find(p => p.id === pageId);
+    const frame = document.getElementById("frame-" + pageId);
+    if (!page || !frame || frame.getAttribute("src")) return;
+    frame.src = page.frame;
+  });
+}
+
+function loadInitialPage() {
+  const allowedPages = getAllowedPages();
+
+  if (!allowedPages.length) {
+    document.getElementById("pageLoader").innerHTML = `
+      <div style="text-align:center;color:#dc2626;font-weight:700;padding:2rem">
+        لا توجد صفحات متاحة لهذا المستخدم
+      </div>
+    `;
+    return;
+  }
+
+  openPage(allowedPages[0].id);
+}
+
+function openPage(pageId) {
+  const page = NAV_PAGES.find(p => p.id === pageId);
+  if (!page) return;
+
+  currentPage = pageId;
+  updateNavActive();
+
+  const loader = document.getElementById("pageLoader");
+  const allFrames = document.querySelectorAll(".page-frame");
+  allFrames.forEach(f => f.classList.remove("active"));
+
+  const targetFrame = document.getElementById("frame-" + pageId);
+
+  if (!targetFrame) {
+    loader.style.display = "flex";
+    loader.innerHTML = `
+      <div style="text-align:center;color:#dc2626;font-weight:700;padding:2rem">
+        الإطار غير موجود للصفحة: ${pageId}
+      </div>
+    `;
+    return;
+  }
+
+  loader.style.display = "flex";
+
+  const activateFrame = () => {
+    allFrames.forEach(f => f.classList.remove("active"));
+    targetFrame.classList.add("active");
+    loader.style.display = "none";
+    try { targetFrame.contentWindow.postMessage({ type: "page:shown", payload: { pageId } }, "*"); } catch (e) {}
+  };
+
+  const desiredSrc = page.frame;
+  const currentSrc = targetFrame.getAttribute("src") || "";
+
+  if (currentSrc !== desiredSrc) {
+    targetFrame.onload = activateFrame;
+    targetFrame.onerror = () => {
+      loader.innerHTML = `
+        <div style="text-align:center;color:#dc2626;font-weight:700;padding:2rem">
+          تعذر تحميل الصفحة: ${desiredSrc}
+        </div>
+      `;
+    };
+    targetFrame.src = desiredSrc;
+  } else {
+    activateFrame();
+  }
+}
+
+function doLogout() {
+  Session.clear();
+  window.location.href = APP_CONFIG.PAGES.index || "index.html";
+}
+
+window.addEventListener("message", e => {
+  const { type, payload } = e.data || {};
+  if (type === "navigate") navigateTo(payload);
+  if (type === "logout") doLogout();
+  if (type === "toast" && typeof Toast !== "undefined") {
+    Toast[payload.level || "info"](payload.message);
+  }
+});
+
+window.addEventListener("load", () => {
+  if (Session.isLoggedIn()) {
+    showMainApp();
+  } else {
+    document.getElementById("loginCode").focus();
+  }
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,558 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>المشاريع</title>
+
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.rtl.min.css" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;800;900&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <script src="config-fixed.js"></script>
+
+  <style>
+    :root{
+      --p:#014979; --p-dk:#013560; --p-lt:#e8f4fd;
+      --gold:#c6a43f; --gold-lt:#fdf6e3; --gold-dk:#a68a2e;
+      --ok:#059669; --ok-lt:#d1fae5;
+      --err:#dc2626; --err-lt:#fee2e2;
+      --warn:#d97706; --warn-lt:#ffedd5;
+      --pur:#7c3aed; --pur-lt:#ede9fe;
+      --bg:#f1f5f9; --card:#fff;
+      --txt:#0f172a; --muted:#64748b;
+      --border:rgba(15,23,42,.08);
+      --sh:0 4px 18px rgba(15,23,42,.07);
+      --sh-lg:0 10px 28px rgba(15,23,42,.12);
+    }
+    *{box-sizing:border-box}
+    html,body{margin:0;padding:0;font-family:'Tajawal',sans-serif;background:var(--bg);color:var(--txt)}
+    body{padding:1rem}
+    @media (max-width:768px){ body{padding:.75rem} }
+
+    .top-nav{
+      position:sticky;top:0;z-index:1000;background:rgba(241,245,249,.92);
+      backdrop-filter:blur(10px);border:1px solid var(--border);border-radius:1rem;
+      padding:.65rem;margin-bottom:1rem;box-shadow:var(--sh);
+    }
+    .top-nav-inner{display:flex;gap:.45rem;overflow:auto;scrollbar-width:none}
+    .top-nav-inner::-webkit-scrollbar{display:none}
+    .top-link{
+      flex:0 0 auto;display:inline-flex;align-items:center;gap:.4rem;padding:.65rem 1rem;border-radius:999px;
+      text-decoration:none;border:1px solid var(--border);background:#fff;color:var(--muted);font-weight:800;font-size:.88rem;white-space:nowrap;
+    }
+    .top-link.active{background:linear-gradient(135deg,var(--p),var(--gold));color:#fff;border-color:transparent;box-shadow:0 8px 18px rgba(1,73,121,.22)}
+
+    .hero{
+      background:linear-gradient(135deg,#00243f 0%, #014979 52%, #026aa7 100%);
+      color:#fff;border-radius:1.5rem;padding:1.25rem 1.35rem;box-shadow:0 16px 36px rgba(1,73,121,.23);
+      margin-bottom:1rem;position:relative;overflow:hidden;
+    }
+    .hero::before{
+      content:"";position:absolute;inset-inline-end:-60px;top:-40px;width:180px;height:180px;border-radius:50%;
+      background:radial-gradient(circle, rgba(255,255,255,.2), transparent 68%);
+    }
+    .hero-title{font-weight:900;font-size:1.4rem;margin:0 0 .35rem}
+    .hero-sub{margin:0;color:rgba(255,255,255,.88);font-size:.92rem}
+    .hero-meta{margin-top:.85rem;display:flex;gap:.5rem;flex-wrap:wrap}
+    .hero-chip{
+      display:inline-flex;align-items:center;gap:.35rem;padding:.35rem .75rem;border-radius:999px;
+      background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.18);font-size:.8rem;font-weight:700
+    }
+
+    .summary-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:.75rem;margin-bottom:1rem}
+    @media(max-width:992px){ .summary-grid{grid-template-columns:repeat(2,minmax(0,1fr))} }
+    @media(max-width:560px){ .summary-grid{grid-template-columns:1fr} }
+    .summary-card{
+      background:var(--card);border:1px solid var(--border);border-radius:1.25rem;box-shadow:var(--sh);padding:1rem;position:relative;overflow:hidden
+    }
+    .summary-card::before{
+      content:"";position:absolute;inset-inline-start:0;top:0;width:100%;height:4px;background:linear-gradient(90deg,var(--p),#38bdf8)
+    }
+    .summary-card.k2::before{ background:linear-gradient(90deg,var(--ok),#34d399) }
+    .summary-card.k3::before{ background:linear-gradient(90deg,var(--gold-dk),var(--gold)) }
+    .summary-card.k4::before{ background:linear-gradient(90deg,var(--pur),#a78bfa) }
+    .summary-label{font-size:.8rem;color:var(--muted);font-weight:700}
+    .summary-value{font-size:1.55rem;font-weight:900;margin:.25rem 0 .1rem}
+    .summary-note{font-size:.76rem;color:var(--muted)}
+    .summary-icon{position:absolute;inset-inline-end:-4px;bottom:-10px;font-size:3.4rem;opacity:.06;pointer-events:none}
+
+    .box{
+      background:var(--card);border:1px solid var(--border);border-radius:1.25rem;box-shadow:var(--sh);margin-bottom:1rem;overflow:hidden
+    }
+    .box-head{
+      display:flex;align-items:center;justify-content:space-between;gap:.75rem;flex-wrap:wrap;
+      padding:.95rem 1rem;border-bottom:1px solid var(--border);background:linear-gradient(180deg,#fff 0%,#f8fafc 100%)
+    }
+    .box-title{font-weight:900;color:var(--p);font-size:1rem;margin:0}
+    .box-body{padding:1rem}
+    .toolbar{display:flex;align-items:center;justify-content:space-between;gap:.75rem;flex-wrap:wrap;margin-bottom:.85rem}
+    .toolbar-group{display:flex;gap:.55rem;flex-wrap:wrap;align-items:center}
+
+    .form-control,.form-select{border-radius:.9rem;padding:.7rem .9rem;border-color:#dbe4ee}
+    .form-control:focus,.form-select:focus{border-color:rgba(1,73,121,.35);box-shadow:0 0 0 .2rem rgba(1,73,121,.12)}
+    .btn{border-radius:.9rem;font-weight:800}
+    .btn-main{background:var(--p);color:#fff}
+    .btn-main:hover{background:var(--p-dk);color:#fff}
+    .btn-soft{background:#f8fafc;border:1px solid var(--border);color:#334155}
+    .btn-soft:hover{background:#eef2f7}
+
+    .chip{
+      display:inline-flex;align-items:center;gap:.32rem;padding:.2rem .55rem;border-radius:999px;font-size:.72rem;font-weight:800;border:1px solid transparent;white-space:nowrap
+    }
+    .chip.ok{background:var(--ok-lt);color:var(--ok);border-color:rgba(5,150,105,.16)}
+    .chip.warn{background:var(--warn-lt);color:var(--warn);border-color:rgba(217,119,6,.15)}
+    .chip.base{background:var(--p-lt);color:var(--p);border-color:rgba(1,73,121,.14)}
+    .chip.gray{background:#f1f5f9;color:#475569;border-color:#e2e8f0}
+
+    .card-list{display:grid;gap:.75rem}
+    .mobile-card{border:1px solid var(--border);border-radius:1rem;background:#fff;padding:.9rem;box-shadow:var(--sh)}
+    .mobile-card .head{display:flex;justify-content:space-between;gap:.75rem;align-items:flex-start;margin-bottom:.45rem}
+    .mobile-card .title{font-weight:900;color:var(--p)}
+    .mobile-card .line{font-size:.83rem;margin-top:.25rem}
+    .mobile-actions{display:flex;gap:.4rem;flex-wrap:wrap;margin-top:.75rem}
+
+    .table-wrap{width:100%;overflow:auto;border-radius:1rem;border:1px solid var(--border)}
+    .table{margin-bottom:0}
+    .table thead th{background:#f8fafc;color:#334155;font-weight:900;white-space:nowrap;font-size:.84rem}
+    .table td{vertical-align:middle;font-size:.84rem}
+    .table-actions{display:flex;gap:.35rem;flex-wrap:wrap}
+
+    .empty{border:1px dashed #cbd5e1;border-radius:1rem;padding:1.2rem;text-align:center;color:var(--muted);background:#fff}
+    .hidden-mobile{display:table}
+    .hidden-desktop{display:none}
+    @media(max-width:991.98px){
+      .hidden-mobile{display:none !important}
+      .hidden-desktop{display:block !important}
+    }
+
+    .steps-wrap{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:.6rem}
+    .step-item{
+      border:1px solid var(--border);background:#fff;border-radius:.9rem;padding:.7rem .85rem;
+      display:flex;align-items:center;gap:.55rem;font-weight:700;color:#334155
+    }
+    .text-num{font-variant-numeric:tabular-nums}
+  </style>
+</head>
+<body>
+  <div class="top-nav">
+    <div class="top-nav-inner" id="topPageNav"></div>
+  </div>
+
+  <section class="hero">
+    <h1 class="hero-title"><i class="fa-solid fa-diagram-project me-2"></i>المشاريع</h1>
+    <p class="hero-sub">إدارة المشاريع، متابعة الحالة حسب الخطوات المعرفة من الإعدادات، وإضافة وتعديل وحذف المشاريع.</p>
+    <div class="hero-meta">
+      <span class="hero-chip"><i class="fa-solid fa-building"></i> <span id="agencyNameHero">وكالة ميديا</span></span>
+      <span class="hero-chip"><i class="fa-solid fa-user"></i> <span id="currentUserHero">—</span></span>
+      <span class="hero-chip"><i class="fa-solid fa-list-check"></i> <span id="stepsCountHero">0</span> خطوة</span>
+    </div>
+  </section>
+
+  <section class="summary-grid">
+    <div class="summary-card">
+      <div class="summary-label">عدد المشاريع</div>
+      <div class="summary-value text-num" id="sumProjects">0</div>
+      <div class="summary-note">كل السجلات</div>
+      <i class="fa-solid fa-briefcase summary-icon"></i>
+    </div>
+    <div class="summary-card k2">
+      <div class="summary-label">قيد التنفيذ</div>
+      <div class="summary-value text-num" id="sumActive">0</div>
+      <div class="summary-note">بحسب خطوات المشروع</div>
+      <i class="fa-solid fa-spinner summary-icon"></i>
+    </div>
+    <div class="summary-card k3">
+      <div class="summary-label">المكتملة</div>
+      <div class="summary-value text-num" id="sumDone">0</div>
+      <div class="summary-note">منتهية بالكامل</div>
+      <i class="fa-solid fa-circle-check summary-icon"></i>
+    </div>
+    <div class="summary-card k4">
+      <div class="summary-label">الإجمالي التقديري</div>
+      <div class="summary-value text-num" id="sumValue">0</div>
+      <div class="summary-note">من قيمة المشاريع إن وجدت</div>
+      <i class="fa-solid fa-sack-dollar summary-icon"></i>
+    </div>
+  </section>
+
+  <div class="box">
+    <div class="box-head">
+      <h2 class="box-title"><i class="fa-solid fa-list-check me-2"></i>خطوات المشاريع المعتمدة</h2>
+    </div>
+    <div class="box-body">
+      <div id="stepsWrap" class="steps-wrap"></div>
+    </div>
+  </div>
+
+  <div class="box">
+    <div class="box-head">
+      <h2 class="box-title"><i class="fa-solid fa-table me-2"></i>قائمة المشاريع</h2>
+      <button class="btn btn-main" onclick="openProjectModal()"><i class="fa-solid fa-plus me-1"></i> إضافة مشروع</button>
+    </div>
+    <div class="box-body">
+      <div class="toolbar">
+        <div class="toolbar-group">
+          <input id="searchInput" type="text" class="form-control" placeholder="بحث باسم المشروع..." style="min-width:240px">
+          <select id="statusFilter" class="form-select" style="min-width:180px">
+            <option value="">كل الحالات</option>
+            <option value="جديد">جديد</option>
+            <option value="قيد التنفيذ">قيد التنفيذ</option>
+            <option value="مكتمل">مكتمل</option>
+          </select>
+        </div>
+        <div class="toolbar-group">
+          <button class="btn btn-soft" onclick="loadProjects()"><i class="fa-solid fa-rotate me-1"></i> تحديث</button>
+        </div>
+      </div>
+
+      <div class="card-list hidden-desktop" id="projectsCardsContainer"></div>
+
+      <div class="table-wrap hidden-mobile">
+        <table class="table table-striped align-middle" id="projectsTable">
+          <thead>
+            <tr id="projectsHeadRow">
+              <th>اسم المشروع</th>
+              <th>الحالة</th>
+              <th>القيمة</th>
+              <th>تاريخ البداية</th>
+              <th>آخر تحديث</th>
+              <th>إجراءات</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+
+      <div id="emptyState" class="empty d-none">لا توجد مشاريع مطابقة.</div>
+    </div>
+  </div>
+
+  <div class="modal fade" id="projectModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-scrollable modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header text-white" style="background:linear-gradient(135deg,var(--p),var(--gold))">
+          <h5 class="modal-title" id="projectModalTitle">إضافة مشروع</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <form id="projectForm" class="row g-3">
+            <input type="hidden" id="projectId">
+
+            <div class="col-md-6">
+              <label class="form-label">اسم المشروع *</label>
+              <input type="text" id="projectName" class="form-control" required>
+            </div>
+
+            <div class="col-md-6">
+              <label class="form-label">قيمة المشروع</label>
+              <input type="number" id="projectValue" class="form-control" min="0">
+            </div>
+
+            <div class="col-md-6">
+              <label class="form-label">حالة الإنهاء</label>
+              <select id="projectEnded" class="form-select">
+                <option value="false">غير منتهٍ</option>
+                <option value="true">مكتمل</option>
+              </select>
+            </div>
+
+            <div class="col-12">
+              <label class="form-label">الخطوات</label>
+              <div id="projectStepsForm" class="steps-wrap"></div>
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-soft" data-bs-dismiss="modal">إغلاق</button>
+          <button type="button" class="btn btn-main" onclick="saveProject()">حفظ المشروع</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    let _settings = {};
+    let _steps = [];
+    let _projects = [];
+    let _filtered = [];
+    let projectModal = null;
+
+    function fmt(v){ return Number(v || 0).toLocaleString('ar-SA'); }
+    function esc(t){ return String(t ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#039;'); }
+    function num(v){ return Number(v || 0) || 0; }
+
+    function buildTopNav(){
+      const nav = document.getElementById('topPageNav');
+      const pages = [
+        { id:'dashboard', label:'لوحة التحكم', icon:'fa-gauge', href:'dashboard.html' },
+        { id:'bookings', label:'الحجوزات', icon:'fa-calendar-check', href:'bookings.html' },
+        { id:'finance', label:'المالية', icon:'fa-wallet', href:'finance.html' },
+        { id:'projects', label:'المشاريع', icon:'fa-diagram-project', href:'projects.html', active:true },
+        { id:'settings', label:'الإعدادات', icon:'fa-gear', href:'settings.html' }
+      ];
+      nav.innerHTML = pages.map(p => `
+        <a class="top-link ${p.active ? 'active' : ''}" href="${p.href}">
+          <i class="fa-solid ${p.icon}"></i> ${p.label}
+        </a>
+      `).join('');
+    }
+
+    function getProjectName(p){
+      return String(p?.['اسم_المشروع'] ?? p?.['اسم المشروع'] ?? p?.name ?? '');
+    }
+    function getProjectValue(p){
+      const keys = ['قيمة_المشروع','قيمة المشروع','المبلغ','قيمة_العقد','قيمة العقد','سعر_المشروع','سعر المشروع'];
+      for (const k of keys){
+        if (p && p[k] !== undefined && p[k] !== null && String(p[k]).trim() !== '') return num(p[k]);
+      }
+      return 0;
+    }
+    function boolVal(v){
+      return v === true || String(v).toLowerCase() === 'true';
+    }
+    function getProjectStatus(p){
+      const ended = boolVal(p?.['إنهاء_المشروع']) || boolVal(p?.['إنهاء المشروع']);
+      if (ended) return 'مكتمل';
+      if (!_steps.length) return 'قيد التنفيذ';
+      const doneCount = _steps.filter(step => boolVal(p?.[step])).length;
+      if (doneCount === 0) return 'جديد';
+      if (doneCount === _steps.length) return 'مكتمل';
+      return 'قيد التنفيذ';
+    }
+
+    async function safeApi(fn, ...args){
+      try{
+        return await API.run(fn, ...args);
+      }catch(e){
+        console.error(e);
+        Toast.error(e.message || 'تعذر تنفيذ العملية');
+        throw e;
+      }
+    }
+
+    async function initPage(){
+      buildTopNav();
+      projectModal = new bootstrap.Modal(document.getElementById('projectModal'));
+
+      const session = Session.get ? Session.get() : {};
+      document.getElementById('currentUserHero').textContent = session.userName || '—';
+
+      _settings = await safeApi('getSystemSettings');
+      _steps = Array.isArray(_settings?.projectSteps) ? _settings.projectSteps : [];
+      document.getElementById('stepsCountHero').textContent = _steps.length;
+      renderStepsShowcase();
+      bindEvents();
+      await loadProjects();
+    }
+
+    function renderStepsShowcase(){
+      const wrap = document.getElementById('stepsWrap');
+      if (!_steps.length){
+        wrap.innerHTML = '<div class="empty">لا توجد خطوات معرفة حاليًا في الإعدادات.</div>';
+        return;
+      }
+      wrap.innerHTML = _steps.map(s => `
+        <div class="step-item"><i class="fa-solid fa-check-double" style="color:var(--ok)"></i>${esc(s)}</div>
+      `).join('');
+    }
+
+    function bindEvents(){
+      document.getElementById('searchInput').addEventListener('input', applyFilters);
+      document.getElementById('statusFilter').addEventListener('change', applyFilters);
+    }
+
+    async function loadProjects(){
+      Spinner.show('جاري تحميل المشاريع...');
+      try{
+        _projects = await safeApi('getProjects');
+        applyFilters();
+      }finally{
+        Spinner.hide();
+      }
+    }
+
+    function applyFilters(){
+      const search = (document.getElementById('searchInput').value || '').trim().toLowerCase();
+      const status = document.getElementById('statusFilter').value || '';
+
+      _filtered = (_projects || []).filter(p => {
+        const name = getProjectName(p).toLowerCase();
+        const st = getProjectStatus(p);
+        if (search && !name.includes(search)) return false;
+        if (status && st !== status) return false;
+        return true;
+      });
+
+      renderSummary();
+      renderProjects();
+    }
+
+    function renderSummary(){
+      const total = _filtered.length;
+      const active = _filtered.filter(p => getProjectStatus(p) === 'قيد التنفيذ').length;
+      const done = _filtered.filter(p => getProjectStatus(p) === 'مكتمل').length;
+      const totalValue = _filtered.reduce((a,p) => a + getProjectValue(p), 0);
+
+      document.getElementById('sumProjects').textContent = fmt(total);
+      document.getElementById('sumActive').textContent = fmt(active);
+      document.getElementById('sumDone').textContent = fmt(done);
+      document.getElementById('sumValue').textContent = fmt(totalValue);
+    }
+
+    function renderProjects(){
+      const cards = document.getElementById('projectsCardsContainer');
+      const tbody = document.querySelector('#projectsTable tbody');
+      const empty = document.getElementById('emptyState');
+
+      cards.innerHTML = '';
+      tbody.innerHTML = '';
+
+      if (!_filtered.length){
+        empty.classList.remove('d-none');
+        return;
+      }
+      empty.classList.add('d-none');
+
+      _filtered.forEach(p => {
+        const id = String(p.id || p['id'] || '');
+        const name = getProjectName(p) || '—';
+        const status = getProjectStatus(p);
+        const statusClass = status === 'مكتمل' ? 'ok' : (status === 'قيد التنفيذ' ? 'warn' : 'base');
+        const value = getProjectValue(p);
+        const start = p['تاريخ بداية المشروع'] || '—';
+        const updated = p['تاريخ آخر تحديث'] || '—';
+        const stepsDone = _steps.filter(step => boolVal(p[step])).length;
+
+        cards.insertAdjacentHTML('beforeend', `
+          <div class="mobile-card">
+            <div class="head">
+              <div class="title">${esc(name)}</div>
+              <span class="chip ${statusClass}">${esc(status)}</span>
+            </div>
+            <div class="line"><strong>القيمة:</strong> <span class="text-num">${fmt(value)}</span></div>
+            <div class="line"><strong>تاريخ البداية:</strong> ${esc(start)}</div>
+            <div class="line"><strong>آخر تحديث:</strong> ${esc(updated)}</div>
+            <div class="line"><strong>الخطوات المنجزة:</strong> ${fmt(stepsDone)} / ${fmt(_steps.length)}</div>
+            <div class="mobile-actions">
+              <button class="btn btn-sm btn-outline-warning" onclick="editProject('${esc(id)}')"><i class="fa-solid fa-pen"></i> تعديل</button>
+              <button class="btn btn-sm btn-outline-danger" onclick="deleteProjectUI('${esc(id)}')"><i class="fa-solid fa-trash"></i> حذف</button>
+            </div>
+          </div>
+        `);
+
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>${esc(name)}</td>
+          <td><span class="chip ${statusClass}">${esc(status)}</span></td>
+          <td class="text-num">${fmt(value)}</td>
+          <td>${esc(start)}</td>
+          <td>${esc(updated)}</td>
+          <td>
+            <div class="table-actions">
+              <button class="btn btn-sm btn-outline-warning" onclick="editProject('${esc(id)}')"><i class="fa-solid fa-pen"></i></button>
+              <button class="btn btn-sm btn-outline-danger" onclick="deleteProjectUI('${esc(id)}')"><i class="fa-solid fa-trash"></i></button>
+            </div>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function openProjectModal(project = null){
+      document.getElementById('projectForm').reset();
+      document.getElementById('projectId').value = project?.id || project?.['id'] || '';
+      document.getElementById('projectModalTitle').textContent = project ? 'تعديل مشروع' : 'إضافة مشروع';
+      document.getElementById('projectName').value = getProjectName(project || {});
+      document.getElementById('projectValue').value = getProjectValue(project || {}) || '';
+      document.getElementById('projectEnded').value = (boolVal(project?.['إنهاء المشروع']) || boolVal(project?.['إنهاء_المشروع'])) ? 'true' : 'false';
+
+      const stepsWrap = document.getElementById('projectStepsForm');
+      stepsWrap.innerHTML = (_steps || []).map(step => `
+        <label class="step-item">
+          <input type="checkbox" class="form-check-input ms-2 project-step-check" data-step="${esc(step)}" ${boolVal(project?.[step]) ? 'checked' : ''}>
+          <span>${esc(step)}</span>
+        </label>
+      `).join('') || '<div class="empty">عرّف خطوات المشاريع أولًا من الإعدادات.</div>';
+
+      projectModal.show();
+    }
+
+    function editProject(id){
+      const project = (_projects || []).find(p => String(p.id || p['id'] || '') === String(id));
+      if (!project) return Toast.error('تعذر العثور على المشروع');
+      openProjectModal(project);
+    }
+
+    function buildProjectPayload(){
+      const payload = {
+        'اسم المشروع': document.getElementById('projectName').value.trim(),
+        'قيمة المشروع': document.getElementById('projectValue').value ? Number(document.getElementById('projectValue').value) : '',
+        'إنهاء المشروع': document.getElementById('projectEnded').value === 'true'
+      };
+
+      document.querySelectorAll('.project-step-check').forEach(ch => {
+        payload[ch.dataset.step] = ch.checked;
+      });
+
+      return payload;
+    }
+
+    async function saveProject(){
+      const id = document.getElementById('projectId').value.trim();
+      const payload = buildProjectPayload();
+
+      if (!payload['اسم المشروع']){
+        Toast.warning('اسم المشروع مطلوب');
+        return;
+      }
+
+      Spinner.show(id ? 'جاري تحديث المشروع...' : 'جاري إضافة المشروع...');
+      try{
+        if (id){
+          payload.id = id;
+          await safeApi('updateProject', payload);
+          Toast.success('تم تحديث المشروع بنجاح');
+        }else{
+          await safeApi('addProject', payload);
+          Toast.success('تم إضافة المشروع بنجاح');
+        }
+        projectModal.hide();
+        await loadProjects();
+      }finally{
+        Spinner.hide();
+      }
+    }
+
+    async function deleteProjectUI(id){
+      const ok = await Swal.fire({
+        title:'حذف المشروع؟',
+        text:'لن يمكن التراجع عن هذه العملية',
+        icon:'warning',
+        showCancelButton:true,
+        confirmButtonText:'نعم، احذف',
+        cancelButtonText:'إلغاء'
+      });
+      if (!ok.isConfirmed) return;
+
+      Spinner.show('جاري حذف المشروع...');
+      try{
+        await safeApi('deleteProject', id);
+        Toast.success('تم حذف المشروع');
+        await loadProjects();
+      }finally{
+        Spinner.hide();
+      }
+    }
+
+    window.openProjectModal = openProjectModal;
+    window.editProject = editProject;
+    window.saveProject = saveProject;
+    window.deleteProjectUI = deleteProjectUI;
+    window.loadProjects = loadProjects;
+
+    document.addEventListener('DOMContentLoaded', initPage);
+  </script>
+</body>
+</html>

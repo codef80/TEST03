@@ -1,0 +1,1544 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>المالية والمصروفات</title>
+
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.rtl.min.css" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;800;900&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+  <script src="config-fixed.js"></script>
+
+  <style>
+    :root{
+      --p:#014979; --p-dk:#013560; --p-lt:#e8f4fd;
+      --gold:#c6a43f; --gold-lt:#fdf6e3; --gold-dk:#a68a2e;
+      --ok:#059669; --ok-lt:#d1fae5;
+      --err:#dc2626; --err-lt:#fee2e2;
+      --warn:#d97706; --warn-lt:#ffedd5;
+      --pur:#7c3aed; --pur-lt:#ede9fe;
+      --bg:#f1f5f9; --card:#fff;
+      --txt:#0f172a; --muted:#64748b;
+      --border:rgba(15,23,42,.08);
+      --r:.95rem; --r-lg:1.25rem;
+      --sh:0 4px 18px rgba(15,23,42,.07);
+      --sh-lg:0 10px 28px rgba(15,23,42,.12);
+    }
+
+    *{box-sizing:border-box}
+    html,body{
+      margin:0;padding:0;
+      font-family:'Tajawal',sans-serif;
+      background:var(--bg);color:var(--txt)
+    }
+
+    body{padding:1rem}
+    @media (max-width:768px){ body{padding:.75rem} }
+
+    .top-nav{
+      position:sticky;top:0;z-index:1000;
+      background:rgba(241,245,249,.92);
+      backdrop-filter:blur(10px);
+      border:1px solid var(--border);
+      border-radius:1rem;
+      padding:.65rem;
+      margin-bottom:1rem;
+      box-shadow:var(--sh);
+    }
+    .top-nav-inner{
+      display:flex;gap:.45rem;overflow:auto;padding-bottom:.1rem;
+      scrollbar-width:none;
+    }
+    .top-nav-inner::-webkit-scrollbar{display:none}
+    .top-link{
+      flex:0 0 auto;
+      display:inline-flex;align-items:center;gap:.4rem;
+      padding:.65rem 1rem;border-radius:999px;text-decoration:none;
+      border:1px solid var(--border);background:#fff;color:var(--muted);
+      font-weight:800;font-size:.88rem;white-space:nowrap;transition:.18s ease;
+    }
+    .top-link:hover{color:var(--p);border-color:rgba(1,73,121,.22);transform:translateY(-1px)}
+    .top-link.active{
+      background:linear-gradient(135deg,var(--p),var(--gold));
+      color:#fff;border-color:transparent;box-shadow:0 8px 18px rgba(1,73,121,.22);
+    }
+
+    .hero{
+      background:linear-gradient(135deg,#00243f 0%, #014979 52%, #026aa7 100%);
+      color:#fff;border-radius:1.5rem;padding:1.25rem 1.35rem;
+      box-shadow:0 16px 36px rgba(1,73,121,.23);
+      margin-bottom:1rem;position:relative;overflow:hidden;
+    }
+    .hero::before{
+      content:"";position:absolute;inset-inline-end:-60px;top:-40px;width:180px;height:180px;
+      border-radius:50%;
+      background:radial-gradient(circle, rgba(255,255,255,.2), transparent 68%);
+    }
+    .hero-title{font-weight:900;font-size:1.4rem;margin:0 0 .35rem}
+    .hero-sub{margin:0;color:rgba(255,255,255,.88);font-size:.92rem}
+    .hero-meta{margin-top:.85rem;display:flex;gap:.5rem;flex-wrap:wrap}
+    .hero-chip{
+      display:inline-flex;align-items:center;gap:.35rem;
+      padding:.35rem .75rem;border-radius:999px;
+      background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.18);
+      font-size:.8rem;font-weight:700
+    }
+
+    .summary-grid{
+      display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:.75rem;margin-bottom:1rem
+    }
+    @media(max-width:992px){ .summary-grid{grid-template-columns:repeat(2,minmax(0,1fr))} }
+    @media(max-width:560px){ .summary-grid{grid-template-columns:1fr} }
+
+    .summary-card{
+      background:var(--card);border:1px solid var(--border);border-radius:1.25rem;
+      box-shadow:var(--sh);padding:1rem;position:relative;overflow:hidden
+    }
+    .summary-card::before{
+      content:"";position:absolute;inset-inline-start:0;top:0;width:100%;height:4px;
+      background:linear-gradient(90deg,var(--p),#38bdf8)
+    }
+    .summary-card.k2::before{ background:linear-gradient(90deg,var(--ok),#34d399) }
+    .summary-card.k3::before{ background:linear-gradient(90deg,var(--gold-dk),var(--gold)) }
+    .summary-card.k4::before{ background:linear-gradient(90deg,var(--pur),#a78bfa) }
+    .summary-label{font-size:.8rem;color:var(--muted);font-weight:700}
+    .summary-value{font-size:1.55rem;font-weight:900;margin:.25rem 0 .1rem}
+    .summary-note{font-size:.76rem;color:var(--muted)}
+    .summary-icon{
+      position:absolute;inset-inline-start:auto;inset-inline-end:-4px;bottom:-10px;
+      font-size:3.4rem;opacity:.06;pointer-events:none
+    }
+
+    .box{
+      background:var(--card);border:1px solid var(--border);border-radius:1.25rem;
+      box-shadow:var(--sh);margin-bottom:1rem;overflow:hidden
+    }
+    .box-head{
+      display:flex;align-items:center;justify-content:space-between;gap:.75rem;
+      padding:.95rem 1rem;border-bottom:1px solid var(--border);
+      background:linear-gradient(180deg,#fff 0%,#f8fafc 100%)
+    }
+    .box-title{font-weight:900;color:var(--p);font-size:1rem;margin:0}
+    .box-body{padding:1rem}
+
+    .nav-pills .nav-link{
+      border-radius:999px;font-weight:800;color:var(--muted);
+      border:1px solid rgba(148,163,184,.35);
+      background:rgba(255,255,255,.75);box-shadow:0 4px 10px rgba(15,23,42,.05)
+    }
+    .nav-pills .nav-link.active{
+      background:linear-gradient(135deg,var(--p),var(--gold));color:#fff;border-color:transparent
+    }
+
+    .mini-stats{
+      display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:.65rem;margin-bottom:1rem
+    }
+    @media(max-width:992px){ .mini-stats{grid-template-columns:repeat(2,minmax(0,1fr))} }
+    @media(max-width:560px){ .mini-stats{grid-template-columns:1fr} }
+
+    .mini-card{
+      border-radius:1rem;border:1px solid var(--border);background:#fff;padding:.85rem .95rem
+    }
+    .mini-card .t{font-size:.78rem;color:var(--muted);font-weight:700}
+    .mini-card .v{font-size:1.18rem;font-weight:900;margin-top:.2rem}
+    .mini-card .s{font-size:.72rem;color:var(--muted);margin-top:.15rem}
+
+    .toolbar{
+      display:flex;align-items:center;justify-content:space-between;gap:.75rem;flex-wrap:wrap;margin-bottom:.85rem
+    }
+    .toolbar-group{display:flex;gap:.55rem;flex-wrap:wrap;align-items:center}
+
+    .card-list{
+      display:grid;gap:.75rem
+    }
+    .mobile-card{
+      border:1px solid var(--border);border-radius:1rem;background:#fff;padding:.9rem;box-shadow:var(--sh)
+    }
+    .mobile-card .head{
+      display:flex;justify-content:space-between;gap:.75rem;align-items:flex-start;margin-bottom:.45rem
+    }
+    .mobile-card .title{font-weight:900;color:var(--p)}
+    .mobile-card .meta{font-size:.78rem;color:var(--muted);display:flex;gap:.4rem;flex-wrap:wrap}
+    .mobile-card .line{font-size:.83rem;margin-top:.25rem}
+    .mobile-actions{display:flex;gap:.4rem;flex-wrap:wrap;margin-top:.75rem}
+
+    .chip{
+      display:inline-flex;align-items:center;gap:.32rem;padding:.2rem .55rem;border-radius:999px;
+      font-size:.72rem;font-weight:800;border:1px solid transparent;white-space:nowrap
+    }
+    .chip.ok{background:var(--ok-lt);color:var(--ok);border-color:rgba(5,150,105,.16)}
+    .chip.warn{background:var(--warn-lt);color:var(--warn);border-color:rgba(217,119,6,.15)}
+    .chip.err{background:var(--err-lt);color:var(--err);border-color:rgba(220,38,38,.14)}
+    .chip.base{background:var(--p-lt);color:var(--p);border-color:rgba(1,73,121,.14)}
+    .chip.gray{background:#f1f5f9;color:#475569;border-color:#e2e8f0}
+
+    .table-wrap{
+      width:100%;overflow:auto;border-radius:1rem;border:1px solid var(--border)
+    }
+    .table{margin-bottom:0}
+    .table thead th{
+      background:#f8fafc;color:#334155;font-weight:900;white-space:nowrap;font-size:.84rem
+    }
+    .table td{vertical-align:middle;font-size:.84rem}
+    .table-actions{display:flex;gap:.35rem;flex-wrap:wrap}
+
+    .pagination .page-link{color:var(--p)}
+    .pagination .page-item.active .page-link{
+      background:var(--p);border-color:var(--p)
+    }
+
+    .form-control,.form-select{
+      border-radius:.9rem;padding:.7rem .9rem;border-color:#dbe4ee
+    }
+    .form-control:focus,.form-select:focus{
+      border-color:rgba(1,73,121,.35);box-shadow:0 0 0 .2rem rgba(1,73,121,.12)
+    }
+    .btn{border-radius:.9rem;font-weight:800}
+    .btn-main{background:var(--p);color:#fff}
+    .btn-main:hover{background:var(--p-dk);color:#fff}
+    .btn-soft{background:#f8fafc;border:1px solid var(--border);color:#334155}
+    .btn-soft:hover{background:#eef2f7}
+    .btn-gold{background:var(--gold);border-color:var(--gold);color:#fff}
+    .btn-gold:hover{background:var(--gold-dk);border-color:var(--gold-dk);color:#fff}
+
+    .empty{
+      border:1px dashed #cbd5e1;border-radius:1rem;padding:1.2rem;text-align:center;color:var(--muted);background:#fff
+    }
+
+    .text-num{font-variant-numeric:tabular-nums}
+    .hidden-mobile{display:table}
+    .hidden-desktop{display:none}
+    @media(max-width:991.98px){
+      .hidden-mobile{display:none !important}
+      .hidden-desktop{display:block !important}
+    }
+  </style>
+</head>
+<body>
+
+  <div class="top-nav">
+    <div class="top-nav-inner" id="topPageNav"></div>
+  </div>
+
+  <section class="hero">
+    <h1 class="hero-title"><i class="fa-solid fa-wallet me-2"></i>المالية والمصروفات</h1>
+    <p class="hero-sub">لوحة موحّدة للمصروفات العامة، أسباب مصروفات الحجوزات، مصروفات المشاريع، والمستهدفات الشهرية والسنوية.</p>
+    <div class="hero-meta">
+      <span class="hero-chip"><i class="fa-solid fa-building"></i> <span id="agencyNameHero">وكالة ميديا</span></span>
+      <span class="hero-chip"><i class="fa-solid fa-user"></i> <span id="currentUserHero">—</span></span>
+      <span class="hero-chip"><i class="fa-solid fa-calendar-days"></i> <span id="todayText">—</span></span>
+    </div>
+  </section>
+
+  <section class="summary-grid">
+    <div class="summary-card">
+      <div class="summary-label">إجمالي الإيرادات</div>
+      <div class="summary-value text-num" id="sumRevenue">0</div>
+      <div class="summary-note">من ملخص المالية</div>
+      <i class="fa-solid fa-sack-dollar summary-icon"></i>
+    </div>
+    <div class="summary-card k2">
+      <div class="summary-label">المستحقات</div>
+      <div class="summary-value text-num" id="sumReceivables">0</div>
+      <div class="summary-note">المتبقي على العملاء</div>
+      <i class="fa-solid fa-file-invoice-dollar summary-icon"></i>
+    </div>
+    <div class="summary-card k3">
+      <div class="summary-label">صافي الربح</div>
+      <div class="summary-value text-num" id="sumNet">0</div>
+      <div class="summary-note">بعد المصروفات</div>
+      <i class="fa-solid fa-coins summary-icon"></i>
+    </div>
+    <div class="summary-card k4">
+      <div class="summary-label">عدد الحجوزات</div>
+      <div class="summary-value text-num" id="sumBookings">0</div>
+      <div class="summary-note">للاطلاع العام</div>
+      <i class="fa-solid fa-calendar-check summary-icon"></i>
+    </div>
+  </section>
+
+  <div class="box">
+    <div class="box-head">
+      <h2 class="box-title"><i class="fa-solid fa-layer-group me-2"></i>أقسام المالية</h2>
+    </div>
+    <div class="box-body">
+      <ul class="nav nav-pills gap-2 mb-3" id="financeMainTabs" role="tablist">
+        <li class="nav-item" role="presentation">
+          <button class="nav-link active" id="tab-general-expenses-btn" data-bs-toggle="tab" data-bs-target="#tab-general-expenses" type="button">
+            <i class="fa-solid fa-money-bill-wave me-1"></i> المصروفات العامة
+          </button>
+        </li>
+        <li class="nav-item" role="presentation">
+          <button class="nav-link" id="tab-booking-expenses-btn" data-bs-toggle="tab" data-bs-target="#tab-booking-expenses" type="button">
+            <i class="fa-solid fa-receipt me-1"></i> مصروفات الحجوزات
+          </button>
+        </li>
+        <li class="nav-item" role="presentation">
+          <button class="nav-link" id="tab-project-expenses-btn" data-bs-toggle="tab" data-bs-target="#tab-project-expenses" type="button">
+            <i class="fa-solid fa-diagram-project me-1"></i> مصروفات المشاريع
+          </button>
+        </li>
+        <li class="nav-item" role="presentation">
+          <button class="nav-link" id="tab-targets-btn" data-bs-toggle="tab" data-bs-target="#tab-targets" type="button">
+            <i class="fa-solid fa-bullseye me-1"></i> المستهدفات
+          </button>
+        </li>
+      </ul>
+
+      <div class="tab-content">
+        <!-- المصروفات العامة -->
+        <div class="tab-pane fade show active" id="tab-general-expenses" role="tabpanel">
+          <div class="mini-stats">
+            <div class="mini-card">
+              <div class="t">عدد المصروفات</div>
+              <div class="v text-num" id="genCount">0</div>
+              <div class="s">كل السجلات</div>
+            </div>
+            <div class="mini-card">
+              <div class="t">إجمالي القيمة</div>
+              <div class="v text-num" id="genTotal">0</div>
+              <div class="s">جميع الحالات</div>
+            </div>
+            <div class="mini-card">
+              <div class="t">المسددة</div>
+              <div class="v text-num" id="genPaid">0</div>
+              <div class="s">بحالة مسدد</div>
+            </div>
+            <div class="mini-card">
+              <div class="t">المعلقة</div>
+              <div class="v text-num" id="genPending">0</div>
+              <div class="s">بحالة معلق</div>
+            </div>
+          </div>
+
+          <div class="toolbar">
+            <div class="toolbar-group">
+              <button class="btn btn-success" onclick="showAddExpense()">
+                <i class="fa-solid fa-plus me-1"></i> إضافة مصروف
+              </button>
+            </div>
+            <div class="toolbar-group">
+              <input type="text" id="expenseSearch" class="form-control" placeholder="بحث في السبب أو الملاحظات..." style="min-width:240px">
+            </div>
+          </div>
+
+          <div class="card-list hidden-desktop" id="expensesCardsContainer"></div>
+
+          <div class="table-wrap hidden-mobile">
+            <table class="table table-striped align-middle" id="expensesTable">
+              <thead>
+                <tr>
+                  <th>السبب</th>
+                  <th>القيمة</th>
+                  <th>التاريخ</th>
+                  <th>الحالة</th>
+                  <th>ملاحظات</th>
+                  <th>إجراءات</th>
+                </tr>
+              </thead>
+              <tbody></tbody>
+            </table>
+          </div>
+
+          <nav class="mt-3">
+            <ul class="pagination justify-content-center" id="expensesPagination"></ul>
+          </nav>
+        </div>
+
+        <!-- مصروفات الحجوزات -->
+        <div class="tab-pane fade" id="tab-booking-expenses" role="tabpanel">
+          <div class="mini-stats">
+            <div class="mini-card">
+              <div class="t">عدد الأسباب</div>
+              <div class="v text-num" id="bookingExpCount">0</div>
+              <div class="s">كل الأسباب المستخرجة</div>
+            </div>
+            <div class="mini-card">
+              <div class="t">إجمالي القيمة</div>
+              <div class="v text-num" id="bookingExpTotal">0</div>
+              <div class="s">كل الحالات</div>
+            </div>
+            <div class="mini-card">
+              <div class="t">المسددة</div>
+              <div class="v text-num" id="bookingExpPaid">0</div>
+              <div class="s">بحالة مسدد</div>
+            </div>
+            <div class="mini-card">
+              <div class="t">المعلقة</div>
+              <div class="v text-num" id="bookingExpPending">0</div>
+              <div class="s">بحالة معلق</div>
+            </div>
+          </div>
+
+          <div class="toolbar">
+            <div class="toolbar-group">
+              <button class="btn btn-soft" id="undoBookingExpenseBtn" onclick="undoBookingExpenseStatus()" style="display:none">
+                <i class="fa-solid fa-rotate-left me-1"></i> تراجع
+              </button>
+            </div>
+            <div class="toolbar-group">
+              <select id="bookingExpenseStatusFilter" class="form-select" style="min-width:180px">
+                <option value="">كل الحالات</option>
+                <option value="مسدد">مسدد</option>
+                <option value="معلق">معلق</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="card-list hidden-desktop" id="bookingExpensesCardsContainer"></div>
+
+          <div class="table-wrap hidden-mobile">
+            <table class="table table-striped align-middle" id="bookingExpensesTable">
+              <thead>
+                <tr>
+                  <th>الحجز</th>
+                  <th>السبب</th>
+                  <th>النوع</th>
+                  <th>القيمة</th>
+                  <th>التاريخ</th>
+                  <th>الحالة</th>
+                  <th>إجراءات</th>
+                </tr>
+              </thead>
+              <tbody></tbody>
+            </table>
+          </div>
+
+          <nav class="mt-3">
+            <ul class="pagination justify-content-center" id="bookingExpensesPagination"></ul>
+          </nav>
+        </div>
+
+        <!-- مصروفات المشاريع -->
+        <div class="tab-pane fade" id="tab-project-expenses" role="tabpanel">
+          <ul class="nav nav-pills gap-2 mb-3" id="projectExpensesInnerTabs" role="tablist">
+            <li class="nav-item" role="presentation">
+              <button class="nav-link active" id="proj-detailed-tab-btn" data-bs-toggle="tab" data-bs-target="#proj-detailed-tab" type="button">
+                <i class="fa-solid fa-list-ul me-1"></i> التفصيلي
+              </button>
+            </li>
+            <li class="nav-item" role="presentation">
+              <button class="nav-link" id="proj-report-tab-btn" data-bs-toggle="tab" data-bs-target="#proj-report-tab" type="button">
+                <i class="fa-solid fa-chart-pie me-1"></i> تقرير المشاريع
+              </button>
+            </li>
+          </ul>
+
+          <div class="tab-content">
+            <!-- التفصيلي -->
+            <div class="tab-pane fade show active" id="proj-detailed-tab" role="tabpanel">
+              <div class="mini-stats">
+                <div class="mini-card">
+                  <div class="t">عدد السجلات</div>
+                  <div class="v text-num" id="projectExpCount">0</div>
+                  <div class="s">بعد الفلترة</div>
+                </div>
+                <div class="mini-card">
+                  <div class="t">إجمالي المصروفات</div>
+                  <div class="v text-num" id="projectExpTotal">0</div>
+                  <div class="s">بعد الفلترة</div>
+                </div>
+                <div class="mini-card">
+                  <div class="t">المسددة</div>
+                  <div class="v text-num" id="projectExpPaid">0</div>
+                  <div class="s">بحالة مسدد</div>
+                </div>
+                <div class="mini-card">
+                  <div class="t">المعلقة</div>
+                  <div class="v text-num" id="projectExpPending">0</div>
+                  <div class="s">بحالة معلق</div>
+                </div>
+              </div>
+
+              <div class="toolbar">
+                <div class="toolbar-group">
+                  <select id="projectExpenseProjectFilter" class="form-select" style="min-width:240px"></select>
+                  <select id="projectExpenseStatusFilter" class="form-select" style="min-width:170px">
+                    <option value="">كل الحالات</option>
+                    <option value="مسدد">مسدد</option>
+                    <option value="معلق">معلق</option>
+                  </select>
+                </div>
+                <div class="toolbar-group">
+                  <button class="btn btn-soft" onclick="reloadProjectExpensesDetailed()">
+                    <i class="fa-solid fa-rotate me-1"></i> تحديث
+                  </button>
+                </div>
+              </div>
+
+              <div class="card-list hidden-desktop" id="projectExpensesCardsContainerFinance"></div>
+
+              <div class="table-wrap hidden-mobile">
+                <table class="table table-striped align-middle" id="projectExpensesFinanceTable">
+                  <thead>
+                    <tr>
+                      <th>المشروع</th>
+                      <th>سبب المصروف</th>
+                      <th>المبلغ</th>
+                      <th>الحالة</th>
+                      <th>التاريخ</th>
+                      <th>إجراءات</th>
+                    </tr>
+                  </thead>
+                  <tbody></tbody>
+                </table>
+              </div>
+
+              <nav class="mt-3">
+                <ul class="pagination justify-content-center" id="projectExpensesFinancePagination"></ul>
+              </nav>
+            </div>
+
+            <!-- التقرير -->
+            <div class="tab-pane fade" id="proj-report-tab" role="tabpanel">
+              <div class="mini-stats">
+                <div class="mini-card">
+                  <div class="t">عدد المشاريع</div>
+                  <div class="v text-num" id="projectReportCount">0</div>
+                  <div class="s">من شيت المشاريع</div>
+                </div>
+                <div class="mini-card">
+                  <div class="t">إجمالي مصروفات المشاريع</div>
+                  <div class="v text-num" id="projectReportExpenses">0</div>
+                  <div class="s">كل المشاريع</div>
+                </div>
+                <div class="mini-card">
+                  <div class="t">إجمالي قيمة المشاريع</div>
+                  <div class="v text-num" id="projectReportValues">0</div>
+                  <div class="s">إذا كان الحقل موجودًا</div>
+                </div>
+                <div class="mini-card">
+                  <div class="t">المتبقي</div>
+                  <div class="v text-num" id="projectReportRemaining">0</div>
+                  <div class="s">قيمة المشروع - المصروفات</div>
+                </div>
+              </div>
+
+              <div class="toolbar">
+                <div class="toolbar-group">
+                  <input type="text" id="projectReportSearch" class="form-control" placeholder="بحث باسم المشروع..." style="min-width:240px">
+                </div>
+                <div class="toolbar-group">
+                  <button class="btn btn-soft" onclick="loadProjectReport()">
+                    <i class="fa-solid fa-rotate me-1"></i> إعادة التحميل
+                  </button>
+                </div>
+              </div>
+
+              <div class="card-list hidden-desktop" id="projectReportCards"></div>
+
+              <div class="table-wrap hidden-mobile">
+                <table class="table table-striped align-middle" id="projectReportTable">
+                  <thead>
+                    <tr>
+                      <th>اسم المشروع</th>
+                      <th>حالة المشروع</th>
+                      <th>إجمالي مصروفات المشروع</th>
+                      <th>قيمة المشروع</th>
+                      <th>المتبقي</th>
+                    </tr>
+                  </thead>
+                  <tbody></tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- المستهدفات -->
+        <div class="tab-pane fade" id="tab-targets" role="tabpanel">
+          <div class="mini-stats">
+            <div class="mini-card">
+              <div class="t">عدد الأشهر</div>
+              <div class="v text-num" id="targetsCount">0</div>
+              <div class="s">المستهدفات الشهرية</div>
+            </div>
+            <div class="mini-card">
+              <div class="t">إجمالي المستهدف</div>
+              <div class="v text-num" id="targetsTotalTarget">0</div>
+              <div class="s">لكل الأشهر</div>
+            </div>
+            <div class="mini-card">
+              <div class="t">إجمالي المحقق</div>
+              <div class="v text-num" id="targetsTotalAchieved">0</div>
+              <div class="s">محسوب تلقائيًا</div>
+            </div>
+            <div class="mini-card">
+              <div class="t">إجمالي صافي الربح</div>
+              <div class="v text-num" id="targetsTotalNet">0</div>
+              <div class="s">محسوب تلقائيًا</div>
+            </div>
+          </div>
+
+          <div class="toolbar">
+            <div class="toolbar-group">
+              <button class="btn btn-success" onclick="showTargetModal()">
+                <i class="fa-solid fa-plus me-1"></i> إضافة مستهدف
+              </button>
+            </div>
+          </div>
+
+          <ul class="nav nav-pills gap-2 mb-3" id="targetsInnerTabs" role="tablist">
+            <li class="nav-item" role="presentation">
+              <button class="nav-link active" id="targets-yearly-tab" data-bs-toggle="tab" data-bs-target="#targets-yearly" type="button">
+                <i class="fa-solid fa-chart-column me-1"></i> المستهدفات السنوية
+              </button>
+            </li>
+            <li class="nav-item" role="presentation">
+              <button class="nav-link" id="targets-monthly-tab" data-bs-toggle="tab" data-bs-target="#targets-monthly" type="button">
+                <i class="fa-solid fa-bullseye me-1"></i> المستهدفات الشهرية
+              </button>
+            </li>
+          </ul>
+
+          <div class="tab-content">
+            <div class="tab-pane fade show active" id="targets-yearly" role="tabpanel">
+              <div class="card-list hidden-desktop mb-3" id="yearlyTargetsCardsContainer"></div>
+              <div class="table-wrap hidden-mobile">
+                <table class="table table-striped align-middle" id="yearlyTargetsTable">
+                  <thead>
+                    <tr>
+                      <th>السنة</th>
+                      <th>إجمالي المستهدف</th>
+                      <th>إجمالي المحقق</th>
+                      <th>إجمالي المصروفات</th>
+                      <th>صافي الربح</th>
+                      <th>نسبة الإنجاز</th>
+                    </tr>
+                  </thead>
+                  <tbody></tbody>
+                </table>
+              </div>
+            </div>
+
+            <div class="tab-pane fade" id="targets-monthly" role="tabpanel">
+              <div class="card-list hidden-desktop mb-3" id="targetsContainer"></div>
+              <div class="table-wrap hidden-mobile">
+                <table class="table table-striped align-middle" id="targetsTable">
+                  <thead>
+                    <tr>
+                      <th>الشهر</th>
+                      <th>السنة</th>
+                      <th>المستهدف</th>
+                      <th>المحقق</th>
+                      <th>المستحقات</th>
+                      <th>المصروفات</th>
+                      <th>صافي الربح</th>
+                      <th>نسبة الإنجاز</th>
+                      <th>ملاحظات</th>
+                      <th>إجراءات</th>
+                    </tr>
+                  </thead>
+                  <tbody></tbody>
+                </table>
+              </div>
+              <nav class="mt-3">
+                <ul class="pagination justify-content-center" id="targetsPagination"></ul>
+              </nav>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- مودال المصروفات العامة -->
+  <div class="modal fade" id="expenseModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content border-0" style="border-radius:1.2rem;overflow:hidden">
+        <div class="modal-header" style="background:linear-gradient(135deg,var(--p),var(--gold));color:#fff">
+          <h5 class="modal-title"><i class="fa-solid fa-plus me-1"></i>إضافة مصروف عام</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" style="filter:brightness(0) invert(1)"></button>
+        </div>
+        <form id="expenseForm">
+          <div class="modal-body">
+            <div class="mb-3">
+              <label class="form-label fw-bold">سبب المصروف</label>
+              <input id="expenseReason" class="form-control" required>
+            </div>
+            <div class="mb-3">
+              <label class="form-label fw-bold">القيمة</label>
+              <input id="expenseValue" type="number" min="0" step="0.01" class="form-control" required>
+            </div>
+            <div class="mb-3">
+              <label class="form-label fw-bold">التاريخ</label>
+              <input id="expenseDate" type="date" class="form-control" required>
+            </div>
+            <div>
+              <label class="form-label fw-bold">ملاحظات</label>
+              <textarea id="expenseNotes" class="form-control" rows="3"></textarea>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-soft" data-bs-dismiss="modal">إلغاء</button>
+            <button type="submit" class="btn btn-main">حفظ</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- مودال المستهدفات -->
+  <div class="modal fade" id="targetModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content border-0" style="border-radius:1.2rem;overflow:hidden">
+        <div class="modal-header" style="background:linear-gradient(135deg,var(--p),var(--gold));color:#fff">
+          <h5 class="modal-title" id="targetModalTitle"><i class="fa-solid fa-bullseye me-1"></i>إضافة مستهدف</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" style="filter:brightness(0) invert(1)"></button>
+        </div>
+        <form id="targetForm">
+          <input type="hidden" id="targetRowIndex">
+          <div class="modal-body">
+            <div class="row g-3">
+              <div class="col-6">
+                <label class="form-label fw-bold">الشهر</label>
+                <select id="targetMonth" class="form-select" required>
+                  <option value="">اختر</option>
+                  <option value="1">1</option><option value="2">2</option><option value="3">3</option>
+                  <option value="4">4</option><option value="5">5</option><option value="6">6</option>
+                  <option value="7">7</option><option value="8">8</option><option value="9">9</option>
+                  <option value="10">10</option><option value="11">11</option><option value="12">12</option>
+                </select>
+              </div>
+              <div class="col-6">
+                <label class="form-label fw-bold">السنة</label>
+                <input id="targetYear" type="number" class="form-control" required>
+              </div>
+              <div class="col-12">
+                <label class="form-label fw-bold">المستهدف</label>
+                <input id="targetValue" type="number" min="0" step="0.01" class="form-control" required>
+              </div>
+              <div class="col-12">
+                <label class="form-label fw-bold">ملاحظات</label>
+                <textarea id="targetNotes" class="form-control" rows="3"></textarea>
+              </div>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-soft" data-bs-dismiss="modal">إلغاء</button>
+            <button type="submit" class="btn btn-main">حفظ</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+  <script>
+    const PAGE_SIZE = (window.APP_CONFIG && APP_CONFIG.DEFAULT_PAGE_SIZE) || 15;
+
+    let _expensesCache = [];
+    let _targetsCache = [];
+    let _yearlyTargetsCache = [];
+    let _bookingExpensePage = 1;
+    let _bookingExpenseFilter = { status: "" };
+    let _projectExpensePage = 1;
+    let _projectExpenseRaw = [];
+    let _projectsCache = [];
+    let _projectReportRaw = [];
+    let _lastBookingExpenseChange = null;
+
+    document.addEventListener("DOMContentLoaded", async () => {
+      guardSession();
+      renderTopPageNav();
+      hydrateHero();
+      wireEvents();
+      await initPage();
+    });
+
+    function guardSession(){
+      if (!window.Session || !Session.isLoggedIn || !Session.isLoggedIn()) {
+        window.location.href = (APP_CONFIG?.PAGES?.index || "index.html");
+      }
+    }
+
+    function hydrateHero(){
+      const session = Session.get ? Session.get() : {};
+      const cfgRaw = localStorage.getItem(APP_CONFIG.STORAGE.systemCfg || "media_systemConfig");
+      let cfg = {};
+      try { cfg = JSON.parse(cfgRaw || "{}"); } catch(e){ cfg = {}; }
+
+      document.getElementById("currentUserHero").textContent = session.userName || "مستخدم النظام";
+      document.getElementById("agencyNameHero").textContent = cfg.agencyName || APP_CONFIG.APP_NAME || "وكالة ميديا";
+      document.getElementById("todayText").textContent = new Date().toLocaleDateString("ar-SA");
+    }
+
+    function renderTopPageNav(){
+      const nav = document.getElementById("topPageNav");
+      const pages = [
+        { id: "dashboard", text: "لوحة التحكم", icon: "fa-gauge-high", href: APP_CONFIG.PAGES.dashboard },
+        { id: "bookings",  text: "الحجوزات", icon: "fa-calendar-check", href: (APP_CONFIG.PAGES.bookings || 'bookings.html') },
+        { id: "finance",   text: "المالية",      icon: "fa-wallet",     href: APP_CONFIG.PAGES.finance },
+        { id: "projects",  text: "المشاريع",     icon: "fa-diagram-project", href: APP_CONFIG.PAGES.projects },
+        { id: "settings",  text: "الإعدادات",    icon: "fa-gear", href: APP_CONFIG.PAGES.settings }
+      ];
+
+      const allowed = pages.filter(p => !Session.canAccess || Session.canAccess(p.id));
+      nav.innerHTML = allowed.map(p => `
+        <a class="top-link ${p.id === 'finance' ? 'active' : ''}" href="${p.href}">
+          <i class="fa-solid ${p.icon}"></i>
+          <span>${p.text}</span>
+        </a>
+      `).join("");
+    }
+
+    function wireEvents(){
+      document.getElementById("expenseSearch").addEventListener("input", () => renderExpensesPage(1));
+      document.getElementById("bookingExpenseStatusFilter").addEventListener("change", e => {
+        _bookingExpenseFilter.status = e.target.value || "";
+        loadBookingExpenses(1);
+      });
+
+      document.getElementById("projectExpenseProjectFilter").addEventListener("change", () => {
+        _projectExpensePage = 1;
+        renderProjectExpensesDetailed();
+      });
+      document.getElementById("projectExpenseStatusFilter").addEventListener("change", () => {
+        _projectExpensePage = 1;
+        renderProjectExpensesDetailed();
+      });
+      document.getElementById("projectReportSearch").addEventListener("input", renderProjectReport);
+
+      document.getElementById("expenseForm").addEventListener("submit", onExpenseSubmit);
+      document.getElementById("targetForm").addEventListener("submit", onTargetSubmit);
+    }
+
+    async function initPage(){
+      await Promise.all([
+        loadFinanceSummary(),
+        loadExpensesData(),
+        loadBookingExpenses(1),
+        loadProjectsForFinance(),
+        loadTargetsData()
+      ]);
+      await loadProjectExpensesDetailedData();
+      await loadProjectReport();
+    }
+
+    function num(v){ return Number(v || 0) || 0; }
+    function fmt(v){ return new Intl.NumberFormat("en-US", { maximumFractionDigits: 2 }).format(num(v)); }
+    function escapeHtml(s){
+      return String(s ?? "")
+        .replace(/&/g,"&amp;").replace(/</g,"&lt;")
+        .replace(/>/g,"&gt;").replace(/"/g,"&quot;")
+        .replace(/'/g,"&#039;");
+    }
+    function statusBadgeClass(status){
+      return status === "مسدد" ? "ok" : (status === "معلق" ? "warn" : "gray");
+    }
+
+    function toast(icon, title){
+      Swal.fire({ toast:true, position:"top", icon, title, timer:1800, showConfirmButton:false });
+    }
+    function showBusy(title="جاري التنفيذ..."){
+      Swal.fire({ title, allowOutsideClick:false, didOpen:()=>Swal.showLoading() });
+    }
+    function closeBusy(){ Swal.close(); }
+
+    async function safeApi(fn, ...args){
+      try {
+        return await API.run(fn, ...args);
+      } catch (e) {
+        console.error(fn, e);
+        throw e;
+      }
+    }
+
+    async function loadFinanceSummary(){
+      try {
+        const s = await safeApi("getFinanceSummary", {});
+        document.getElementById("sumRevenue").textContent = fmt(s.totalRevenue || 0);
+        document.getElementById("sumReceivables").textContent = fmt(s.totalDue || s.totalReceivables || 0);
+        document.getElementById("sumNet").textContent = fmt(s.net || s.netProfit || 0);
+        document.getElementById("sumBookings").textContent = fmt(s.totalBookings || 0);
+      } catch(e) {
+        console.warn("Finance summary fallback", e);
+      }
+    }
+
+    async function loadExpensesData(){
+      _expensesCache = await safeApi("getExpensesList");
+      updateExpensesSummary();
+      renderExpensesPage(1);
+    }
+
+    function filteredExpenses(){
+      const q = (document.getElementById("expenseSearch").value || "").trim().toLowerCase();
+      if (!q) return [..._expensesCache];
+      return _expensesCache.filter(r =>
+        String(r.reason || "").toLowerCase().includes(q) ||
+        String(r.notes || "").toLowerCase().includes(q)
+      );
+    }
+
+    function updateExpensesSummary(){
+      const rows = _expensesCache || [];
+      const paid = rows.filter(x => x.status === "مسدد");
+      const pending = rows.filter(x => x.status !== "مسدد");
+      document.getElementById("genCount").textContent = fmt(rows.length);
+      document.getElementById("genTotal").textContent = fmt(rows.reduce((a,b)=>a+num(b.value),0));
+      document.getElementById("genPaid").textContent = fmt(paid.reduce((a,b)=>a+num(b.value),0));
+      document.getElementById("genPending").textContent = fmt(pending.reduce((a,b)=>a+num(b.value),0));
+    }
+
+    function renderExpensesPage(page){
+      const rows = filteredExpenses();
+      const totalPages = Math.max(1, Math.ceil(rows.length / PAGE_SIZE));
+      page = Math.min(Math.max(1,page), totalPages);
+      const slice = rows.slice((page-1)*PAGE_SIZE, page*PAGE_SIZE);
+
+      const cards = document.getElementById("expensesCardsContainer");
+      const tbody = document.querySelector("#expensesTable tbody");
+      const pag = document.getElementById("expensesPagination");
+
+      cards.innerHTML = "";
+      tbody.innerHTML = "";
+
+      if (!slice.length){
+        const html = `<div class="empty">لا توجد مصروفات مطابقة.</div>`;
+        cards.innerHTML = html;
+        tbody.innerHTML = `<tr><td colspan="6" class="text-center py-4 text-muted">لا توجد بيانات</td></tr>`;
+      } else {
+        slice.forEach(r => {
+          const badge = statusBadgeClass(r.status);
+          cards.insertAdjacentHTML("beforeend", `
+            <div class="mobile-card">
+              <div class="head">
+                <div>
+                  <div class="title">${escapeHtml(r.reason)}</div>
+                  <div class="meta">
+                    <span><i class="fa-regular fa-calendar"></i> ${escapeHtml(r.date || "")}</span>
+                  </div>
+                </div>
+                <span class="chip ${badge}">${escapeHtml(r.status || "معلق")}</span>
+              </div>
+              <div class="line"><strong>القيمة:</strong> <span class="text-num">${fmt(r.value)}</span></div>
+              <div class="line"><strong>ملاحظات:</strong> ${escapeHtml(r.notes || "—")}</div>
+              <div class="mobile-actions">
+                <button class="btn btn-sm btn-outline-success" onclick="setGeneralExpenseStatus(${r.rowIndex}, 'مسدد')">مسدد</button>
+                <button class="btn btn-sm btn-outline-secondary" onclick="setGeneralExpenseStatus(${r.rowIndex}, 'معلق')">معلق</button>
+                <button class="btn btn-sm btn-outline-danger" onclick="deleteExpenseUI(${r.rowIndex})"><i class="fa-solid fa-trash"></i></button>
+              </div>
+            </div>
+          `);
+
+          tbody.insertAdjacentHTML("beforeend", `
+            <tr>
+              <td>${escapeHtml(r.reason)}</td>
+              <td class="text-num">${fmt(r.value)}</td>
+              <td>${escapeHtml(r.date || "")}</td>
+              <td><span class="chip ${badge}">${escapeHtml(r.status || "معلق")}</span></td>
+              <td>${escapeHtml(r.notes || "")}</td>
+              <td>
+                <div class="table-actions">
+                  <button class="btn btn-sm btn-outline-success" onclick="setGeneralExpenseStatus(${r.rowIndex}, 'مسدد')">مسدد</button>
+                  <button class="btn btn-sm btn-outline-secondary" onclick="setGeneralExpenseStatus(${r.rowIndex}, 'معلق')">معلق</button>
+                  <button class="btn btn-sm btn-outline-danger" onclick="deleteExpenseUI(${r.rowIndex})"><i class="fa-solid fa-trash"></i></button>
+                </div>
+              </td>
+            </tr>
+          `);
+        });
+      }
+
+      renderPagination(pag, totalPages, page, "renderExpensesPage");
+    }
+
+    function showAddExpense(){
+      document.getElementById("expenseForm").reset();
+      document.getElementById("expenseDate").value = new Date().toISOString().substring(0,10);
+      bootstrap.Modal.getOrCreateInstance(document.getElementById("expenseModal")).show();
+    }
+
+    async function onExpenseSubmit(ev){
+      ev.preventDefault();
+      const payload = {
+        reason: document.getElementById("expenseReason").value.trim(),
+        value: document.getElementById("expenseValue").value,
+        date: document.getElementById("expenseDate").value,
+        status: "معلق",
+        notes: document.getElementById("expenseNotes").value.trim()
+      };
+      showBusy("جاري حفظ المصروف...");
+      try{
+        await safeApi("addExpense", payload);
+        bootstrap.Modal.getOrCreateInstance(document.getElementById("expenseModal")).hide();
+        await loadExpensesData();
+        closeBusy(); toast("success","تمت إضافة المصروف بنجاح");
+      }catch(e){
+        closeBusy(); Swal.fire("خطأ","تعذر حفظ المصروف","error");
+      }
+    }
+
+    async function setGeneralExpenseStatus(rowIndex, status){
+      showBusy("جاري تحديث الحالة...");
+      try{
+        await safeApi("updateExpenseStatus", rowIndex, status);
+        await loadExpensesData();
+        closeBusy(); toast("success","تم تحديث الحالة");
+      }catch(e){
+        closeBusy(); Swal.fire("خطأ","تعذر تحديث الحالة","error");
+      }
+    }
+
+    async function deleteExpenseUI(rowIndex){
+      const ok = await Swal.fire({
+        title:"تأكيد الحذف", text:"هل تريد حذف هذا المصروف؟",
+        icon:"warning", showCancelButton:true, confirmButtonText:"نعم", cancelButtonText:"إلغاء"
+      });
+      if(!ok.isConfirmed) return;
+      showBusy("جاري الحذف...");
+      try{
+        await safeApi("deleteExpense", rowIndex);
+        await loadExpensesData();
+        closeBusy(); toast("success","تم حذف المصروف");
+      }catch(e){
+        closeBusy(); Swal.fire("خطأ","تعذر حذف المصروف","error");
+      }
+    }
+
+    async function loadBookingExpenses(page=1){
+      _bookingExpensePage = page;
+      const result = await safeApi("getBookingExpenseReasons", { page, pageSize: PAGE_SIZE });
+      const allItems = (result && result.items) ? result.items : [];
+      const filtered = _bookingExpenseFilter.status
+        ? allItems.filter(x => String(x.status || "") === _bookingExpenseFilter.status)
+        : allItems;
+
+      document.getElementById("bookingExpCount").textContent = fmt(result.total || filtered.length);
+      document.getElementById("bookingExpTotal").textContent = fmt(filtered.reduce((a,b)=>a+num(b.value),0));
+      document.getElementById("bookingExpPaid").textContent = fmt(filtered.filter(x=>x.status==="مسدد").reduce((a,b)=>a+num(b.value),0));
+      document.getElementById("bookingExpPending").textContent = fmt(filtered.filter(x=>x.status!=="مسدد").reduce((a,b)=>a+num(b.value),0));
+
+      const cards = document.getElementById("bookingExpensesCardsContainer");
+      const tbody = document.querySelector("#bookingExpensesTable tbody");
+      const pag = document.getElementById("bookingExpensesPagination");
+      cards.innerHTML = "";
+      tbody.innerHTML = "";
+
+      if (!filtered.length){
+        const html = `<div class="empty">لا توجد أسباب مصروفات للحجوزات.</div>`;
+        cards.innerHTML = html;
+        tbody.innerHTML = `<tr><td colspan="7" class="text-center py-4 text-muted">لا توجد بيانات</td></tr>`;
+      } else {
+        filtered.forEach(r => {
+          const badge = statusBadgeClass(r.status);
+          const bookingLabel = [r.bookingName, r.bookingType].filter(Boolean).join(" — ") || r.bookingId || "حجز";
+          cards.insertAdjacentHTML("beforeend", `
+            <div class="mobile-card">
+              <div class="head">
+                <div>
+                  <div class="title">${escapeHtml(bookingLabel)}</div>
+                  <div class="meta">
+                    <span><i class="fa-regular fa-calendar"></i> ${escapeHtml(r.date || "")}</span>
+                    <span><i class="fa-solid fa-tag"></i> ${escapeHtml(r.type || "—")}</span>
+                  </div>
+                </div>
+                <span class="chip ${badge}">${escapeHtml(r.status || "معلق")}</span>
+              </div>
+              <div class="line"><strong>السبب:</strong> ${escapeHtml(r.reason || "")}</div>
+              <div class="line"><strong>القيمة:</strong> <span class="text-num">${fmt(r.value)}</span></div>
+              <div class="mobile-actions">
+                <button class="btn btn-sm btn-outline-success" onclick="setBookingExpenseStatusUI(${r.bookingRow}, ${r.reasonIndex}, 'مسدد', '${escapeHtml(r.status || "")}')">مسدد</button>
+                <button class="btn btn-sm btn-outline-secondary" onclick="setBookingExpenseStatusUI(${r.bookingRow}, ${r.reasonIndex}, 'معلق', '${escapeHtml(r.status || "")}')">معلق</button>
+              </div>
+            </div>
+          `);
+
+          tbody.insertAdjacentHTML("beforeend", `
+            <tr>
+              <td>${escapeHtml(bookingLabel)}</td>
+              <td>${escapeHtml(r.reason || "")}</td>
+              <td>${escapeHtml(r.type || "")}</td>
+              <td class="text-num">${fmt(r.value)}</td>
+              <td>${escapeHtml(r.date || "")}</td>
+              <td><span class="chip ${badge}">${escapeHtml(r.status || "معلق")}</span></td>
+              <td>
+                <div class="table-actions">
+                  <button class="btn btn-sm btn-outline-success" onclick="setBookingExpenseStatusUI(${r.bookingRow}, ${r.reasonIndex}, 'مسدد', '${escapeHtml(r.status || "")}')">مسدد</button>
+                  <button class="btn btn-sm btn-outline-secondary" onclick="setBookingExpenseStatusUI(${r.bookingRow}, ${r.reasonIndex}, 'معلق', '${escapeHtml(r.status || "")}')">معلق</button>
+                </div>
+              </td>
+            </tr>
+          `);
+        });
+      }
+
+      const totalPages = Math.max(1, Math.ceil((result.total || filtered.length) / PAGE_SIZE));
+      renderPagination(pag, totalPages, page, "loadBookingExpenses");
+    }
+
+    async function setBookingExpenseStatusUI(bookingRow, reasonIndex, status, prevStatus){
+      showBusy("جاري تحديث حالة السبب...");
+      try{
+        await safeApi("setBookingExpenseStatus", { bookingRow, reasonIndex, status });
+        _lastBookingExpenseChange = { bookingRow, reasonIndex, prevStatus };
+        document.getElementById("undoBookingExpenseBtn").style.display = "inline-flex";
+        await loadBookingExpenses(_bookingExpensePage);
+        closeBusy(); toast("success","تم تحديث الحالة");
+      }catch(e){
+        closeBusy(); Swal.fire("خطأ","تعذر تحديث الحالة","error");
+      }
+    }
+
+    async function undoBookingExpenseStatus(){
+      if(!_lastBookingExpenseChange) return;
+      const { bookingRow, reasonIndex, prevStatus } = _lastBookingExpenseChange;
+      showBusy("جاري التراجع...");
+      try{
+        await safeApi("setBookingExpenseStatus", { bookingRow, reasonIndex, status: prevStatus || "معلق" });
+        _lastBookingExpenseChange = null;
+        document.getElementById("undoBookingExpenseBtn").style.display = "none";
+        await loadBookingExpenses(_bookingExpensePage);
+        closeBusy(); toast("success","تم التراجع");
+      }catch(e){
+        closeBusy(); Swal.fire("خطأ","تعذر التراجع","error");
+      }
+    }
+
+    async function loadProjectsForFinance(){
+      _projectsCache = await safeApi("getProjects");
+      const sel = document.getElementById("projectExpenseProjectFilter");
+      sel.innerHTML = `<option value="">كل المشاريع</option>` + (_projectsCache || []).map(p => {
+        const name = getProjectName(p);
+        const id = getProjectId(p);
+        return `<option value="${escapeHtml(id)}">${escapeHtml(name)}</option>`;
+      }).join("");
+    }
+
+    async function loadProjectExpensesDetailedData(){
+      const all = await fetchAllProjectExpenses();
+      _projectExpenseRaw = all;
+      renderProjectExpensesDetailed();
+    }
+
+    async function fetchAllProjectExpenses(){
+      let page = 1;
+      let items = [];
+      let total = 0;
+      do {
+        const res = await safeApi("getProjectsExpensesList", { page, pageSize: 200 });
+        const batch = res.items || [];
+        total = res.total || batch.length;
+        items = items.concat(batch);
+        if (items.length >= total || batch.length === 0) break;
+        page++;
+      } while (true);
+      return items;
+    }
+
+    function filteredProjectExpenses(){
+      const pid = document.getElementById("projectExpenseProjectFilter").value || "";
+      const status = document.getElementById("projectExpenseStatusFilter").value || "";
+      return (_projectExpenseRaw || []).filter(r => {
+        if (pid && String(r.projectId || "") !== pid) return false;
+        if (status && String(r.status || "") !== status) return false;
+        return true;
+      });
+    }
+
+    function renderProjectExpensesDetailed(page = _projectExpensePage){
+      _projectExpensePage = page;
+      const rows = filteredProjectExpenses();
+      const totalPages = Math.max(1, Math.ceil(rows.length / PAGE_SIZE));
+      page = Math.min(Math.max(1, page), totalPages);
+      const slice = rows.slice((page-1)*PAGE_SIZE, page*PAGE_SIZE);
+
+      document.getElementById("projectExpCount").textContent = fmt(rows.length);
+      document.getElementById("projectExpTotal").textContent = fmt(rows.reduce((a,b)=>a+num(b.value),0));
+      document.getElementById("projectExpPaid").textContent = fmt(rows.filter(x=>x.status==="مسدد").reduce((a,b)=>a+num(b.value),0));
+      document.getElementById("projectExpPending").textContent = fmt(rows.filter(x=>x.status!=="مسدد").reduce((a,b)=>a+num(b.value),0));
+
+      const cards = document.getElementById("projectExpensesCardsContainerFinance");
+      const tbody = document.querySelector("#projectExpensesFinanceTable tbody");
+      const pag = document.getElementById("projectExpensesFinancePagination");
+      cards.innerHTML = "";
+      tbody.innerHTML = "";
+
+      if (!slice.length){
+        const html = `<div class="empty">لا توجد مصروفات مشاريع ضمن الفلتر الحالي.</div>`;
+        cards.innerHTML = html;
+        tbody.innerHTML = `<tr><td colspan="6" class="text-center py-4 text-muted">لا توجد بيانات</td></tr>`;
+      } else {
+        slice.forEach(r => {
+          const badge = statusBadgeClass(r.status);
+          const when = r.updatedAt || r.createdAt || "";
+          cards.insertAdjacentHTML("beforeend", `
+            <div class="mobile-card">
+              <div class="head">
+                <div>
+                  <div class="title">${escapeHtml(r.projectName || "—")}</div>
+                  <div class="meta"><span><i class="fa-regular fa-calendar"></i> ${escapeHtml(when)}</span></div>
+                </div>
+                <span class="chip ${badge}">${escapeHtml(r.status || "معلق")}</span>
+              </div>
+              <div class="line"><strong>السبب:</strong> ${escapeHtml(r.reason || "")}</div>
+              <div class="line"><strong>المبلغ:</strong> <span class="text-num">${fmt(r.value)}</span></div>
+              <div class="mobile-actions">
+                <button class="btn btn-sm btn-outline-success" onclick="setProjectExpenseStatus(${r.rowIndex}, 'مسدد')">مسدد</button>
+                <button class="btn btn-sm btn-outline-secondary" onclick="setProjectExpenseStatus(${r.rowIndex}, 'معلق')">معلق</button>
+                <button class="btn btn-sm btn-outline-danger" onclick="deleteProjectExpenseUI(${r.rowIndex})"><i class="fa-solid fa-trash"></i></button>
+              </div>
+            </div>
+          `);
+
+          tbody.insertAdjacentHTML("beforeend", `
+            <tr>
+              <td>${escapeHtml(r.projectName || "")}</td>
+              <td>${escapeHtml(r.reason || "")}</td>
+              <td class="text-num">${fmt(r.value)}</td>
+              <td><span class="chip ${badge}">${escapeHtml(r.status || "معلق")}</span></td>
+              <td>${escapeHtml(when)}</td>
+              <td>
+                <div class="table-actions">
+                  <button class="btn btn-sm btn-outline-success" onclick="setProjectExpenseStatus(${r.rowIndex}, 'مسدد')">مسدد</button>
+                  <button class="btn btn-sm btn-outline-secondary" onclick="setProjectExpenseStatus(${r.rowIndex}, 'معلق')">معلق</button>
+                  <button class="btn btn-sm btn-outline-danger" onclick="deleteProjectExpenseUI(${r.rowIndex})"><i class="fa-solid fa-trash"></i></button>
+                </div>
+              </td>
+            </tr>
+          `);
+        });
+      }
+
+      renderPagination(pag, totalPages, page, "renderProjectExpensesDetailed");
+    }
+
+    async function reloadProjectExpensesDetailed(){
+      await loadProjectExpensesDetailedData();
+    }
+
+    async function setProjectExpenseStatus(rowIndex, status){
+      showBusy("جاري تحديث حالة مصروف المشروع...");
+      try{
+        await safeApi("updateProjectExpenseStatus", rowIndex, status);
+        await loadProjectExpensesDetailedData();
+        await loadProjectReport();
+        closeBusy(); toast("success","تم تحديث الحالة");
+      }catch(e){
+        closeBusy(); Swal.fire("خطأ","تعذر تحديث الحالة","error");
+      }
+    }
+
+    async function deleteProjectExpenseUI(rowIndex){
+      const ok = await Swal.fire({
+        title:"تأكيد الحذف", text:"هل تريد حذف هذا المصروف؟",
+        icon:"warning", showCancelButton:true, confirmButtonText:"نعم", cancelButtonText:"إلغاء"
+      });
+      if(!ok.isConfirmed) return;
+      showBusy("جاري الحذف...");
+      try{
+        await safeApi("deleteProjectExpense", rowIndex);
+        await loadProjectExpensesDetailedData();
+        await loadProjectReport();
+        closeBusy(); toast("success","تم حذف السجل");
+      }catch(e){
+        closeBusy(); Swal.fire("خطأ","تعذر حذف السجل","error");
+      }
+    }
+
+    function getProjectId(project){
+      return String(project?.id || project?.["id"] || "");
+    }
+    function getProjectName(project){
+      return String(
+        project?.["اسم_المشروع"] ??
+        project?.["اسم المشروع"] ??
+        project?.name ?? ""
+      );
+    }
+
+    function getProjectStatus(project){
+      const settings = JSON.parse(localStorage.getItem(APP_CONFIG.STORAGE.systemCfg || "media_systemConfig") || "{}");
+      const steps = Array.isArray(settings.projectSteps) ? settings.projectSteps : [];
+      const ended = project?.["إنهاء_المشروع"] === true || String(project?.["إنهاء_المشروع"]).toLowerCase() === "true"
+                 || project?.["إنهاء المشروع"] === true || String(project?.["إنهاء المشروع"]).toLowerCase() === "true";
+
+      if (ended) return "مكتمل";
+      if (steps.length){
+        const doneCount = steps.filter(step => project?.[step] === true || String(project?.[step]).toLowerCase() === "true").length;
+        if (doneCount === 0) return "جديد";
+        if (doneCount === steps.length) return "مكتمل";
+        return "قيد التنفيذ";
+      }
+      return "قيد التنفيذ";
+    }
+
+    function getProjectValue(project){
+      const keys = ["قيمة_المشروع","قيمة المشروع","المبلغ","قيمة_العقد","قيمة العقد","سعر_المشروع","سعر المشروع"];
+      for (const k of keys){
+        if (project && project[k] !== undefined && project[k] !== null && String(project[k]).trim() !== ""){
+          return num(project[k]);
+        }
+      }
+      return null;
+    }
+
+    async function loadProjectReport(){
+      if (!_projectsCache.length) _projectsCache = await safeApi("getProjects");
+      if (!_projectExpenseRaw.length) _projectExpenseRaw = await fetchAllProjectExpenses();
+
+      const search = (document.getElementById("projectReportSearch").value || "").trim().toLowerCase();
+      const expenseMap = {};
+
+      (_projectExpenseRaw || []).forEach(r => {
+        const pid = String(r.projectId || "");
+        if (!expenseMap[pid]) expenseMap[pid] = 0;
+        expenseMap[pid] += num(r.value);
+      });
+
+      _projectReportRaw = (_projectsCache || []).map(p => {
+        const id = getProjectId(p);
+        const name = getProjectName(p);
+        const totalExpenses = num(expenseMap[id] || 0);
+        const projectValue = getProjectValue(p);
+        const remaining = projectValue === null ? null : Math.max(0, projectValue - totalExpenses);
+        return {
+          id, name,
+          status: getProjectStatus(p),
+          totalExpenses,
+          projectValue,
+          remaining
+        };
+      }).filter(r => !search || r.name.toLowerCase().includes(search));
+
+      document.getElementById("projectReportCount").textContent = fmt(_projectReportRaw.length);
+      document.getElementById("projectReportExpenses").textContent = fmt(_projectReportRaw.reduce((a,b)=>a+b.totalExpenses,0));
+      document.getElementById("projectReportValues").textContent = fmt(_projectReportRaw.reduce((a,b)=>a+(b.projectValue || 0),0));
+      document.getElementById("projectReportRemaining").textContent = fmt(_projectReportRaw.reduce((a,b)=>a+(b.remaining || 0),0));
+
+      renderProjectReport();
+    }
+
+    function renderProjectReport(){
+      const rows = _projectReportRaw || [];
+      const cards = document.getElementById("projectReportCards");
+      const tbody = document.querySelector("#projectReportTable tbody");
+      cards.innerHTML = "";
+      tbody.innerHTML = "";
+
+      if (!rows.length){
+        const html = `<div class="empty">لا توجد مشاريع مطابقة.</div>`;
+        cards.innerHTML = html;
+        tbody.innerHTML = `<tr><td colspan="5" class="text-center py-4 text-muted">لا توجد بيانات</td></tr>`;
+        return;
+      }
+
+      rows.forEach(r => {
+        const statusClass = r.status === "مكتمل" ? "ok" : (r.status === "قيد التنفيذ" ? "warn" : "base");
+        cards.insertAdjacentHTML("beforeend", `
+          <div class="mobile-card">
+            <div class="head">
+              <div class="title">${escapeHtml(r.name || "—")}</div>
+              <span class="chip ${statusClass}">${escapeHtml(r.status)}</span>
+            </div>
+            <div class="line"><strong>إجمالي المصروفات:</strong> <span class="text-num">${fmt(r.totalExpenses)}</span></div>
+            <div class="line"><strong>قيمة المشروع:</strong> <span class="text-num">${r.projectValue === null ? "—" : fmt(r.projectValue)}</span></div>
+            <div class="line"><strong>المتبقي:</strong> <span class="text-num">${r.remaining === null ? "—" : fmt(r.remaining)}</span></div>
+          </div>
+        `);
+
+        tbody.insertAdjacentHTML("beforeend", `
+          <tr>
+            <td>${escapeHtml(r.name || "")}</td>
+            <td><span class="chip ${statusClass}">${escapeHtml(r.status)}</span></td>
+            <td class="text-num">${fmt(r.totalExpenses)}</td>
+            <td class="text-num">${r.projectValue === null ? "—" : fmt(r.projectValue)}</td>
+            <td class="text-num">${r.remaining === null ? "—" : fmt(r.remaining)}</td>
+          </tr>
+        `);
+      });
+    }
+
+    async function loadTargetsData(){
+      _targetsCache = await safeApi("getTargets");
+      _yearlyTargetsCache = await safeApi("getYearlyTargets");
+      updateTargetsSummary();
+      renderTargetsPage(1);
+      renderYearlyTargets();
+    }
+
+    function updateTargetsSummary(){
+      const rows = _targetsCache || [];
+      document.getElementById("targetsCount").textContent = fmt(rows.length);
+      document.getElementById("targetsTotalTarget").textContent = fmt(rows.reduce((a,b)=>a+num(b.target),0));
+      document.getElementById("targetsTotalAchieved").textContent = fmt(rows.reduce((a,b)=>a+num(b.achieved),0));
+      document.getElementById("targetsTotalNet").textContent = fmt(rows.reduce((a,b)=>a+num(b.netProfit),0));
+    }
+
+    function renderTargetsPage(page){
+      const rows = _targetsCache || [];
+      const totalPages = Math.max(1, Math.ceil(rows.length / PAGE_SIZE));
+      page = Math.min(Math.max(1, page), totalPages);
+      const slice = rows.slice((page-1)*PAGE_SIZE, page*PAGE_SIZE);
+
+      const cards = document.getElementById("targetsContainer");
+      const tbody = document.querySelector("#targetsTable tbody");
+      const pag = document.getElementById("targetsPagination");
+      cards.innerHTML = "";
+      tbody.innerHTML = "";
+
+      if (!slice.length){
+        const html = `<div class="empty">لا توجد مستهدفات شهرية.</div>`;
+        cards.innerHTML = html;
+        tbody.innerHTML = `<tr><td colspan="10" class="text-center py-4 text-muted">لا توجد بيانات</td></tr>`;
+      } else {
+        slice.forEach(r => {
+          cards.insertAdjacentHTML("beforeend", `
+            <div class="mobile-card">
+              <div class="head">
+                <div class="title">شهر ${escapeHtml(r.month)} / ${escapeHtml(r.year)}</div>
+                <span class="chip base">${escapeHtml(r.percent)}%</span>
+              </div>
+              <div class="line"><strong>المستهدف:</strong> <span class="text-num">${fmt(r.target)}</span></div>
+              <div class="line"><strong>المحقق:</strong> <span class="text-num">${fmt(r.achieved)}</span></div>
+              <div class="line"><strong>المستحقات:</strong> <span class="text-num">${fmt(r.due)}</span></div>
+              <div class="line"><strong>المصروفات:</strong> <span class="text-num">${fmt(r.expenses)}</span></div>
+              <div class="line"><strong>صافي الربح:</strong> <span class="text-num">${fmt(r.netProfit)}</span></div>
+              <div class="line"><strong>ملاحظات:</strong> ${escapeHtml(r.notes || "—")}</div>
+              <div class="mobile-actions">
+                <button class="btn btn-sm btn-outline-warning" onclick='editTarget(${JSON.stringify(r).replace(/"/g,"&quot;")})'><i class="fa-solid fa-pen"></i></button>
+                <button class="btn btn-sm btn-outline-danger" onclick="deleteTargetUI(${r.rowIndex})"><i class="fa-solid fa-trash"></i></button>
+              </div>
+            </div>
+          `);
+
+          tbody.insertAdjacentHTML("beforeend", `
+            <tr>
+              <td>${escapeHtml(r.month)}</td>
+              <td>${escapeHtml(r.year)}</td>
+              <td class="text-num">${fmt(r.target)}</td>
+              <td class="text-num">${fmt(r.achieved)}</td>
+              <td class="text-num">${fmt(r.due)}</td>
+              <td class="text-num">${fmt(r.expenses)}</td>
+              <td class="text-num">${fmt(r.netProfit)}</td>
+              <td>${escapeHtml(r.percent)}%</td>
+              <td>${escapeHtml(r.notes || "")}</td>
+              <td>
+                <div class="table-actions">
+                  <button class="btn btn-sm btn-outline-warning" onclick='editTarget(${JSON.stringify(r).replace(/"/g,"&quot;")})'><i class="fa-solid fa-pen"></i></button>
+                  <button class="btn btn-sm btn-outline-danger" onclick="deleteTargetUI(${r.rowIndex})"><i class="fa-solid fa-trash"></i></button>
+                </div>
+              </td>
+            </tr>
+          `);
+        });
+      }
+
+      renderPagination(pag, totalPages, page, "renderTargetsPage");
+    }
+
+    function renderYearlyTargets(){
+      const rows = _yearlyTargetsCache || [];
+      const cards = document.getElementById("yearlyTargetsCardsContainer");
+      const tbody = document.querySelector("#yearlyTargetsTable tbody");
+      cards.innerHTML = "";
+      tbody.innerHTML = "";
+
+      if (!rows.length){
+        const html = `<div class="empty">لا توجد مستهدفات سنوية.</div>`;
+        cards.innerHTML = html;
+        tbody.innerHTML = `<tr><td colspan="6" class="text-center py-4 text-muted">لا توجد بيانات</td></tr>`;
+        return;
+      }
+
+      rows.forEach(r => {
+        cards.insertAdjacentHTML("beforeend", `
+          <div class="mobile-card">
+            <div class="head">
+              <div class="title">سنة ${escapeHtml(r.year)}</div>
+              <span class="chip ok">${escapeHtml(r.percent)}</span>
+            </div>
+            <div class="line"><strong>إجمالي المستهدف:</strong> <span class="text-num">${fmt(r.target)}</span></div>
+            <div class="line"><strong>إجمالي المحقق:</strong> <span class="text-num">${fmt(r.achieved)}</span></div>
+            <div class="line"><strong>إجمالي المصروفات:</strong> <span class="text-num">${fmt(r.expenses)}</span></div>
+            <div class="line"><strong>صافي الربح:</strong> <span class="text-num">${fmt(r.netProfit)}</span></div>
+          </div>
+        `);
+
+        tbody.insertAdjacentHTML("beforeend", `
+          <tr>
+            <td>${escapeHtml(r.year)}</td>
+            <td class="text-num">${fmt(r.target)}</td>
+            <td class="text-num">${fmt(r.achieved)}</td>
+            <td class="text-num">${fmt(r.expenses)}</td>
+            <td class="text-num">${fmt(r.netProfit)}</td>
+            <td><span class="chip ok">${escapeHtml(r.percent)}</span></td>
+          </tr>
+        `);
+      });
+    }
+
+    function showTargetModal(){
+      document.getElementById("targetForm").reset();
+      document.getElementById("targetRowIndex").value = "";
+      document.getElementById("targetModalTitle").innerHTML = `<i class="fa-solid fa-bullseye me-1"></i>إضافة مستهدف`;
+      document.getElementById("targetYear").value = new Date().getFullYear();
+      bootstrap.Modal.getOrCreateInstance(document.getElementById("targetModal")).show();
+    }
+
+    function editTarget(r){
+      document.getElementById("targetRowIndex").value = r.rowIndex || "";
+      document.getElementById("targetMonth").value = r.month || "";
+      document.getElementById("targetYear").value = r.year || "";
+      document.getElementById("targetValue").value = r.target || "";
+      document.getElementById("targetNotes").value = r.notes || "";
+      document.getElementById("targetModalTitle").innerHTML = `<i class="fa-solid fa-pen me-1"></i>تعديل مستهدف`;
+      bootstrap.Modal.getOrCreateInstance(document.getElementById("targetModal")).show();
+    }
+
+    async function onTargetSubmit(ev){
+      ev.preventDefault();
+      const rowIndex = document.getElementById("targetRowIndex").value;
+      const payload = {
+        month: document.getElementById("targetMonth").value,
+        year: document.getElementById("targetYear").value,
+        target: document.getElementById("targetValue").value,
+        notes: document.getElementById("targetNotes").value.trim()
+      };
+      showBusy("جاري حفظ المستهدف...");
+      try{
+        if (rowIndex) await safeApi("updateTarget", rowIndex, payload);
+        else await safeApi("addTarget", payload);
+        bootstrap.Modal.getOrCreateInstance(document.getElementById("targetModal")).hide();
+        await loadTargetsData();
+        closeBusy(); toast("success","تم حفظ المستهدف");
+      }catch(e){
+        closeBusy(); Swal.fire("خطأ","تعذر حفظ المستهدف","error");
+      }
+    }
+
+    async function deleteTargetUI(rowIndex){
+      const ok = await Swal.fire({
+        title:"تأكيد الحذف", text:"هل تريد حذف هذا المستهدف؟",
+        icon:"warning", showCancelButton:true, confirmButtonText:"نعم", cancelButtonText:"إلغاء"
+      });
+      if(!ok.isConfirmed) return;
+      showBusy("جاري الحذف...");
+      try{
+        await safeApi("deleteTarget", rowIndex);
+        await loadTargetsData();
+        closeBusy(); toast("success","تم حذف المستهدف");
+      }catch(e){
+        closeBusy(); Swal.fire("خطأ","تعذر حذف المستهدف","error");
+      }
+    }
+
+    function renderPagination(container, totalPages, currentPage, fnName){
+      container.innerHTML = "";
+      for(let i=1;i<=totalPages;i++){
+        container.insertAdjacentHTML("beforeend", `
+          <li class="page-item ${i===currentPage ? "active" : ""}">
+            <a class="page-link" href="#" onclick="${fnName}(${i}); return false;">${i}</a>
+          </li>
+        `);
+      }
+    }
+  </script>
+</body>
+</html>

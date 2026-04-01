@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>لوحة التحكم</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.rtl.min.css" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;800;900&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <script src="config-fixed.js"></script>
+  <style>
+    :root{--p:#014979;--p-dk:#013560;--p-lt:#e8f4fd;--gold:#c6a43f;--gold-lt:#fdf6e3;--gold-dk:#a68a2e;--ok:#059669;--warn:#d97706;--pur:#6d28d9;--bg:#f1f5f9;--card:#fff;--border:rgba(15,23,42,.07);--txt:#0f172a;--muted:#64748b;--r:1.1rem;--sh:0 8px 24px rgba(15,23,42,.08)}
+    *{box-sizing:border-box} html,body{margin:0;padding:0;font-family:'Tajawal',sans-serif;background:var(--bg);color:var(--txt)}
+    body{padding:1rem}
+    .hero{background:linear-gradient(135deg,#00243f 0%,#014979 60%,#026aa7 100%);color:#fff;border-radius:1.5rem;padding:1.2rem 1.3rem;box-shadow:0 16px 36px rgba(1,73,121,.23);margin-bottom:1rem}
+    .hero h1{margin:0 0 .3rem;font-size:1.35rem;font-weight:900}.hero p{margin:0;color:rgba(255,255,255,.85)}
+    .grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:.75rem;margin-bottom:1rem}
+    @media(max-width:900px){.grid{grid-template-columns:repeat(2,minmax(0,1fr))}} @media(max-width:560px){.grid{grid-template-columns:1fr}}
+    .cardx{background:var(--card);border-radius:1.2rem;border:1px solid var(--border);box-shadow:var(--sh);padding:1rem;position:relative;overflow:hidden}
+    .cardx:before{content:"";position:absolute;top:0;left:0;right:0;height:4px;background:linear-gradient(90deg,var(--p),#38bdf8)}
+    .cardx.k2:before{background:linear-gradient(90deg,var(--gold-dk),var(--gold))}
+    .cardx.k3:before{background:linear-gradient(90deg,var(--pur),#a78bfa)}
+    .cardx.k4:before{background:linear-gradient(90deg,var(--ok),#34d399)}
+    .lbl{font-size:.8rem;color:var(--muted);font-weight:700}.val{font-size:1.55rem;font-weight:900;margin:.2rem 0}
+    .box{background:#fff;border:1px solid var(--border);border-radius:1.2rem;box-shadow:var(--sh);overflow:hidden;margin-bottom:1rem}
+    .bh{padding:.8rem 1rem;border-bottom:1px solid var(--border);font-weight:900;color:var(--p);display:flex;justify-content:space-between;align-items:center}
+    .bb{padding:1rem}
+    .progress{height:16px}
+    .item{background:#f8fafc;border:1px solid var(--border);border-radius:.9rem;padding:.7rem .8rem;margin-bottom:.55rem;display:flex;justify-content:space-between;gap:.5rem;align-items:flex-start}
+    .item .n{font-weight:800;color:var(--p)} .item .m{font-size:.77rem;color:var(--muted);margin-top:.15rem}
+    .chip{display:inline-flex;align-items:center;gap:.22rem;padding:.18rem .52rem;border-radius:999px;font-size:.7rem;font-weight:700}
+    .co{background:#fdf6e3;color:#a68a2e}.cr{background:#fee2e2;color:#dc2626}.cg{background:#d1fae5;color:#059669}
+    .empty{text-align:center;color:var(--muted);padding:1.2rem}
+  </style>
+</head>
+<body>
+  <section class="hero">
+    <h1><i class="fas fa-gauge-high me-2"></i>لوحة التحكم</h1>
+    <p>ملخص سريع للأداء، المستهدف الشهري، وأقرب الحجوزات.</p>
+  </section>
+
+  <section class="grid">
+    <div class="cardx"><div class="lbl">إجمالي الحجوزات</div><div class="val" id="k-bk">--</div><div class="lbl">عدد الحجوزات المسجلة</div></div>
+    <div class="cardx k2"><div class="lbl">الإيرادات</div><div class="val" id="k-rv">--</div><div class="lbl">إجمالي الإيرادات</div></div>
+    <div class="cardx k3"><div class="lbl">المستحقات</div><div class="val" id="k-rc">--</div><div class="lbl">المبالغ المتبقية</div></div>
+    <div class="cardx k4"><div class="lbl">صافي الربح</div><div class="val" id="k-nt">--</div><div class="lbl">بعد جميع المصروفات</div></div>
+  </section>
+
+  <div class="grid" style="grid-template-columns:1.2fr 1fr">
+    <div class="box">
+      <div class="bh"><span><i class="fas fa-bullseye me-2"></i>المستهدف الشهري</span><span id="t-lbl">--</span></div>
+      <div class="bb">
+        <div class="grid" style="grid-template-columns:repeat(3,minmax(0,1fr));margin-bottom:.5rem">
+          <div><div class="lbl">المستهدف</div><div class="val" id="t-tgt" style="font-size:1.2rem">--</div></div>
+          <div><div class="lbl">المحقق</div><div class="val" id="t-ach" style="font-size:1.2rem;color:var(--ok)">--</div></div>
+          <div><div class="lbl">المتبقي</div><div class="val" id="t-rem" style="font-size:1.2rem;color:var(--warn)">--</div></div>
+        </div>
+        <div class="d-flex justify-content-between mb-1"><small class="text-muted">نسبة الإنجاز</small><small class="text-muted" id="t-pct">0%</small></div>
+        <div class="progress"><div id="t-bar" class="progress-bar bg-success" style="width:0%"></div></div>
+        <div class="mt-2"><span class="chip co"><i class="fas fa-clock"></i> تبقّى <span id="d-left">0</span> يوم</span></div>
+      </div>
+    </div>
+    <div class="box">
+      <div class="bh"><span><i class="fas fa-calendar-day me-2"></i>أقرب الحجوزات</span><span id="td-lbl">--</span></div>
+      <div class="bb" id="td-list"><div class="empty">جاري التحميل...</div></div>
+    </div>
+  </div>
+
+<script>
+function x(t){return String(t??"").replace(/[&<>"']/g,m=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;' }[m]))}
+function n(v){return Number(v||0).toLocaleString("ar-SA")}
+function dleft(){const now=new Date(),last=new Date(now.getFullYear(),now.getMonth()+1,0);return last.getDate()-now.getDate()}
+function $s(id,v){const e=document.getElementById(id); if(e) e.textContent=v}
+function renderNearest(list){
+ const el=document.getElementById('td-list');
+ if(!list || !list.length){el.innerHTML='<div class="empty">لا توجد حجوزات خلال 3 أيام</div>'; return;}
+ el.innerHTML=list.map(b=>`<div class="item"><div><div class="n">${x(b.name||'')}</div><div class="m">${x(b.type||'')} - ${x(b.date||'')}${b.time?' - '+x(b.time):''}${b.assignedTo?' - '+x(b.assignedTo):''}</div></div><div><span class="chip ${+b.remaining?'cr':'cg'}">${+b.remaining?n(b.remaining)+' ريال':'تم السداد'}</span></div></div>`).join('');
+}
+async function loadDash(){
+ try{
+   const s=await API.run('getDashboardStats');
+   $s('k-bk', s.totalBookings||0); $s('k-rv', n(s.totalRevenue)); $s('k-rc', n(s.totalReceivables)); $s('k-nt', n(s.netProfit));
+   $s('t-lbl', s.monthLabel||'--'); $s('t-tgt', n(s.monthTarget)); $s('t-ach', n(s.monthAchieved)); $s('t-rem', n(s.monthRemaining));
+   $s('t-pct', (s.monthPercent||0)+'%'); $s('d-left', dleft()); $s('td-lbl', s.todaysLabel||'--');
+   document.getElementById('t-bar').style.width=Math.min(100, parseFloat(s.monthPercent)||0)+'%';
+   renderNearest(s.todaysBookings||[]);
+ }catch(e){ console.error(e); document.getElementById('td-list').innerHTML='<div class="empty">تعذر تحميل البيانات</div>'; }
+}
+document.addEventListener('DOMContentLoaded', loadDash);
+</script>
+</body>
+</html>
