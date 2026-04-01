@@ -743,7 +743,6 @@
 
     document.addEventListener("DOMContentLoaded", async () => {
       guardSession();
-      renderTopPageNav();
       hydrateHero();
       wireEvents();
       await initPage();
@@ -766,27 +765,7 @@
       document.getElementById("todayText").textContent = new Date().toLocaleDateString("ar-SA");
     }
 
-    function renderTopPageNav(){
-  const nav = document.getElementById("topPageNav");
-  const pages = [
-    { id: "dashboard", text: "لوحة التحكم", icon: "fa-gauge-high", href: "index.html" },
-    { id: "bookings",  text: "الحجوزات", icon: "fa-calendar-check", href: "index.html" },
-    { id: "finance",   text: "المالية",      icon: "fa-wallet",     href: "index.html" },
-    { id: "projects",  text: "المشاريع",     icon: "fa-diagram-project", href: "index.html" },
-    { id: "settings",  text: "الإعدادات",    icon: "fa-gear", href: "index.html" }
-  ];
-
-  const currentPageId = document.title === "المالية والمصروفات" ? "finance" : 
-                         (document.title === "الإعدادات" ? "settings" : "dashboard");
-
-  const allowed = pages.filter(p => !Session.canAccess || Session.canAccess(p.id));
-  nav.innerHTML = allowed.map(p => `
-    <a class="top-link ${p.id === currentPageId ? 'active' : ''}" href="${p.href}">
-      <i class="fa-solid ${p.icon}"></i>
-      <span>${p.text}</span>
-    </a>
-  `).join("");
-}
+  
 
     function wireEvents(){
       document.getElementById("expenseSearch").addEventListener("input", () => renderExpensesPage(1));
