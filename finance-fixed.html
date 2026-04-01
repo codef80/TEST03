@@ -742,47 +742,36 @@
     let _lastBookingExpenseChange = null;
 
     document.addEventListener("DOMContentLoaded", async () => {
-      guardSession();
-      hydrateHero();
-      wireEvents();
-      await initPage();
-    });
+  if (!guardSession()) return;
+
+  // إذا كنت لا تريد التبويب العلوي احذف السطر التالي أيضًا
+  // renderTopPageNav();
+
+  hydrateHero();
+  wireEvents();
+  await initPage();
+});
 
     function guardSession(){
-  // محاولة الحصول على الجلسة من localStorage
-  const userName = localStorage.getItem(APP_CONFIG.STORAGE.userName);
-  
-  // إذا لم يكن هناك مستخدم مسجل الدخول
-  if (!userName) {
-    // التحقق إذا كنا داخل iframe
-    const isInIframe = window.self !== window.top;
+  const isInIframe = window.self !== window.top;
+  const sessionValid = !!(window.Session && Session.isLoggedIn && Session.isLoggedIn());
+
+  if (isInIframe && sessionValid) {
+    return true;
+  }
+
+  if (!sessionValid) {
     if (isInIframe) {
-      // في iframe، نعرض رسالة ونطلب من الصفحة الأم التوجيه
-      console.warn("جلسة غير نشطة في iframe");
-      // إرسال رسالة للصفحة الأم
       window.parent.postMessage({ type: "logout" }, "*");
       return false;
     }
-    window.location.href = (APP_CONFIG?.PAGES?.index || 'index.html');
+    window.location.href = (APP_CONFIG?.PAGES?.index || "index.html");
     return false;
   }
-  
-  // التحقق من انتهاء الجلسة
-  const loginTime = localStorage.getItem(APP_CONFIG.STORAGE.loginTime);
-  if (loginTime) {
-    const diff = (Date.now() - new Date(loginTime).getTime()) / 60000;
-    if (diff > APP_CONFIG.SESSION_TIMEOUT) {
-      Session.clear();
-      if (window.self !== window.top) {
-        window.parent.postMessage({ type: "logout" }, "*");
-      } else {
-        window.location.href = (APP_CONFIG?.PAGES?.index || 'index.html');
-      }
-      return false;
-    }
-  }
+
   return true;
 }
+    
     function hydrateHero(){
       const session = Session.get ? Session.get() : {};
       const cfgRaw = localStorage.getItem(APP_CONFIG.STORAGE.systemCfg || "media_systemConfig");
