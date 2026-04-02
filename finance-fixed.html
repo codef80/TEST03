@@ -750,26 +750,36 @@
   try {
     await initPage();
   } catch (e) {
-    console.error("Finance page failed to initialize", e);
-    Swal.fire("تنبيه", "تم فتح الصفحة لكن بعض بيانات المالية تعذر تحميلها", "warning");
+    console.error("Finance init failed", e);
   }
 });
-
+    
     function guardSession(){
+  const userName = localStorage.getItem(APP_CONFIG.STORAGE.userName);
   const isInIframe = window.self !== window.top;
-  const sessionValid = !!(window.Session && Session.isLoggedIn && Session.isLoggedIn());
 
-  if (isInIframe && sessionValid) {
-    return true;
-  }
-
-  if (!sessionValid) {
+  if (!userName) {
     if (isInIframe) {
+      console.warn("جلسة غير نشطة في iframe");
       window.parent.postMessage({ type: "logout" }, "*");
       return false;
     }
     window.location.href = (APP_CONFIG?.PAGES?.index || "index.html");
     return false;
+  }
+
+  const loginTime = localStorage.getItem(APP_CONFIG.STORAGE.loginTime);
+  if (loginTime) {
+    const diff = (Date.now() - new Date(loginTime).getTime()) / 60000;
+    if (diff > APP_CONFIG.SESSION_TIMEOUT) {
+      Session.clear();
+      if (isInIframe) {
+        window.parent.postMessage({ type: "logout" }, "*");
+      } else {
+        window.location.href = (APP_CONFIG?.PAGES?.index || "index.html");
+      }
+      return false;
+    }
   }
 
   return true;
