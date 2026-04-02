@@ -744,12 +744,15 @@
     document.addEventListener("DOMContentLoaded", async () => {
   if (!guardSession()) return;
 
-  // إذا كنت لا تريد التبويب العلوي احذف السطر التالي أيضًا
-  // renderTopPageNav();
-
   hydrateHero();
   wireEvents();
-  await initPage();
+
+  try {
+    await initPage();
+  } catch (e) {
+    console.error("Finance page failed to initialize", e);
+    Swal.fire("تنبيه", "تم فتح الصفحة لكن بعض بيانات المالية تعذر تحميلها", "warning");
+  }
 });
 
     function guardSession(){
