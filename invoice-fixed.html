@@ -3,606 +3,133 @@
 <html lang="ar" dir="rtl">
 <head>
   <meta charset="UTF-8" />
-  <title>فاتورة حجز</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>الفاتورة</title>
   <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <script src="config-fixed.js"></script>
   <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-
-    body {
-      font-family: 'Cairo', sans-serif;
-      background: linear-gradient(135deg, #00243f, #014979, #026aa7);
-      padding: 20px;
-      color: #1e2f40;
-      min-height: 100vh;
-    }
-
-    .wrap { max-width: 850px; margin: 0 auto; }
-
-    .invoice {
-      background: #fff;
-      border-radius: 16px;
-      overflow: hidden;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-    }
-
-    .gold-strip {
-      height: 5px;
-      background: linear-gradient(to left, #C6A43F, #e8c96a, #C6A43F);
-      -webkit-print-color-adjust: exact;
-      print-color-adjust: exact;
-    }
-
-    .status-bar {
-      padding: 10px 30px;
-      background: #f9fcff;
-      border-bottom: 1px solid #e0e8f0;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-    }
-    .status-label { font-size: 0.8rem; color: #546e7a; font-weight: 600; }
-    .status-badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 7px;
-      padding: 5px 16px;
-      border-radius: 50px;
-      background: #fff;
-      border: 1px solid #e0e8f0;
-      font-weight: 700;
-      font-size: 0.9rem;
-    }
-    .badge-dot { width: 9px; height: 9px; border-radius: 50%; }
-    .badge-paid { color: #00243f; }
-    .badge-paid .badge-dot {
-      background: #27ae60;
-      -webkit-print-color-adjust: exact;
-      print-color-adjust: exact;
-    }
-    .badge-pending { color: #a1662f; }
-    .badge-pending .badge-dot {
-      background: #f39c12;
-      -webkit-print-color-adjust: exact;
-      print-color-adjust: exact;
-    }
-
-    .royal-header {
-      background: #00243f;
-      padding: 30px 35px;
-      color: #fff;
-      border-bottom: 4px solid #C6A43F;
-      -webkit-print-color-adjust: exact;
-      print-color-adjust: exact;
-    }
-
-    .header-flex {
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-start;
-      gap: 20px;
-    }
-
-    .brand-title {
-      font-size: 2.2rem;
-      font-weight: 800;
-      color: #C6A43F;
-      margin-bottom: 5px;
-      -webkit-print-color-adjust: exact;
-      print-color-adjust: exact;
-    }
-
-    .brand-sub {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      opacity: 0.85;
-      margin-bottom: 20px;
-      font-size: 0.9rem;
-    }
-
-    .brand-sub .line {
-      width: 40px;
-      height: 2px;
-      background: #C6A43F;
-      -webkit-print-color-adjust: exact;
-      print-color-adjust: exact;
-    }
-
-    .meta-box { display: flex; gap: 12px; flex-wrap: wrap; }
-
-    .meta-item {
-      background: rgba(255,255,255,0.1);
-      border: 1px solid rgba(255,255,255,0.2);
-      padding: 10px 18px;
-      border-radius: 12px;
-      -webkit-print-color-adjust: exact;
-      print-color-adjust: exact;
-    }
-
-    .meta-label {
-      display: block;
-      font-size: 0.65rem;
-      opacity: 0.7;
-      letter-spacing: 0.5px;
-      margin-bottom: 2px;
-    }
-
-    .meta-value {
-      display: block;
-      font-size: 1.1rem;
-      font-weight: 700;
-    }
-
-    .company-section {
-      background: rgba(255,255,255,0.08);
-      border: 1px solid rgba(255,255,255,0.15);
-      padding: 18px 22px;
-      border-radius: 14px;
-      min-width: 220px;
-      direction: ltr;
-      text-align: left;
-      -webkit-print-color-adjust: exact;
-      print-color-adjust: exact;
-    }
-
-    .company-name {
-      font-size: 1.2rem;
-      font-weight: 700;
-      margin-bottom: 12px;
-      color: #C6A43F;
-      text-align: left;
-      -webkit-print-color-adjust: exact;
-      print-color-adjust: exact;
-    }
-
-    .company-detail {
-      font-size: 0.88rem;
-      margin-bottom: 7px;
-      opacity: 0.9;
-      display: flex;
-      align-items: center;
-      justify-content: flex-start;
-      gap: 8px;
-      direction: ltr;
-    }
-
-    .content-area { padding: 30px 35px; }
-
-    .section-head {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      margin-bottom: 18px;
-    }
-
-    .section-icon {
-      width: 42px;
-      height: 42px;
-      background: #f0f4fa;
-      border-radius: 12px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 1.3rem;
-      border: 1px solid #e0e8f0;
-    }
-
-    .section-head h2 {
-      font-size: 1.25rem;
-      font-weight: 700;
-      color: #00243f;
-    }
-
-    .section-note {
-      font-size: 0.8rem;
-      color: #546e7a;
-      margin-right: auto;
-    }
-
-    .data-card {
-      border-radius: 16px;
-      overflow: hidden;
-      border: 1px solid #e0e8f0;
-      margin-bottom: 25px;
-    }
-
-    .data-grid { width: 100%; border-collapse: collapse; }
-
-    .data-grid td {
-      padding: 14px 20px;
-      border-bottom: 1px solid #eef2f7;
-    }
-
-    .data-grid tr:last-child td { border-bottom: none; }
-
-    .data-grid .lbl {
-      width: 33%;
-      background: #f5f8fc;
-      font-weight: 700;
-      color: #00243f;
-      border-right: 4px solid #C6A43F;
-      -webkit-print-color-adjust: exact;
-      print-color-adjust: exact;
-    }
-
-    .data-grid .val {
-      background: #fff;
-      font-weight: 500;
-      color: #1e2f40;
-    }
-
-    .finance-layout {
-      display: flex;
-      gap: 20px;
-      align-items: flex-start;
-    }
-
-    .info-note {
-      flex: 1;
-      background: #f5f8fc;
-      border-radius: 16px;
-      padding: 20px;
-      border: 1px solid #e0e8f0;
-      -webkit-print-color-adjust: exact;
-      print-color-adjust: exact;
-    }
-
-    .note-title {
-      display: block;
-      font-weight: 800;
-      color: #00243f;
-      margin-bottom: 8px;
-      font-size: 1rem;
-    }
-
-    .info-note p {
-      color: #546e7a;
-      font-size: 0.88rem;
-      line-height: 1.7;
-    }
-
-    .totals-box {
-      min-width: 290px;
-      border-radius: 16px;
-      overflow: hidden;
-      border: 1px solid #e0e8f0;
-    }
-
-    .totals-header {
-      background: #00243f;
-      color: #fff;
-      padding: 15px 20px;
-      font-weight: 700;
-      font-size: 1rem;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      -webkit-print-color-adjust: exact;
-      print-color-adjust: exact;
-    }
-
-    .totals-header span:last-child {
-      background: #C6A43F;
-      padding: 3px 10px;
-      border-radius: 20px;
-      font-size: 0.75rem;
-      -webkit-print-color-adjust: exact;
-      print-color-adjust: exact;
-    }
-
-    .totals-details { width: 100%; border-collapse: collapse; }
-
-    .totals-details td {
-      padding: 14px 20px;
-      border-bottom: 1px dashed #eef2f7;
-    }
-
-    .totals-details tr:last-child td { border-bottom: none; }
-
-    .amount-label { font-weight: 600; color: #546e7a; }
-
-    .amount-value {
-      font-weight: 800;
-      color: #00243f;
-      text-align: left;
-      direction: ltr;
-      font-size: 1rem;
-    }
-
-    .highlight-row td {
-      background: linear-gradient(to left, #C6A43F, #B49450) !important;
-      -webkit-print-color-adjust: exact !important;
-      print-color-adjust: exact !important;
-    }
-
-    .highlight-row .amount-label,
-    .highlight-row .amount-value {
-      color: #fff !important;
-      font-size: 1.1rem;
-    }
-
-    .footer-lux {
-      background: #00243f;
-      color: #fff;
-      text-align: center;
-      padding: 22px;
-      border-top: 3px solid #C6A43F;
-      -webkit-print-color-adjust: exact;
-      print-color-adjust: exact;
-    }
-
-    .footer-lux p {
-      font-size: 1.15rem;
-      font-weight: 600;
-    }
-
-    .footer-lux small {
-      display: block;
-      font-size: 0.78rem;
-      opacity: 0.75;
-      margin-top: 6px;
-    }
-
-    .gold-line {
-      width: 70px;
-      height: 3px;
-      background: #C6A43F;
-      margin: 12px auto 0;
-      border-radius: 3px;
-      -webkit-print-color-adjust: exact;
-      print-color-adjust: exact;
-    }
-
-    .ltr-inline {
-      direction: ltr;
-      unicode-bidi: plaintext;
-      display: inline-block;
-      text-align: left;
-      white-space: nowrap;
-    }
-
-    /* ===== PDF / Print ===== */
-    @page {
-      size: A4 portrait;
-      margin: 10mm 14mm 10mm 14mm;
-    }
-
-    @media print {
-      html, body {
-        width: 100% !important;
-        height: auto !important;
-        margin: 0 !important;
-        padding: 0 !important;
-        background: #fff !important;
-        -webkit-print-color-adjust: exact !important;
-        print-color-adjust: exact !important;
-        color-adjust: exact !important;
-      }
-
-      * {
-        -webkit-print-color-adjust: exact !important;
-        print-color-adjust: exact !important;
-        color-adjust: exact !important;
-      }
-
-      .wrap {
-        max-width: 100% !important;
-        width: 100% !important;
-        margin: 0 !important;
-        padding: 0 !important;
-      }
-
-      .invoice {
-        width: 100% !important;
-        border-radius: 0 !important;
-        box-shadow: none !important;
-        border: none !important;
-        page-break-inside: avoid;
-        break-inside: avoid;
-      }
-
-      /* إزالة جميع الظلال */
-      .data-card,
-      .totals-box,
-      .status-badge,
-      .meta-item,
-      .company-section,
-      .info-note {
-        box-shadow: none !important;
-      }
-
-      /* منع تكسير الكتل */
-      .royal-header,
-      .status-bar,
-      .content-area,
-      .footer-lux,
-      .finance-layout,
-      .data-card,
-      .totals-box,
-      .header-flex,
-      .meta-box,
-      .company-section,
-      .section-head,
-      table,
-      thead,
-      tbody,
-      tr {
-        break-inside: avoid !important;
-        page-break-inside: avoid !important;
-      }
-
-      /* ثبات الألوان */
-      .royal-header {
-        background: #00243f !important;
-        color: #fff !important;
-      }
-
-      .gold-strip {
-        background: #C6A43F !important;
-      }
-
-      .data-grid .lbl {
-        background: #f5f8fc !important;
-      }
-
-      .info-note {
-        background: #f5f8fc !important;
-      }
-
-      .totals-header {
-        background: #00243f !important;
-        color: #fff !important;
-      }
-
-      .totals-header span:last-child {
-        background: #C6A43F !important;
-      }
-
-      .highlight-row td {
-        background: #C6A43F !important;
-      }
-
-      .footer-lux {
-        background: #00243f !important;
-        color: #fff !important;
-      }
-
-      .gold-line {
-        background: #C6A43F !important;
-      }
-
-      .brand-title,
-      .company-name {
-        color: #C6A43F !important;
-      }
-
-      .brand-sub .line {
-        background: #C6A43F !important;
-      }
-
-      a, a:visited {
-        color: inherit !important;
-        text-decoration: none !important;
-      }
-    }
+    *{margin:0;padding:0;box-sizing:border-box}
+    body{font-family:'Cairo',sans-serif;background:linear-gradient(135deg,#00243f,#014979,#026aa7);padding:20px;color:#1e2f40;min-height:100vh}
+    .page-actions{max-width:850px;margin:0 auto 14px;display:flex;gap:10px;flex-wrap:wrap;justify-content:center}
+    .btn{border:none;border-radius:12px;padding:12px 18px;font-family:'Cairo',sans-serif;font-weight:800;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;gap:8px}
+    .btn-main{background:#fff;color:#014979}.btn-gold{background:#C6A43F;color:#fff}.btn-soft{background:rgba(255,255,255,.14);color:#fff;border:1px solid rgba(255,255,255,.2)}
+    .wrap{max-width:850px;margin:0 auto}.invoice{background:#fff;border-radius:16px;overflow:hidden;box-shadow:0 4px 12px rgba(0,0,0,.08)}
+    .gold-strip{height:5px;background:linear-gradient(to left,#C6A43F,#e8c96a,#C6A43F)}
+    .status-bar{padding:10px 30px;background:#f9fcff;border-bottom:1px solid #e0e8f0;display:flex;align-items:center;justify-content:space-between}.status-label{font-size:.8rem;color:#546e7a;font-weight:600}
+    .status-badge{display:inline-flex;align-items:center;gap:7px;padding:5px 16px;border-radius:50px;background:#fff;border:1px solid #e0e8f0;font-weight:700;font-size:.9rem}.badge-dot{width:9px;height:9px;border-radius:50%}.badge-paid{color:#00243f}.badge-paid .badge-dot{background:#27ae60}.badge-pending{color:#a1662f}.badge-pending .badge-dot{background:#f39c12}
+    .royal-header{background:#00243f;padding:30px 35px;color:#fff;border-bottom:4px solid #C6A43F}.header-flex{display:flex;justify-content:space-between;align-items:flex-start;gap:20px}.brand-title{font-size:2.2rem;font-weight:800;color:#C6A43F;margin-bottom:5px}.brand-sub{display:flex;align-items:center;gap:10px;opacity:.85;margin-bottom:20px;font-size:.9rem}.brand-sub .line{width:40px;height:2px;background:#C6A43F}
+    .meta-box{display:flex;gap:12px;flex-wrap:wrap}.meta-item{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);padding:10px 18px;border-radius:12px}.meta-label{display:block;font-size:.65rem;opacity:.7;letter-spacing:.5px;margin-bottom:2px}.meta-value{display:block;font-size:1.1rem;font-weight:700}
+    .company-section{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);padding:18px 22px;border-radius:14px;min-width:220px;direction:ltr;text-align:left}.company-name{font-size:1.2rem;font-weight:700;margin-bottom:12px;color:#C6A43F}.company-detail{font-size:.88rem;margin-bottom:7px;opacity:.9;display:flex;align-items:center;justify-content:flex-start;gap:8px;direction:ltr}
+    .content-area{padding:30px 35px}.section-head{display:flex;align-items:center;gap:12px;margin-bottom:18px}.section-icon{width:42px;height:42px;background:#f0f4fa;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:1.3rem;border:1px solid #e0e8f0}.section-head h2{font-size:1.25rem;font-weight:700;color:#00243f}.section-note{font-size:.8rem;color:#546e7a;margin-right:auto}
+    .data-card{border-radius:16px;overflow:hidden;border:1px solid #e0e8f0;margin-bottom:25px}.data-grid{width:100%;border-collapse:collapse}.data-grid td{padding:14px 20px;border-bottom:1px solid #eef2f7}.data-grid tr:last-child td{border-bottom:none}.data-grid .lbl{width:33%;background:#f5f8fc;font-weight:700;color:#00243f;border-right:4px solid #C6A43F}.data-grid .val{background:#fff;font-weight:500;color:#1e2f40}
+    .finance-layout{display:flex;gap:20px;align-items:flex-start}.info-note{flex:1;background:#f5f8fc;border-radius:16px;padding:20px;border:1px solid #e0e8f0}.note-title{display:block;font-weight:800;color:#00243f;margin-bottom:8px;font-size:1rem}.info-note p{color:#546e7a;font-size:.88rem;line-height:1.7}
+    .totals-box{min-width:290px;border-radius:16px;overflow:hidden;border:1px solid #e0e8f0}.totals-header{background:#00243f;color:#fff;padding:15px 20px;font-weight:700;font-size:1rem;display:flex;justify-content:space-between;align-items:center}.totals-header span:last-child{background:#C6A43F;padding:3px 10px;border-radius:20px;font-size:.75rem}.totals-details{width:100%;border-collapse:collapse}.totals-details td{padding:14px 20px;border-bottom:1px dashed #eef2f7}.totals-details tr:last-child td{border-bottom:none}.amount-label{font-weight:600;color:#546e7a}.amount-value{font-weight:800;color:#00243f;text-align:left;direction:ltr;font-size:1rem}.highlight-row td{background:linear-gradient(to left,#C6A43F,#B49450)!important}.highlight-row .amount-label,.highlight-row .amount-value{color:#fff!important;font-size:1.1rem}
+    .footer-lux{background:#00243f;color:#fff;text-align:center;padding:22px;border-top:3px solid #C6A43F}.footer-lux p{font-size:1.15rem;font-weight:600}.footer-lux small{display:block;font-size:.78rem;opacity:.75;margin-top:6px}.gold-line{width:70px;height:3px;background:#C6A43F;margin:12px auto 0;border-radius:3px}.ltr-inline{direction:ltr;unicode-bidi:plaintext;display:inline-block;text-align:left;white-space:nowrap}
+    .state{max-width:850px;margin:20px auto;background:#fff;border-radius:16px;padding:24px;text-align:center}
+    @media (max-width:768px){body{padding:12px}.header-flex,.finance-layout{flex-direction:column}.company-section,.totals-box{min-width:100%}.content-area,.royal-header{padding:20px}.page-actions{justify-content:stretch}.page-actions .btn{flex:1;justify-content:center}}
+    @media print{body{background:#fff;padding:0}.page-actions{display:none}.wrap{max-width:100%}.invoice{box-shadow:none;border-radius:0}}
   </style>
 </head>
 <body>
-  <div class="wrap">
+  <div class="page-actions" id="pageActions" style="display:none">
+    <button class="btn btn-main" onclick="window.print()">🖨️ طباعة</button>
+    <a class="btn btn-gold" id="openPdfBtn" href="#" target="_blank" style="display:none">📄 فتح PDF المحفوظ</a>
+    <a class="btn btn-soft" id="waBtn" href="#" target="_blank" style="display:none">💬 إرسال واتساب</a>
+  </div>
+  <div id="loading" class="state">جاري تحميل الفاتورة...</div>
+  <div id="error" class="state" style="display:none"></div>
+  <div class="wrap" id="invoiceWrap" style="display:none">
     <div class="invoice">
       <div class="gold-strip"></div>
-
       <div class="status-bar">
         <span class="status-label">حالة الفاتورة</span>
-        <? var remaining = Number(booking.remaining || 0); var isPaid = remaining <= 0; ?>
-        <div class="status-badge <?= isPaid ? 'badge-paid' : 'badge-pending' ?>">
-          <span class="badge-dot"></span>
-          <span><?= isPaid ? 'مدفوع بالكامل ✓' : 'مستحق الدفع' ?></span>
-        </div>
+        <div class="status-badge" id="statusBadge"><span class="badge-dot"></span><span id="statusText"></span></div>
       </div>
-
       <div class="royal-header">
         <div class="header-flex">
           <div>
             <div class="brand-title">فاتورة حجز</div>
-            <div class="brand-sub">
-              <span class="line"></span>
-              <span>إيصال معتمد</span>
-            </div>
+            <div class="brand-sub"><span class="line"></span><span>إيصال معتمد</span></div>
             <div class="meta-box">
-              <div class="meta-item">
-                <span class="meta-label">تاريخ الإصدار</span>
-                <span class="meta-value"><?= issuedAt || Utilities.formatDate(new Date(), Session.getScriptTimeZone(), "yyyy/MM/dd") ?></span>
-              </div>
-              <div class="meta-item">
-                <span class="meta-label">رقم الفاتورة</span>
-                <span class="meta-value">#<?= String(booking.id).slice(-8) ?></span>
-              </div>
+              <div class="meta-item"><span class="meta-label">تاريخ الإصدار</span><span class="meta-value" id="issuedAt"></span></div>
+              <div class="meta-item"><span class="meta-label">رقم الفاتورة</span><span class="meta-value" id="invoiceNo"></span></div>
             </div>
           </div>
-
           <div class="company-section">
-            <div class="company-name"><?= agencyName || "وكالة ميديا" ?></div>
-            <div class="company-detail">📞 <span><?= whatsappNum || "—" ?></span></div>
+            <div class="company-name" id="agencyName"></div>
+            <div class="company-detail">📞 <span id="agencyPhone"></span></div>
             <div class="company-detail">📍 <span>بريدة، السعودية</span></div>
-            <div class="company-detail">✉️ <span>media@agency.sa</span></div>
+            <div class="company-detail">📄 <span>فاتورة إلكترونية</span></div>
           </div>
         </div>
       </div>
-
       <div class="content-area">
-
-        <div class="section-head">
-          <div class="section-icon">👤</div>
-          <h2>بيانات العميل</h2>
-          <div class="section-note">معلومات الحجز الأساسية</div>
-        </div>
-
+        <div class="section-head"><div class="section-icon">👤</div><h2>بيانات العميل</h2><div class="section-note">معلومات الحجز الأساسية</div></div>
         <div class="data-card">
           <table class="data-grid">
-            <tr>
-              <td class="lbl">اسم العميل</td>
-              <td class="val"><?= booking.name ?></td>
-            </tr>
-            <tr>
-              <td class="lbl">رقم الهاتف</td>
-              <td class="val ltr-inline"><?= booking.phone ?></td>
-            </tr>
-            <tr>
-              <td class="lbl">نوع الحجز</td>
-              <td class="val"><?= booking.type ?></td>
-            </tr>
-            <tr>
-              <td class="lbl">التاريخ والمكان</td>
-              <td class="val"><?= booking.date ?> <?= booking.place ? '— ' + booking.place : '' ?></td>
-            </tr>
-            <tr>
-              <td class="lbl">ملاحظات</td>
-              <td class="val"><?= booking.details || 'لا يوجد' ?></td>
-            </tr>
+            <tr><td class="lbl">اسم العميل</td><td class="val" id="bName"></td></tr>
+            <tr><td class="lbl">رقم الهاتف</td><td class="val ltr-inline" id="bPhone"></td></tr>
+            <tr><td class="lbl">نوع الحجز</td><td class="val" id="bType"></td></tr>
+            <tr><td class="lbl">التاريخ والمكان</td><td class="val" id="bDatePlace"></td></tr>
+            <tr><td class="lbl">ملاحظات</td><td class="val" id="bDetails"></td></tr>
           </table>
         </div>
-
-        <div class="section-head">
-          <div class="section-icon">💰</div>
-          <h2>ملخص الحساب</h2>
-          <div class="section-note">إجمالي - مدفوع - متبقي</div>
-        </div>
-
+        <div class="section-head"><div class="section-icon">💰</div><h2>ملخص الحساب</h2><div class="section-note">إجمالي - مدفوع - متبقي</div></div>
         <div class="finance-layout">
-          <div class="info-note">
-          </div>
           <div class="totals-box">
-            <div class="totals-header">
-              <span>تفاصيل المبالغ</span>
-              <span>ريال سعودي</span>
-            </div>
+            <div class="totals-header"><span>تفاصيل المبالغ</span><span>ريال سعودي</span></div>
             <table class="totals-details">
-              <tr>
-                <td class="amount-label">المبلغ الإجمالي</td>
-                <td class="amount-value"><?= booking.amount ?> SAR</td>
-              </tr>
-              <tr>
-                <td class="amount-label">المدفوع (واصل)</td>
-                <td class="amount-value"><?= booking.deposit ?> SAR</td>
-              </tr>
-              <tr class="highlight-row">
-                <td class="amount-label">المتبقي</td>
-                <td class="amount-value"><?= booking.remaining ?> SAR</td>
-              </tr>
+              <tr><td class="amount-label">المبلغ الإجمالي</td><td class="amount-value" id="bAmount"></td></tr>
+              <tr><td class="amount-label">المدفوع (واصل)</td><td class="amount-value" id="bDeposit"></td></tr>
+              <tr class="highlight-row"><td class="amount-label">المتبقي</td><td class="amount-value" id="bRemaining"></td></tr>
             </table>
           </div>
         </div>
-
       </div>
-
-      <div class="footer-lux">
-        <p>شكراً لثقتك.. ننتظرك في تجربة تصوير فريدة ✨</p>
-        <small>فاتورة إلكترونية معتمدة </small>
-        <div class="gold-line"></div>
-      </div>
-
+      <div class="footer-lux"><p>شكراً لثقتك.. ننتظرك في تجربة تصوير فريدة ✨</p><small>فاتورة إلكترونية معتمدة</small><div class="gold-line"></div></div>
     </div>
   </div>
+  <script>
+    function q(name){ return new URLSearchParams(location.search).get(name) || ''; }
+    function esc(t){ return String(t ?? '').replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m])); }
+    function fmt(v){ return Number(v || 0).toLocaleString('en-US') + ' SAR'; }
+    function np(raw){ let s = String(raw||'').replace(/\s/g,'').replace(/^\+/,'').replace(/^'/,''); if (s.startsWith('966')&&s.length===12) return s; if (s.startsWith('05')&&s.length===10) return '966'+s.slice(1); if (s.startsWith('5')&&s.length===9) return '966'+s; return s; }
+    async function init(){
+      const id = q('id'); const pdfUrl = q('url'); const phoneFromQ = q('phone');
+      if(!id){ showError('لا يوجد معرف حجز في الرابط'); return; }
+      try{
+        const res = await API.run('getBookingInvoiceData', id);
+        if(!res || res.success === false || !res.booking){ throw new Error(res?.message || 'تعذر تحميل بيانات الفاتورة'); }
+        const b = res.booking; const cfg = res.systemConfig || {};
+        document.getElementById('agencyName').textContent = cfg.agencyName || APP_CONFIG.APP_NAME || 'وكالة ميديا';
+        document.getElementById('agencyPhone').textContent = cfg.whatsappNumber || '—';
+        document.getElementById('issuedAt').textContent = res.issuedAt || new Date().toLocaleDateString('en-CA');
+        document.getElementById('invoiceNo').textContent = '#' + String(b.id || '').slice(-8);
+        document.getElementById('bName').textContent = b.name || '';
+        document.getElementById('bPhone').textContent = b.phone || '';
+        document.getElementById('bType').textContent = b.type || '';
+        document.getElementById('bDatePlace').textContent = `${b.date || ''}${b.place ? ' — ' + b.place : ''}`;
+        document.getElementById('bDetails').textContent = b.details || 'لا يوجد';
+        document.getElementById('bAmount').textContent = fmt(b.amount);
+        document.getElementById('bDeposit').textContent = fmt(b.deposit);
+        document.getElementById('bRemaining').textContent = fmt(b.remaining);
+        const isPaid = Number(b.remaining || 0) <= 0; const badge = document.getElementById('statusBadge');
+        badge.classList.add(isPaid ? 'badge-paid' : 'badge-pending');
+        document.getElementById('statusText').textContent = isPaid ? 'مدفوع بالكامل ✓' : 'مستحق الدفع';
+        document.getElementById('invoiceWrap').style.display = '';
+        document.getElementById('pageActions').style.display = 'flex';
+        document.getElementById('loading').style.display = 'none';
+        if(pdfUrl){ const a = document.getElementById('openPdfBtn'); a.href = pdfUrl; a.style.display = 'inline-flex'; }
+        const waPhone = np(phoneFromQ || b.phone || cfg.whatsappNumber || '');
+        if(waPhone){ const wa = document.getElementById('waBtn'); wa.href = `https://wa.me/${waPhone}?text=${encodeURIComponent(`فاتورة حجزك:
+${pdfUrl || location.href}
+
+${cfg.agencyName || APP_CONFIG.APP_NAME || 'وكالة ميديا'}`)}`; wa.style.display = 'inline-flex'; }
+      }catch(e){ showError(e?.message || 'تعذر تحميل الفاتورة'); }
+    }
+    function showError(msg){ document.getElementById('loading').style.display='none'; const el=document.getElementById('error'); el.style.display='block'; el.textContent=msg; }
+    document.addEventListener('DOMContentLoaded', init);
+  </script>
 </body>
 </html>
