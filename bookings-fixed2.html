@@ -746,8 +746,6 @@ let _filteredEvents = [];  // بعد الفلتر
 let _tasksCache = null;
 let _selectedType = "";
 let _searchTerm = "";
-let _searchTerm = "";
-let _searchQuery = "";
 
 /* ── أدوات مساعدة ── */
 const x   = t => Utils.esc(t);
@@ -809,6 +807,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   if (tools) tools.style.display = "flex";
   _pageShown = true;
   if (!_calOk) { initCal(); _calOk = true; }
+  else { setTimeout(() => { try { cal.updateSize(); } catch(e) {} }, 60); }
 });
 
 /* ══════════════════════════════════════════
@@ -922,9 +921,9 @@ function _updateKPIs() {}
    البحث والفلترة
 ══════════════════════════════════════════ */
 function matchesSearch(ev) {
-  if (!_searchQuery) return true;
+  if (!_searchTerm) return true;
   const p = ev.extendedProps || {};
-  const q = _searchQuery.toLowerCase();
+  const q = _searchTerm.toLowerCase();
   const id = String(p.id || ev.id || '');
   const invoiceNo = id.slice(-8);
   const hay = [p.name, p.phone, p.type, p.place, id, invoiceNo].map(v => String(v || '').toLowerCase()).join(' | ');
@@ -942,14 +941,18 @@ function applyFilters() {
 }
 
 function runSearch() {
-  _searchQuery = (document.getElementById('bookingSearch').value || '').trim();
+  _searchTerm = (document.getElementById('bookingSearch').value || '').trim();
   applyFilters();
+}
+
+function clearSearchAndFilters() {
+  clearFilters();
 }
 
 function clearFilters() {
   document.getElementById("bookingSearch").value = "";
   document.getElementById("typeFilter").value = "";
-  _searchQuery = "";
+  _searchTerm = "";
   _selectedType = "";
   applyFilters();
 }
@@ -972,6 +975,8 @@ function initCal() {
     eventClick: info => openModal(info.event.startStr.substring(0, 10)),
   });
   cal.render();
+  setTimeout(() => { try { cal.updateSize(); } catch(e) {} }, 60);
+  setTimeout(() => { try { cal.updateSize(); } catch(e) {} }, 220);
 
   const adapt = () => cal.setOption("headerToolbar",
     window.innerWidth < 520
