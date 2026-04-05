@@ -1,5 +1,4 @@
 
-
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
@@ -155,6 +154,31 @@
     .kpi.kk .kv { color: var(--ok); }
     .kpi.kp .kv { color: var(--pur); }
     .ks { font-size: .66rem; color: var(--muted); margin-top: .2rem; }
+
+
+    .toolbar-strip {
+      margin-bottom: .7rem;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--r-lg);
+      box-shadow: var(--sh);
+      padding: .6rem;
+    }
+    .toolbar-inline {
+      display:flex; align-items:center; gap:.45rem; flex-wrap:wrap;
+    }
+    .toolbar-field { position:relative; }
+    .toolbar-search { flex: 1 1 340px; display:flex; align-items:center; gap:.35rem; }
+    .toolbar-search .form-control { padding-inline-start: 2rem; min-width: 220px; }
+    .toolbar-icon { position:absolute; right:.7rem; color:var(--muted); z-index:2; pointer-events:none; top:50%; transform:translateY(-50%); }
+    .toolbar-type { flex: 0 1 180px; }
+    .toolbar-actions { display:flex; align-items:center; gap:.35rem; flex-wrap:wrap; }
+    .mini-btn { padding:.45rem .75rem; }
+    @media (max-width: 768px) {
+      .toolbar-inline { align-items:stretch; }
+      .toolbar-search, .toolbar-type, .toolbar-actions { flex: 1 1 100%; }
+      .toolbar-actions .tb { flex:1; justify-content:center; }
+    }
 
     /* ── Box ── */
     .box {
@@ -640,6 +664,7 @@ let _allEvents  = [];      // كل الحجوزات
 let _filteredEvents = [];  // بعد الفلتر
 let _tasksCache = null;
 let _selectedType = "";
+let _searchTerm = "";
 let _searchQuery = "";
 
 /* ── أدوات مساعدة ── */
@@ -903,7 +928,7 @@ function renderDayList(date) {
   if (!day.length) {
     el.innerHTML = `<div class="empty">
       <i class="fas fa-calendar-xmark"></i>
-      <p>لا توجد حجوزات لهذا اليوم${_selectedType ? " ضمن النوع المحدد" : ""}</p>
+      <p>لا توجد حجوزات لهذا اليوم${_selectedType ? " ضمن النوع المحدد" : ""}${_searchTerm ? " وفق البحث الحالي" : ""}</p>
     </div>`;
     return;
   }
