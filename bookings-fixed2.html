@@ -95,14 +95,21 @@
     .pane { display: none; padding: .7rem; padding-bottom: max(.7rem, env(safe-area-inset-bottom)); }
     .pane.on { display: block; }
 
-    /* ── KPI Grid ── */
-    .kpi-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: .55rem;
-      margin-bottom: .7rem;
+    .top-tools{
+      display:flex;align-items:center;gap:.45rem;flex-wrap:wrap;flex:1;justify-content:flex-end;
+      min-width:260px;
     }
-    @media (min-width: 600px) { .kpi-grid { grid-template-columns: repeat(4, 1fr); } }
+    .top-search{display:flex;align-items:center;gap:.35rem;flex-wrap:nowrap;min-width:min(100%,360px);flex:1}
+    .top-search .form-control,.top-search .form-select{background:#fff;min-height:38px}
+    .top-search .form-control{min-width:150px;flex:1}
+    .top-search .form-select{width:auto;min-width:120px;flex:0 0 auto}
+    .top-search .btn{min-height:38px;padding:.42rem .8rem;border-radius:999px}
+    @media (max-width: 768px){
+      .tab-bar{align-items:flex-start;flex-wrap:wrap}
+      .top-tools{width:100%;justify-content:stretch}
+      .top-search{min-width:100%;display:grid;grid-template-columns:1fr 120px 44px 44px}
+      .top-search .form-control,.top-search .form-select,.top-search .btn{min-width:0;width:100%}
+    }
 
     .kpi {
       background: var(--card);
@@ -226,12 +233,16 @@
     .fc .fc-scrollgrid { border-radius: 0 0 var(--r-lg) var(--r-lg); overflow: hidden; }
 
     /* ── Modal ── */
-    .modal-dialog { max-width: 1100px; }
+    .modal-dialog { max-width: 1180px; }
     .modal-content { border-radius: 1.25rem; border: none; box-shadow: 0 24px 64px rgba(0,0,0,.18); }
     .modal-footer-sticky { position: sticky; bottom: 0; background: #fff; border-top: 1px solid var(--border); z-index: 5; }
     @media (max-width: 768px) {
-      .modal-dialog { margin: .35rem; }
-      .modal-content { min-height: calc(100vh - .7rem); }
+      .modal{padding:0 !important}
+      .modal-dialog { margin: 0; max-width:100vw; width:100vw; min-height:100dvh; }
+      .modal-content { min-height:100dvh; height:100dvh; border-radius:0; }
+      .modal-body, .mb { max-height:none !important; overflow:auto !important; flex:1 1 auto; }
+      .modal-footer-sticky { padding-bottom: max(.75rem, env(safe-area-inset-bottom)); }
+      .mh { border-radius:0; padding:1rem 1rem .9rem; }
     }
     .mh {
       background: linear-gradient(135deg, var(--p) 0%, #026aa7 100%);
@@ -412,62 +423,26 @@
   <button class="tb" data-tab="tasks" onclick="goTab('tasks')">
     <i class="fas fa-list-check"></i> المسندة لي
   </button>
+  <div class="top-tools">
+    <div class="top-search">
+      <input type="text" id="bookingSearch" class="form-control" placeholder="بحث بالاسم أو الجوال أو رقم الفاتورة">
+      <select id="typeFilter" class="form-select">
+        <option value="">كل الأنواع</option>
+      </select>
+      <button class="btn tb st" type="button" onclick="runSearch()" title="بحث">
+        <i class="fas fa-magnifying-glass"></i>
+      </button>
+      <button class="btn tb" type="button" onclick="clearFilters()" title="مسح">
+        <i class="fas fa-filter-circle-xmark"></i>
+      </button>
+    </div>
+  </div>
 </div>
 
 <!-- ══════════════════════════════════════════
      تبويب: التقويم والحجوزات
 ══════════════════════════════════════════ -->
 <div class="pane on" id="pane-calendar">
-
-  <!-- KPI -->
-  <div class="kpi-grid" id="kpiGrid">
-    <div class="kpi kb">
-      <div class="kl"><i class="fas fa-calendar-check me-1"></i>الحجوزات</div>
-      <div class="kv" id="k-total"><span class="sk" style="width:40px;height:24px"></span></div>
-      <div class="ks">إجمالي الحجوزات</div>
-      <div class="kico"><i class="fas fa-calendar-check"></i></div>
-    </div>
-    <div class="kpi kg">
-      <div class="kl"><i class="fas fa-coins me-1"></i>الإيرادات</div>
-      <div class="kv" id="k-rev"><span class="sk" style="width:60px;height:24px"></span></div>
-      <div class="ks" id="k-dep">واصل: --</div>
-      <div class="kico"><i class="fas fa-coins"></i></div>
-    </div>
-    <div class="kpi kk">
-      <div class="kl"><i class="fas fa-check-circle me-1"></i>مسدد</div>
-      <div class="kv" id="k-paid"><span class="sk" style="width:40px;height:24px"></span></div>
-      <div class="ks">حجوزات مسدّدة بالكامل</div>
-      <div class="kico"><i class="fas fa-check-double"></i></div>
-    </div>
-    <div class="kpi kp">
-      <div class="kl"><i class="fas fa-hourglass-half me-1"></i>مستحق</div>
-      <div class="kv" id="k-rem"><span class="sk" style="width:60px;height:24px"></span></div>
-      <div class="ks">المبالغ المتبقية</div>
-      <div class="kico"><i class="fas fa-hourglass-half"></i></div>
-    </div>
-  </div>
-
-  <!-- فلتر + تحديث -->
-  <div class="box" style="margin-bottom:.7rem">
-    <div class="bb" style="padding:.72rem">
-      <div class="g2">
-        <div>
-          <label class="fl">فلتر النوع</label>
-          <select id="typeFilter" class="form-select">
-            <option value="">كل الأنواع</option>
-          </select>
-        </div>
-        <div style="display:flex;align-items:end;gap:.38rem;flex-wrap:wrap">
-          <button class="tb" style="padding:.45rem .8rem" onclick="clearTypeFilter()">
-            <i class="fas fa-filter-circle-xmark"></i> مسح
-          </button>
-          <button class="tb st" style="padding:.45rem .8rem" onclick="hardRefresh()">
-            <i class="fas fa-rotate"></i> تحديث
-          </button>
-        </div>
-      </div>
-    </div>
-  </div>
 
   <!-- التقويم -->
   <div class="box">
@@ -665,6 +640,7 @@ let _allEvents  = [];      // كل الحجوزات
 let _filteredEvents = [];  // بعد الفلتر
 let _tasksCache = null;
 let _selectedType = "";
+let _searchQuery = "";
 
 /* ── أدوات مساعدة ── */
 const x   = t => Utils.esc(t);
@@ -686,7 +662,10 @@ document.addEventListener("DOMContentLoaded", async () => {
   document.getElementById("bForm").addEventListener("submit", saveBooking);
   document.getElementById("typeFilter").addEventListener("change", e => {
     _selectedType = e.target.value || "";
-    applyTypeFilter();
+    applyFilters();
+  });
+  document.getElementById("bookingSearch").addEventListener("keydown", e => {
+    if (e.key === 'Enter') { e.preventDefault(); runSearch(); }
   });
 
   // 3) استمع على AppLoader — البيانات الأساسية
@@ -697,7 +676,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   // 4) استمع على تحميل الحجوزات في الخلفية
   AppLoader.on("onBookingsReady", (bookings) => {
     _allEvents = Array.isArray(bookings) ? bookings : [];
-    applyTypeFilter();
+    applyFilters();
     _updateKPIs();
     hideBgBar();
     if (cal) cal.refetchEvents();
@@ -838,21 +817,39 @@ function _updateKPIs() {
 }
 
 /* ══════════════════════════════════════════
-   فلتر النوع
+   البحث والفلترة
 ══════════════════════════════════════════ */
-function applyTypeFilter() {
-  _filteredEvents = !_selectedType
-    ? [..._allEvents]
-    : _allEvents.filter(ev => String(ev.extendedProps?.type || "").trim() === _selectedType);
+function matchesSearch(ev) {
+  if (!_searchQuery) return true;
+  const p = ev.extendedProps || {};
+  const q = _searchQuery.toLowerCase();
+  const id = String(p.id || ev.id || '');
+  const invoiceNo = id.slice(-8);
+  const hay = [p.name, p.phone, p.type, p.place, id, invoiceNo].map(v => String(v || '').toLowerCase()).join(' | ');
+  return hay.includes(q);
+}
+
+function applyFilters() {
+  _filteredEvents = (_allEvents || []).filter(ev => {
+    const typeOk = !_selectedType || String(ev.extendedProps?.type || '').trim() === _selectedType;
+    return typeOk && matchesSearch(ev);
+  });
   if (cal) cal.refetchEvents();
   const date = document.getElementById("f-date").value;
   if (date) renderDayList(date);
 }
 
-function clearTypeFilter() {
+function runSearch() {
+  _searchQuery = (document.getElementById('bookingSearch').value || '').trim();
+  applyFilters();
+}
+
+function clearFilters() {
+  document.getElementById("bookingSearch").value = "";
   document.getElementById("typeFilter").value = "";
+  _searchQuery = "";
   _selectedType = "";
-  applyTypeFilter();
+  applyFilters();
 }
 
 /* ══════════════════════════════════════════
@@ -889,8 +886,9 @@ function initCal() {
 function openModal(date) {
   resetForm();
   document.getElementById("f-date").value = date;
-  document.getElementById("m-ttl").textContent = "📅 " + date;
+  document.getElementById("m-ttl").textContent = "📅 إدارة حجوزات يوم " + date;
   bModal.show();
+  setTimeout(() => document.getElementById('f-name')?.focus(), 250);
   renderDayList(date);
 }
 
@@ -943,11 +941,8 @@ function renderDayList(date) {
                <i class="fas fa-bell"></i>
              </button>`
           : ""}
-        <button class="btn btn-info btn-sm text-white" onclick="openInvoice('${p.id}')">
-          <i class="fas fa-receipt"></i> فاتورة
-        </button>
-        <button class="btn btn-success btn-sm" onclick="shareInvoiceWhatsApp('${p.id}','${x(p.phone||"")}')">
-          <i class="fab fa-whatsapp"></i> مشاركة
+        <button class="btn btn-info btn-sm text-white" onclick="actInv('${p.id}','${x(p.phone||"")}')">
+          <i class="fas fa-receipt"></i>
         </button>
         <button class="btn btn-outline-warning btn-sm" onclick="actEdit(${JSON.stringify(p).replace(/"/g,"&quot;")})">
           <i class="fas fa-edit"></i>
@@ -1162,7 +1157,7 @@ async function actPaid(id, date) {
     DataStore.bookings = _allEvents;
     DataStore._rebuildBookingsIndex();
 
-    applyTypeFilter();
+    applyFilters()
     _updateKPIs();
     if (cal) cal.refetchEvents();
     renderDayList(date);
@@ -1188,69 +1183,25 @@ function actRemind(phone, name, rem) {
   window.open(`https://wa.me/${np(phone)}?text=${encodeURIComponent(txt)}`, "_blank");
 }
 
-function buildInvoiceLink(id) {
-  const page = (APP_CONFIG.PAGES && APP_CONFIG.PAGES.invoice) || 'invoice-fixed.html';
-  const url = new URL(page, window.location.href);
-  url.searchParams.set('id', String(id || ''));
-  return url.toString();
-}
-
-function applyInvoiceTextTemplate(template, booking, link, cfg){
-  let txt = String(template || '').trim();
-  if (!txt) {
-    txt = `السلام عليكم ${booking.name || ''}
-هذه فاتورتكم الخاصة بحجز ${booking.type || ''}
-التاريخ: ${booking.date || ''}
-رابط الفاتورة:
-${link}`;
-  }
-  return txt
-    .replace(/\{\{?اسم_العميل\}?\}/g, booking.name || '')
-    .replace(/\{\{?النوع\}?\}/g, booking.type || '')
-    .replace(/\{\{?التاريخ\}?\}/g, booking.date || '')
-    .replace(/\{\{?المكان\}?\}/g, booking.place || '')
-    .replace(/\{\{?المبلغ\}?\}/g, String(booking.amount || 0))
-    .replace(/\{\{?المتبقي\}?\}/g, String(booking.remaining || 0))
-    .replace(/\{\{?رابط_الفاتورة\}?\}/g, link)
-    .replace(/\{\{?اسم_الوكالة\}?\}/g, cfg.agencyName || 'وكالة ميديا');
-}
-
-function openInvoice(id) {
-  const cfg = DataStore.systemConfig || {};
-  if (cfg.invoiceByLinkEnabled === false) {
-    Swal.fire('تنبيه', 'الفاتورة بالرابط غير مفعلة من الإعدادات', 'warning');
-    return;
-  }
-  window.open(buildInvoiceLink(id), '_blank');
-}
-
-async function shareInvoiceWhatsApp(id, phone) {
+async function actInv(id, phone) {
+  Swal.fire({ title: "جاري إنشاء الفاتورة...", allowOutsideClick: false, didOpen: () => Swal.showLoading() });
   try {
-    const cfg = DataStore.systemConfig || {};
-    if (cfg.invoiceByLinkEnabled === false) {
-      Swal.fire('تنبيه', 'الفاتورة بالرابط غير مفعلة من الإعدادات', 'warning');
-      return;
+    const url = await API.run("generateInvoicePDF", id);
+    Swal.close();
+    const templates = DataStore.templates || [];
+    const tmpl = templates.find(t => t.type === "invoice");
+    const cfg  = DataStore.systemConfig || {};
+    let txt;
+    if (tmpl && tmpl.text) {
+      txt = tmpl.text
+        .replace(/\{رابط_الفاتورة\}/g, url)
+        .replace(/\{اسم_الوكالة\}/g,  cfg.agencyName || "وكالة ميديا");
+    } else {
+      txt = `فاتورة حجزك:\n${url}\n\n${cfg.agencyName || "وكالة ميديا"}`;
     }
-
-    const booking = (_allEvents || []).find(ev => String(ev.id || '') === String(id))?.extendedProps
-      || DataStore.getBookingById?.(id)?.extendedProps
-      || DataStore.getBookingById?.(id)
-      || {};
-
-    const url = buildInvoiceLink(id);
-    const txt = applyInvoiceTextTemplate(cfg.invoiceShareText || '', booking, url, cfg);
-    const waPhone = np(cfg.invoiceWhatsappNumber || phone || booking.phone || '');
-
-    if (!waPhone) {
-      await navigator.clipboard.writeText(txt + '\n' + url);
-      Swal.fire('تم النسخ', 'لا يوجد رقم واتساب، فتم نسخ نص المشاركة والرابط', 'success');
-      return;
-    }
-
-    window.open(`https://wa.me/${waPhone}?text=${encodeURIComponent(txt)}`, '_blank');
+    window.open(`https://wa.me/${np(phone)}?text=${encodeURIComponent(txt)}`, "_blank");
   } catch(e) {
-    console.error(e);
-    Swal.fire('خطأ', 'تعذر تجهيز رابط المشاركة', 'error');
+    Swal.fire("خطأ", "تعذر إنشاء الفاتورة", "error");
   }
 }
 
@@ -1271,7 +1222,7 @@ async function actDel(id, date) {
     DataStore.bookings = _allEvents;
     DataStore._rebuildBookingsIndex();
 
-    applyTypeFilter();
+    applyFilters()
     _updateKPIs();
     if (cal) cal.refetchEvents();
     renderDayList(date);
