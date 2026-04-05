@@ -28,6 +28,7 @@ const APP_CONFIG = {
     finance:   "finance-fixed.html",
     projects:  "projects-fixed.html",
     settings:  "settings-fixed.html",
+    invoice:   "invoice-fixed.html",
     public:    "public.html",
     search:    "search.html",
   },
