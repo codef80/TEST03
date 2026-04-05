@@ -433,6 +433,78 @@
       0%   { background-position: 200% 0; }
       100% { background-position: -200% 0; }
     }
+
+    .tab-bar{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:.5rem;
+      flex-wrap:wrap;
+    }
+    .tab-tabs{display:flex;gap:.35rem;flex-wrap:wrap}
+    .tab-tools{
+      display:flex;
+      align-items:center;
+      gap:.45rem;
+      flex-wrap:wrap;
+      margin-inline-start:auto;
+    }
+    .mini-search-wrap{
+      display:flex;align-items:center;gap:.35rem;
+      background:#f8fafc;border:1px solid var(--border);
+      border-radius:999px;padding:.2rem .25rem .2rem .55rem;
+      min-width:min(100%, 340px);
+    }
+    .mini-search{
+      border:none;background:transparent;outline:none;
+      font-family:'Tajawal', sans-serif;font-size:.78rem;
+      color:var(--txt);width:210px;max-width:42vw;
+    }
+    .mini-search::placeholder{color:var(--muted)}
+    .mini-filter-wrap{
+      display:flex;align-items:center;gap:.35rem;
+      background:#f8fafc;border:1px solid var(--border);
+      border-radius:999px;padding:.2rem .35rem .2rem .55rem;
+    }
+    .mini-label{font-size:.74rem;font-weight:800;color:var(--muted);margin:0}
+    .mini-select{
+      border:none;background:transparent;outline:none;
+      font-family:'Tajawal', sans-serif;font-size:.78rem;font-weight:800;
+      color:var(--txt);padding:0 .15rem;min-width:72px;
+    }
+    .icon-circle{
+      width:32px;height:32px;border-radius:999px;border:1px solid var(--border);
+      background:#fff;color:var(--muted);display:inline-flex;align-items:center;justify-content:center;
+      cursor:pointer;flex-shrink:0;padding:0;
+    }
+    .icon-circle i{font-size:.85rem;line-height:1;display:flex;align-items:center;justify-content:center}
+    .icon-circle.primary{background:var(--p);border-color:var(--p);color:#fff}
+    #pane-calendar{padding-top:.45rem}
+    #bModal .modal-dialog{
+      margin:0 !important;max-width:none !important;width:100vw;height:100dvh;
+    }
+    #bModal .modal-content{
+      min-height:100dvh !important;height:100dvh;border-radius:0 !important;
+    }
+    #bModal .mb{
+      flex:1 1 auto;max-height:none !important;height:auto !important;overflow:auto;
+      padding:1rem 1rem calc(1rem + env(safe-area-inset-bottom));
+    }
+    #bModal .mh{
+      border-radius:0;padding-top:max(.8rem, env(safe-area-inset-top));
+    }
+    #bModal .modal-footer-sticky{
+      padding-bottom:max(.75rem, env(safe-area-inset-bottom));
+    }
+    @media (max-width: 991.98px){
+      .tab-bar{padding:.5rem}
+      .tab-tools{width:100%;margin-inline-start:0}
+      .mini-search-wrap{flex:1 1 100%;min-width:0}
+      .mini-search{width:100%;max-width:none}
+      .mini-filter-wrap{flex:1 1 auto}
+      .icon-circle{width:34px;height:34px}
+    }
+
   </style>
 </head>
 <body>
@@ -441,25 +513,34 @@
 
 <!-- ── Tab Bar ── -->
 <div class="tab-bar">
-  <button class="tb on" data-tab="calendar" onclick="goTab('calendar')">
-    <i class="fas fa-calendar-alt"></i> الحجوزات
-  </button>
-  <button class="tb" data-tab="tasks" onclick="goTab('tasks')">
-    <i class="fas fa-list-check"></i> المسندة لي
-  </button>
-  <div class="top-tools">
-    <div class="top-search">
-      <input type="text" id="bookingSearch" class="form-control" placeholder="بحث بالاسم أو الجوال أو رقم الفاتورة">
-      <select id="typeFilter" class="form-select">
-        <option value="">كل الأنواع</option>
-      </select>
-      <button class="btn tb st" type="button" onclick="runSearch()" title="بحث">
-        <i class="fas fa-magnifying-glass"></i>
+  <div class="tab-tabs">
+    <button class="tb on" data-tab="calendar" onclick="goTab('calendar')">
+      <i class="fas fa-calendar-alt"></i> الحجوزات
+    </button>
+    <button class="tb" data-tab="tasks" onclick="goTab('tasks')">
+      <i class="fas fa-list-check"></i> المسندة لي
+    </button>
+  </div>
+
+  <div class="tab-tools" id="calendarTools">
+    <div class="mini-search-wrap">
+      <input type="text" id="bookingSearch" class="mini-search" placeholder="بحث: اسم/جوال/حجز">
+      <button class="icon-circle primary" type="button" onclick="runSearch()" title="بحث">
+        <i class="fas fa-search"></i>
       </button>
-      <button class="btn tb" type="button" onclick="clearFilters()" title="مسح">
-        <i class="fas fa-filter-circle-xmark"></i>
+      <button class="icon-circle" type="button" onclick="clearSearchAndFilters()" title="مسح">
+        <i class="fas fa-xmark"></i>
       </button>
     </div>
+    <div class="mini-filter-wrap">
+      <label class="mini-label" for="typeFilter">نوع</label>
+      <select id="typeFilter" class="mini-select">
+        <option value="">الكل</option>
+      </select>
+    </div>
+    <button class="icon-circle" type="button" onclick="hardRefresh()" title="تحديث">
+      <i class="fas fa-rotate"></i>
+    </button>
   </div>
 </div>
 
@@ -665,6 +746,7 @@ let _filteredEvents = [];  // بعد الفلتر
 let _tasksCache = null;
 let _selectedType = "";
 let _searchTerm = "";
+let _searchTerm = "";
 let _searchQuery = "";
 
 /* ── أدوات مساعدة ── */
@@ -716,6 +798,8 @@ document.addEventListener("DOMContentLoaded", async () => {
   if (AppLoader.isBookingsReady()) hideBgBar();
 
   // 7) تهيئة التقويم
+  const tools = document.getElementById("calendarTools");
+  if (tools) tools.style.display = "flex";
   _pageShown = true;
   if (!_calOk) { initCal(); _calOk = true; }
 });
@@ -789,6 +873,8 @@ function goTab(id) {
     if (!_calOk) { initCal(); _calOk = true; }
     else { setTimeout(() => cal.updateSize(), 60); setTimeout(() => cal.updateSize(), 220); }
   }
+  const tools = document.getElementById("calendarTools");
+  if (tools) tools.style.display = id === "calendar" ? "flex" : "none";
   if (id === "tasks") renderTasksFromCache();
 }
 
@@ -823,23 +909,7 @@ async function hardRefresh() {
 /* ══════════════════════════════════════════
    KPIs
 ══════════════════════════════════════════ */
-function _updateKPIs() {
-  const evs = _allEvents;
-  let total = 0, rev = 0, dep = 0, rem = 0, paid = 0;
-  evs.forEach(ev => {
-    const p = ev.extendedProps || {};
-    total++;
-    rev  += +p.amount    || 0;
-    dep  += +p.deposit   || 0;
-    rem  += +p.remaining || 0;
-    if ((+p.remaining || 0) === 0 && (+p.amount || 0) > 0) paid++;
-  });
-  $s("k-total", total);
-  $s("k-rev", n(rev));
-  $s("k-dep", "واصل: " + n(dep));
-  $s("k-paid", paid);
-  $s("k-rem", n(rem));
-}
+function _updateKPIs() {}
 
 /* ══════════════════════════════════════════
    البحث والفلترة
@@ -918,7 +988,7 @@ function openModal(date) {
 }
 
 function getDayEvents(date) {
-  const src = _selectedType ? _filteredEvents : _allEvents;
+  const src = (_searchTerm || _selectedType) ? _filteredEvents : _allEvents;
   return src.filter(e => (e.start || "").substring(0, 10) === date);
 }
 
