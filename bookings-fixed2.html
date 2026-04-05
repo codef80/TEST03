@@ -943,8 +943,11 @@ function renderDayList(date) {
                <i class="fas fa-bell"></i>
              </button>`
           : ""}
-        <button class="btn btn-info btn-sm text-white" title="إصدار الفاتورة" onclick="actInv('${p.id}','${x(p.phone||"")}')">
-          <i class="fas fa-receipt"></i>
+        <button class="btn btn-info btn-sm text-white" onclick="openInvoice('${p.id}')">
+          <i class="fas fa-receipt"></i> فاتورة
+        </button>
+        <button class="btn btn-success btn-sm" onclick="shareInvoiceWhatsApp('${p.id}','${x(p.phone||"")}')">
+          <i class="fab fa-whatsapp"></i> مشاركة
         </button>
         <button class="btn btn-outline-warning btn-sm" onclick="actEdit(${JSON.stringify(p).replace(/"/g,"&quot;")})">
           <i class="fas fa-edit"></i>
@@ -1185,16 +1188,66 @@ function actRemind(phone, name, rem) {
   window.open(`https://wa.me/${np(phone)}?text=${encodeURIComponent(txt)}`, "_blank");
 }
 
-async function actInv(id, phone) {
-  Swal.fire({ title: "جاري إصدار الفاتورة...", allowOutsideClick: false, didOpen: () => Swal.showLoading() });
+function buildInvoiceLink(id) {
+  return `${APP_CONFIG.API_URL}?action=invoice&id=${encodeURIComponent(id)}`;
+}
+
+function applyInvoiceTextTemplate(template, booking, link, cfg){
+  let txt = String(template || '').trim();
+  if (!txt) {
+    txt = `السلام عليكم ${booking.name || ''}
+هذه فاتورتكم الخاصة بحجز ${booking.type || ''}
+التاريخ: ${booking.date || ''}
+رابط الفاتورة:
+${link}`;
+  }
+  return txt
+    .replace(/\{\{?اسم_العميل\}?\}/g, booking.name || '')
+    .replace(/\{\{?النوع\}?\}/g, booking.type || '')
+    .replace(/\{\{?التاريخ\}?\}/g, booking.date || '')
+    .replace(/\{\{?المكان\}?\}/g, booking.place || '')
+    .replace(/\{\{?المبلغ\}?\}/g, String(booking.amount || 0))
+    .replace(/\{\{?المتبقي\}?\}/g, String(booking.remaining || 0))
+    .replace(/\{\{?رابط_الفاتورة\}?\}/g, link)
+    .replace(/\{\{?اسم_الوكالة\}?\}/g, cfg.agencyName || 'وكالة ميديا');
+}
+
+function openInvoice(id) {
+  const cfg = DataStore.systemConfig || {};
+  if (cfg.invoiceByLinkEnabled === false) {
+    Swal.fire('تنبيه', 'الفاتورة بالرابط غير مفعلة من الإعدادات', 'warning');
+    return;
+  }
+  window.open(buildInvoiceLink(id), '_blank');
+}
+
+async function shareInvoiceWhatsApp(id, phone) {
   try {
-    const url = await API.run("generateInvoicePDF", id);
-    Swal.close();
-    const page = (APP_CONFIG?.PAGES?.invoice || 'invoice-fixed.html');
-    const qs = new URLSearchParams({ id: String(id || ''), url: String(url || ''), phone: String(phone || '') });
-    window.open(`${page}?${qs.toString()}`, '_blank');
+    const cfg = DataStore.systemConfig || {};
+    if (cfg.invoiceByLinkEnabled === false) {
+      Swal.fire('تنبيه', 'الفاتورة بالرابط غير مفعلة من الإعدادات', 'warning');
+      return;
+    }
+
+    const booking = (_allEvents || []).find(ev => String(ev.id || '') === String(id))?.extendedProps
+      || DataStore.getBookingById?.(id)?.extendedProps
+      || DataStore.getBookingById?.(id)
+      || {};
+
+    const url = buildInvoiceLink(id);
+    const txt = applyInvoiceTextTemplate(cfg.invoiceShareText || '', booking, url, cfg);
+    const waPhone = np(cfg.invoiceWhatsappNumber || phone || booking.phone || '');
+
+    if (!waPhone) {
+      await navigator.clipboard.writeText(txt + '\n' + url);
+      Swal.fire('تم النسخ', 'لا يوجد رقم واتساب، فتم نسخ نص المشاركة والرابط', 'success');
+      return;
+    }
+
+    window.open(`https://wa.me/${waPhone}?text=${encodeURIComponent(txt)}`, '_blank');
   } catch(e) {
-    Swal.fire("خطأ", e?.message || "تعذر إنشاء الفاتورة", "error");
+    console.error(e);
+    Swal.fire('خطأ', 'تعذر تجهيز رابط المشاركة', 'error');
   }
 }
 
