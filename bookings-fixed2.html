@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
@@ -94,21 +93,14 @@
     .pane { display: none; padding: .7rem; padding-bottom: max(.7rem, env(safe-area-inset-bottom)); }
     .pane.on { display: block; }
 
-    .top-tools{
-      display:flex;align-items:center;gap:.45rem;flex-wrap:wrap;flex:1;justify-content:flex-end;
-      min-width:260px;
+    /* ── KPI Grid ── */
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: .55rem;
+      margin-bottom: .7rem;
     }
-    .top-search{display:flex;align-items:center;gap:.35rem;flex-wrap:nowrap;min-width:min(100%,360px);flex:1}
-    .top-search .form-control,.top-search .form-select{background:#fff;min-height:38px}
-    .top-search .form-control{min-width:150px;flex:1}
-    .top-search .form-select{width:auto;min-width:120px;flex:0 0 auto}
-    .top-search .btn{min-height:38px;padding:.42rem .8rem;border-radius:999px}
-    @media (max-width: 768px){
-      .tab-bar{align-items:flex-start;flex-wrap:wrap}
-      .top-tools{width:100%;justify-content:stretch}
-      .top-search{min-width:100%;display:grid;grid-template-columns:1fr 120px 44px 44px}
-      .top-search .form-control,.top-search .form-select,.top-search .btn{min-width:0;width:100%}
-    }
+    @media (min-width: 600px) { .kpi-grid { grid-template-columns: repeat(4, 1fr); } }
 
     .kpi {
       background: var(--card);
@@ -154,31 +146,6 @@
     .kpi.kk .kv { color: var(--ok); }
     .kpi.kp .kv { color: var(--pur); }
     .ks { font-size: .66rem; color: var(--muted); margin-top: .2rem; }
-
-
-    .toolbar-strip {
-      margin-bottom: .7rem;
-      background: var(--card);
-      border: 1px solid var(--border);
-      border-radius: var(--r-lg);
-      box-shadow: var(--sh);
-      padding: .6rem;
-    }
-    .toolbar-inline {
-      display:flex; align-items:center; gap:.45rem; flex-wrap:wrap;
-    }
-    .toolbar-field { position:relative; }
-    .toolbar-search { flex: 1 1 340px; display:flex; align-items:center; gap:.35rem; }
-    .toolbar-search .form-control { padding-inline-start: 2rem; min-width: 220px; }
-    .toolbar-icon { position:absolute; right:.7rem; color:var(--muted); z-index:2; pointer-events:none; top:50%; transform:translateY(-50%); }
-    .toolbar-type { flex: 0 1 180px; }
-    .toolbar-actions { display:flex; align-items:center; gap:.35rem; flex-wrap:wrap; }
-    .mini-btn { padding:.45rem .75rem; }
-    @media (max-width: 768px) {
-      .toolbar-inline { align-items:stretch; }
-      .toolbar-search, .toolbar-type, .toolbar-actions { flex: 1 1 100%; }
-      .toolbar-actions .tb { flex:1; justify-content:center; }
-    }
 
     /* ── Box ── */
     .box {
@@ -257,16 +224,12 @@
     .fc .fc-scrollgrid { border-radius: 0 0 var(--r-lg) var(--r-lg); overflow: hidden; }
 
     /* ── Modal ── */
-    .modal-dialog { max-width: 1180px; }
+    .modal-dialog { max-width: 1100px; }
     .modal-content { border-radius: 1.25rem; border: none; box-shadow: 0 24px 64px rgba(0,0,0,.18); }
     .modal-footer-sticky { position: sticky; bottom: 0; background: #fff; border-top: 1px solid var(--border); z-index: 5; }
     @media (max-width: 768px) {
-      .modal{padding:0 !important}
-      .modal-dialog { margin: 0; max-width:100vw; width:100vw; min-height:100dvh; }
-      .modal-content { min-height:100dvh; height:100dvh; border-radius:0; }
-      .modal-body, .mb { max-height:none !important; overflow:auto !important; flex:1 1 auto; }
-      .modal-footer-sticky { padding-bottom: max(.75rem, env(safe-area-inset-bottom)); }
-      .mh { border-radius:0; padding:1rem 1rem .9rem; }
+      .modal-dialog { margin: .35rem; }
+      .modal-content { min-height: calc(100vh - .7rem); }
     }
     .mh {
       background: linear-gradient(135deg, var(--p) 0%, #026aa7 100%);
@@ -433,76 +396,34 @@
       0%   { background-position: 200% 0; }
       100% { background-position: -200% 0; }
     }
+  
 
-    .tab-bar{
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:.5rem;
-      flex-wrap:wrap;
-    }
-    .tab-tabs{display:flex;gap:.35rem;flex-wrap:wrap}
-    .tab-tools{
-      display:flex;
-      align-items:center;
-      gap:.45rem;
-      flex-wrap:wrap;
-      margin-inline-start:auto;
-    }
-    .mini-search-wrap{
-      display:flex;align-items:center;gap:.35rem;
-      background:#f8fafc;border:1px solid var(--border);
-      border-radius:999px;padding:.2rem .25rem .2rem .55rem;
-      min-width:min(100%, 340px);
-    }
-    .mini-search{
-      border:none;background:transparent;outline:none;
-      font-family:'Tajawal', sans-serif;font-size:.78rem;
-      color:var(--txt);width:210px;max-width:42vw;
-    }
-    .mini-search::placeholder{color:var(--muted)}
-    .mini-filter-wrap{
-      display:flex;align-items:center;gap:.35rem;
-      background:#f8fafc;border:1px solid var(--border);
-      border-radius:999px;padding:.2rem .35rem .2rem .55rem;
-    }
-    .mini-label{font-size:.74rem;font-weight:800;color:var(--muted);margin:0}
-    .mini-select{
-      border:none;background:transparent;outline:none;
-      font-family:'Tajawal', sans-serif;font-size:.78rem;font-weight:800;
-      color:var(--txt);padding:0 .15rem;min-width:72px;
-    }
-    .icon-circle{
-      width:32px;height:32px;border-radius:999px;border:1px solid var(--border);
-      background:#fff;color:var(--muted);display:inline-flex;align-items:center;justify-content:center;
-      cursor:pointer;flex-shrink:0;padding:0;
-    }
-    .icon-circle i{font-size:.85rem;line-height:1;display:flex;align-items:center;justify-content:center}
-    .icon-circle.primary{background:var(--p);border-color:var(--p);color:#fff}
+    /* ── Compact actions in tab row ── */
+    .tab-bar{align-items:center;justify-content:space-between;gap:.45rem;flex-wrap:wrap}
+    .tab-tabs{display:flex;gap:.35rem;align-items:center;flex-wrap:wrap}
+    .tab-tools{display:flex;gap:.35rem;align-items:center;flex-wrap:wrap;margin-inline-start:auto}
+    .mini-search{min-width:170px;max-width:210px;height:36px;padding:.28rem .7rem;border-radius:999px;border:1.5px solid var(--border);background:#fff;font-family:'Tajawal',sans-serif;font-size:.74rem}
+    .mini-search:focus,.mini-select:focus{outline:none;border-color:var(--p);box-shadow:0 0 0 .18rem rgba(1,73,121,.12)}
+    .mini-select{height:36px;padding:.2rem 2rem .2rem .8rem;border-radius:999px;border:1.5px solid var(--border);background:#fff;font-family:'Tajawal',sans-serif;font-size:.74rem;min-width:80px}
+    .icon-round{width:36px;height:36px;border-radius:999px;display:inline-flex;align-items:center;justify-content:center;padding:0;line-height:1}
+    .icon-round i{font-size:.82rem;display:flex;align-items:center;justify-content:center;width:100%;height:100%}
+    .kpi-grid{display:none !important}
     #pane-calendar{padding-top:.45rem}
-    #bModal .modal-dialog{
-      margin:0 !important;max-width:none !important;width:100vw;height:100dvh;
-    }
-    #bModal .modal-content{
-      min-height:100dvh !important;height:100dvh;border-radius:0 !important;
-    }
-    #bModal .mb{
-      flex:1 1 auto;max-height:none !important;height:auto !important;overflow:auto;
-      padding:1rem 1rem calc(1rem + env(safe-area-inset-bottom));
-    }
-    #bModal .mh{
-      border-radius:0;padding-top:max(.8rem, env(safe-area-inset-top));
-    }
-    #bModal .modal-footer-sticky{
-      padding-bottom:max(.75rem, env(safe-area-inset-bottom));
-    }
-    @media (max-width: 991.98px){
-      .tab-bar{padding:.5rem}
+    @media (max-width: 768px){
+      .tab-bar{padding:.45rem .5rem;position:sticky;top:0;z-index:90}
       .tab-tools{width:100%;margin-inline-start:0}
-      .mini-search-wrap{flex:1 1 100%;min-width:0}
-      .mini-search{width:100%;max-width:none}
-      .mini-filter-wrap{flex:1 1 auto}
-      .icon-circle{width:34px;height:34px}
+      .mini-search{flex:1;min-width:0;max-width:none}
+      .mini-select{min-width:68px;max-width:84px}
+    }
+
+    /* ── Full booking modal inside page ── */
+    .modal-dialog.modal-booking{max-width:none;width:100vw;height:100dvh;margin:0 !important}
+    .modal-dialog.modal-booking .modal-content{height:100dvh;border-radius:0;box-shadow:none}
+    .modal-dialog.modal-booking .mb{max-height:none !important;height:calc(100dvh - 128px);overflow:auto}
+    .modal-dialog.modal-booking .modal-footer-sticky{padding:.75rem 1rem}
+    @media (min-width: 769px){
+      .modal-dialog.modal-booking{width:min(1280px,100vw);margin:0 auto !important}
+      .modal-dialog.modal-booking .modal-content{height:100dvh;border-radius:0}
     }
 
   </style>
@@ -521,26 +442,14 @@
       <i class="fas fa-list-check"></i> المسندة لي
     </button>
   </div>
-
   <div class="tab-tools" id="calendarTools">
-    <div class="mini-search-wrap">
-      <input type="text" id="bookingSearch" class="mini-search" placeholder="بحث: اسم/جوال/حجز">
-      <button class="icon-circle primary" type="button" onclick="runSearch()" title="بحث">
-        <i class="fas fa-search"></i>
-      </button>
-      <button class="icon-circle" type="button" onclick="clearSearchAndFilters()" title="مسح">
-        <i class="fas fa-xmark"></i>
-      </button>
-    </div>
-    <div class="mini-filter-wrap">
-      <label class="mini-label" for="typeFilter">نوع</label>
-      <select id="typeFilter" class="mini-select">
-        <option value="">الكل</option>
-      </select>
-    </div>
-    <button class="icon-circle" type="button" onclick="hardRefresh()" title="تحديث">
-      <i class="fas fa-rotate"></i>
-    </button>
+    <input type="text" id="bookingSearch" class="mini-search" placeholder="بحث: اسم/جوال/حجز">
+    <select id="typeFilter" class="mini-select" title="النوع">
+      <option value="">نوع</option>
+    </select>
+    <button class="tb icon-round st" type="button" onclick="runSearch()" title="بحث"><i class="fas fa-search"></i></button>
+    <button class="tb icon-round" type="button" onclick="clearAllFilters()" title="مسح"><i class="fas fa-xmark"></i></button>
+    <button class="tb icon-round" type="button" onclick="hardRefresh()" title="تحديث"><i class="fas fa-rotate"></i></button>
   </div>
 </div>
 
@@ -598,7 +507,7 @@
      Modal: اليوم + نموذج الحجز
 ══════════════════════════════════════════ -->
 <div class="modal fade" id="bModal" tabindex="-1">
-  <div class="modal-dialog modal-xl modal-dialog-scrollable">
+  <div class="modal-dialog modal-xl modal-dialog-scrollable modal-booking">
     <div class="modal-content">
 
       <div class="mh">
@@ -763,21 +672,14 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   // 2) Bootstrap Modal
   bModal = new bootstrap.Modal(document.getElementById("bModal"));
-  document.getElementById("bModal").addEventListener("shown.bs.modal", () => {
-    try { window.parent.postMessage({ type: "bookings:modal", open: true }, "*"); } catch(e) {}
-  });
-  document.getElementById("bModal").addEventListener("hidden.bs.modal", () => {
-    try { window.parent.postMessage({ type: "bookings:modal", open: false }, "*"); } catch(e) {}
-    resetForm();
-    setTimeout(() => { if (cal) cal.updateSize(); }, 80);
-  });
+  document.getElementById("bModal").addEventListener("hidden.bs.modal", resetForm);
   document.getElementById("bForm").addEventListener("submit", saveBooking);
   document.getElementById("typeFilter").addEventListener("change", e => {
     _selectedType = e.target.value || "";
-    applyFilters();
+    applyAllFilters();
   });
   document.getElementById("bookingSearch").addEventListener("keydown", e => {
-    if (e.key === 'Enter') { e.preventDefault(); runSearch(); }
+    if (e.key === "Enter") { e.preventDefault(); runSearch(); }
   });
 
   // 3) استمع على AppLoader — البيانات الأساسية
@@ -788,7 +690,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   // 4) استمع على تحميل الحجوزات في الخلفية
   AppLoader.on("onBookingsReady", (bookings) => {
     _allEvents = Array.isArray(bookings) ? bookings : [];
-    applyFilters();
+    applyAllFilters();
     _updateKPIs();
     hideBgBar();
     if (cal) cal.refetchEvents();
@@ -803,11 +705,8 @@ document.addEventListener("DOMContentLoaded", async () => {
   if (AppLoader.isBookingsReady()) hideBgBar();
 
   // 7) تهيئة التقويم
-  const tools = document.getElementById("calendarTools");
-  if (tools) tools.style.display = "flex";
   _pageShown = true;
   if (!_calOk) { initCal(); _calOk = true; }
-  else { setTimeout(() => { try { cal.updateSize(); } catch(e) {} }, 60); }
 });
 
 /* ══════════════════════════════════════════
@@ -832,7 +731,7 @@ function _applyInitData(ds) {
   // فلتر النوع
   const typeSelEl = document.getElementById("typeFilter");
   const prevType  = typeSelEl.value || _selectedType || "";
-  typeSelEl.innerHTML = `<option value="">كل الأنواع</option>` +
+  typeSelEl.innerHTML = `<option value="">نوع</option>` +
     types.map(t => `<option value="${x(t)}">${x(t)}</option>`).join("");
   if (prevType && types.includes(prevType)) {
     typeSelEl.value = prevType;
@@ -874,13 +773,13 @@ function _buildTasksFromDashStats(stats) {
 function goTab(id) {
   document.querySelectorAll(".tb[data-tab]").forEach(b => b.classList.toggle("on", b.dataset.tab === id));
   document.querySelectorAll(".pane").forEach(p => p.classList.toggle("on", p.id === "pane-" + id));
+  const tools = document.getElementById("calendarTools");
+  if (tools) tools.style.display = id === "calendar" ? "flex" : "none";
   if (id === "calendar") {
     _pageShown = true;
     if (!_calOk) { initCal(); _calOk = true; }
     else { setTimeout(() => cal.updateSize(), 60); setTimeout(() => cal.updateSize(), 220); }
   }
-  const tools = document.getElementById("calendarTools");
-  if (tools) tools.style.display = id === "calendar" ? "flex" : "none";
   if (id === "tasks") renderTasksFromCache();
 }
 
@@ -915,25 +814,40 @@ async function hardRefresh() {
 /* ══════════════════════════════════════════
    KPIs
 ══════════════════════════════════════════ */
-function _updateKPIs() {}
-
-/* ══════════════════════════════════════════
-   البحث والفلترة
-══════════════════════════════════════════ */
-function matchesSearch(ev) {
-  if (!_searchTerm) return true;
-  const p = ev.extendedProps || {};
-  const q = _searchTerm.toLowerCase();
-  const id = String(p.id || ev.id || '');
-  const invoiceNo = id.slice(-8);
-  const hay = [p.name, p.phone, p.type, p.place, id, invoiceNo].map(v => String(v || '').toLowerCase()).join(' | ');
-  return hay.includes(q);
+function _updateKPIs() {
+  const evs = _allEvents;
+  let total = 0, rev = 0, dep = 0, rem = 0, paid = 0;
+  evs.forEach(ev => {
+    const p = ev.extendedProps || {};
+    total++;
+    rev  += +p.amount    || 0;
+    dep  += +p.deposit   || 0;
+    rem  += +p.remaining || 0;
+    if ((+p.remaining || 0) === 0 && (+p.amount || 0) > 0) paid++;
+  });
+  $s("k-total", total);
+  $s("k-rev", n(rev));
+  $s("k-dep", "واصل: " + n(dep));
+  $s("k-paid", paid);
+  $s("k-rem", n(rem));
 }
 
-function applyFilters() {
+/* ══════════════════════════════════════════
+   فلتر النوع
+══════════════════════════════════════════ */
+function matchBookingSearch(ev, term) {
+  if (!term) return true;
+  const p = ev.extendedProps || {};
+  const hay = [p.id, p.name, p.phone, p.type, ev.title].map(v => String(v || '').toLowerCase()).join(' | ');
+  return hay.includes(term);
+}
+
+function applyAllFilters() {
+  const term = (_searchTerm || '').trim().toLowerCase();
   _filteredEvents = (_allEvents || []).filter(ev => {
     const typeOk = !_selectedType || String(ev.extendedProps?.type || '').trim() === _selectedType;
-    return typeOk && matchesSearch(ev);
+    const searchOk = matchBookingSearch(ev, term);
+    return typeOk && searchOk;
   });
   if (cal) cal.refetchEvents();
   const date = document.getElementById("f-date").value;
@@ -941,20 +855,16 @@ function applyFilters() {
 }
 
 function runSearch() {
-  _searchTerm = (document.getElementById('bookingSearch').value || '').trim();
-  applyFilters();
+  _searchTerm = document.getElementById('bookingSearch').value || '';
+  applyAllFilters();
 }
 
-function clearSearchAndFilters() {
-  clearFilters();
-}
-
-function clearFilters() {
-  document.getElementById("bookingSearch").value = "";
+function clearAllFilters() {
   document.getElementById("typeFilter").value = "";
-  _searchTerm = "";
+  document.getElementById("bookingSearch").value = "";
   _selectedType = "";
-  applyFilters();
+  _searchTerm = "";
+  applyAllFilters();
 }
 
 /* ══════════════════════════════════════════
@@ -975,8 +885,6 @@ function initCal() {
     eventClick: info => openModal(info.event.startStr.substring(0, 10)),
   });
   cal.render();
-  setTimeout(() => { try { cal.updateSize(); } catch(e) {} }, 60);
-  setTimeout(() => { try { cal.updateSize(); } catch(e) {} }, 220);
 
   const adapt = () => cal.setOption("headerToolbar",
     window.innerWidth < 520
@@ -993,14 +901,13 @@ function initCal() {
 function openModal(date) {
   resetForm();
   document.getElementById("f-date").value = date;
-  document.getElementById("m-ttl").textContent = "📅 إدارة حجوزات يوم " + date;
+  document.getElementById("m-ttl").textContent = "📅 " + date;
   bModal.show();
-  setTimeout(() => document.getElementById('f-name')?.focus(), 250);
   renderDayList(date);
 }
 
 function getDayEvents(date) {
-  const src = (_searchTerm || _selectedType) ? _filteredEvents : _allEvents;
+  const src = _selectedType ? _filteredEvents : _allEvents;
   return src.filter(e => (e.start || "").substring(0, 10) === date);
 }
 
@@ -1010,7 +917,7 @@ function renderDayList(date) {
   if (!day.length) {
     el.innerHTML = `<div class="empty">
       <i class="fas fa-calendar-xmark"></i>
-      <p>لا توجد حجوزات لهذا اليوم${_selectedType ? " ضمن النوع المحدد" : ""}${_searchTerm ? " وفق البحث الحالي" : ""}</p>
+      <p>لا توجد حجوزات لهذا اليوم${_selectedType ? " ضمن النوع المحدد" : ""}</p>
     </div>`;
     return;
   }
@@ -1048,8 +955,11 @@ function renderDayList(date) {
                <i class="fas fa-bell"></i>
              </button>`
           : ""}
-        <button class="btn btn-info btn-sm text-white" onclick="actInv('${p.id}','${x(p.phone||"")}')">
-          <i class="fas fa-receipt"></i>
+        <button class="btn btn-info btn-sm text-white" onclick="openInvoice('${p.id}')">
+          <i class="fas fa-receipt"></i> فاتورة
+        </button>
+        <button class="btn btn-success btn-sm" onclick="shareInvoiceWhatsApp('${p.id}','${x(p.phone||"")}')">
+          <i class="fab fa-whatsapp"></i> مشاركة
         </button>
         <button class="btn btn-outline-warning btn-sm" onclick="actEdit(${JSON.stringify(p).replace(/"/g,"&quot;")})">
           <i class="fas fa-edit"></i>
@@ -1264,7 +1174,7 @@ async function actPaid(id, date) {
     DataStore.bookings = _allEvents;
     DataStore._rebuildBookingsIndex();
 
-    applyFilters()
+    applyAllFilters();
     _updateKPIs();
     if (cal) cal.refetchEvents();
     renderDayList(date);
@@ -1290,25 +1200,69 @@ function actRemind(phone, name, rem) {
   window.open(`https://wa.me/${np(phone)}?text=${encodeURIComponent(txt)}`, "_blank");
 }
 
-async function actInv(id, phone) {
-  Swal.fire({ title: "جاري إنشاء الفاتورة...", allowOutsideClick: false, didOpen: () => Swal.showLoading() });
+function buildInvoiceLink(id) {
+  const page = (APP_CONFIG.PAGES && APP_CONFIG.PAGES.invoice) || 'invoice-fixed.html';
+  const url = new URL(page, window.location.href);
+  url.searchParams.set('id', String(id || ''));
+  return url.toString();
+}
+
+function applyInvoiceTextTemplate(template, booking, link, cfg){
+  let txt = String(template || '').trim();
+  if (!txt) {
+    txt = `السلام عليكم ${booking.name || ''}
+هذه فاتورتكم الخاصة بحجز ${booking.type || ''}
+التاريخ: ${booking.date || ''}
+رابط الفاتورة:
+${link}`;
+  }
+  return txt
+    .replace(/\{\{?اسم_العميل\}?\}/g, booking.name || '')
+    .replace(/\{\{?النوع\}?\}/g, booking.type || '')
+    .replace(/\{\{?التاريخ\}?\}/g, booking.date || '')
+    .replace(/\{\{?المكان\}?\}/g, booking.place || '')
+    .replace(/\{\{?المبلغ\}?\}/g, String(booking.amount || 0))
+    .replace(/\{\{?المتبقي\}?\}/g, String(booking.remaining || 0))
+    .replace(/\{\{?رابط_الفاتورة\}?\}/g, link)
+    .replace(/\{\{?اسم_الوكالة\}?\}/g, cfg.agencyName || 'وكالة ميديا');
+}
+
+function openInvoice(id) {
+  const cfg = DataStore.systemConfig || {};
+  if (cfg.invoiceByLinkEnabled === false) {
+    Swal.fire('تنبيه', 'الفاتورة بالرابط غير مفعلة من الإعدادات', 'warning');
+    return;
+  }
+  window.open(buildInvoiceLink(id), '_blank');
+}
+
+async function shareInvoiceWhatsApp(id, phone) {
   try {
-    const url = await API.run("generateInvoicePDF", id);
-    Swal.close();
-    const templates = DataStore.templates || [];
-    const tmpl = templates.find(t => t.type === "invoice");
-    const cfg  = DataStore.systemConfig || {};
-    let txt;
-    if (tmpl && tmpl.text) {
-      txt = tmpl.text
-        .replace(/\{رابط_الفاتورة\}/g, url)
-        .replace(/\{اسم_الوكالة\}/g,  cfg.agencyName || "وكالة ميديا");
-    } else {
-      txt = `فاتورة حجزك:\n${url}\n\n${cfg.agencyName || "وكالة ميديا"}`;
+    const cfg = DataStore.systemConfig || {};
+    if (cfg.invoiceByLinkEnabled === false) {
+      Swal.fire('تنبيه', 'الفاتورة بالرابط غير مفعلة من الإعدادات', 'warning');
+      return;
     }
-    window.open(`https://wa.me/${np(phone)}?text=${encodeURIComponent(txt)}`, "_blank");
+
+    const booking = (_allEvents || []).find(ev => String(ev.id || '') === String(id))?.extendedProps
+      || DataStore.getBookingById?.(id)?.extendedProps
+      || DataStore.getBookingById?.(id)
+      || {};
+
+    const url = buildInvoiceLink(id);
+    const txt = applyInvoiceTextTemplate(cfg.invoiceShareText || '', booking, url, cfg);
+    const waPhone = np(cfg.invoiceWhatsappNumber || phone || booking.phone || '');
+
+    if (!waPhone) {
+      await navigator.clipboard.writeText(txt + '\n' + url);
+      Swal.fire('تم النسخ', 'لا يوجد رقم واتساب، فتم نسخ نص المشاركة والرابط', 'success');
+      return;
+    }
+
+    window.open(`https://wa.me/${waPhone}?text=${encodeURIComponent(txt)}`, '_blank');
   } catch(e) {
-    Swal.fire("خطأ", "تعذر إنشاء الفاتورة", "error");
+    console.error(e);
+    Swal.fire('خطأ', 'تعذر تجهيز رابط المشاركة', 'error');
   }
 }
 
@@ -1329,7 +1283,7 @@ async function actDel(id, date) {
     DataStore.bookings = _allEvents;
     DataStore._rebuildBookingsIndex();
 
-    applyFilters()
+    applyAllFilters();
     _updateKPIs();
     if (cal) cal.refetchEvents();
     renderDayList(date);
