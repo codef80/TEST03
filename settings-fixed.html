@@ -247,13 +247,22 @@
                 <div class="box-body">
                   <div class="mb-3">
                     <label class="form-label fw-bold">معرّف تقويم النظام</label>
-                    <input id="systemCalendarId" class="form-control" placeholder="example@group.calendar.google.com">
+                    <input id="systemCalendarId" class="form-control auto-save-system" placeholder="example@group.calendar.google.com">
+                  </div>
+                  <div class="form-check form-switch mb-3">
+                    <input class="form-check-input auto-save-system" type="checkbox" id="invoiceLinkEnabled" style="width:3rem;height:1.4rem">
+                    <label class="form-check-label fw-bold me-2" for="invoiceLinkEnabled">تفعيل الفاتورة بالرابط</label>
                   </div>
                   <div class="mb-3">
-                    <label class="form-label fw-bold">معرّف مجلد الفواتير</label>
-                    <input id="systemInvoiceFolderId" class="form-control" placeholder="Google Drive Folder ID">
+                    <label class="form-label fw-bold">رقم واتساب الفاتورة الافتراضي</label>
+                    <input id="invoiceWhatsappNumber" class="form-control auto-save-system" dir="ltr" placeholder="9665xxxxxxxx">
+                    <div class="template-help">اختياري — إذا تُرك فارغًا يتم الإرسال إلى رقم العميل نفسه.</div>
                   </div>
-                  <div class="template-help">يتم الحفظ تلقائيًا بعد التعديل مباشرة.</div>
+                  <div class="mb-0">
+                    <label class="form-label fw-bold">نص مشاركة الفاتورة الافتراضي</label>
+                    <textarea id="invoiceShareText" class="form-control auto-save-system" rows="5" placeholder="السلام عليكم {{اسم_العميل}}&#10;هذه فاتورتكم:&#10;{{رابط_الفاتورة}}"></textarea>
+                    <div class="template-help">المتاحات: {{اسم_العميل}} - {{النوع}} - {{التاريخ}} - {{المكان}} - {{المبلغ}} - {{المتبقي}} - {{رابط_الفاتورة}} - {{اسم_الوكالة}}</div>
+                  </div>
                 </div>
               </div>
             </div>
@@ -671,66 +680,53 @@
       }
     }
 
+    let _systemSaveTimer = null;
+    let _systemSaving = false;
+    let _systemLoaded = false;
+
     async function loadSystemSettings(){
-      _isHydratingSystemSettings = true;
+      _systemCfg = await safeApi('getSystemSettings');
+      document.getElementById('systemCalendarId').value = _systemCfg.calendarId || '';
+      document.getElementById('invoiceLinkEnabled').checked = _systemCfg.invoiceByLinkEnabled !== false;
+      document.getElementById('invoiceWhatsappNumber').value = _systemCfg.invoiceWhatsappNumber || '';
+      document.getElementById('invoiceShareText').value = _systemCfg.invoiceShareText || defaultInvoiceShareText();
+
+      renderSimpleList('bookingTypesContainer', _systemCfg.bookingTypes || ['زواج','تغطية','إعلان'], 'نوع الحجز');
+      renderSimpleList('bookingServicesContainer', _systemCfg.bookingExtraServices || ['صور','فيديو','درون'], 'اسم الخدمة');
+      renderSimpleList('projectStepsContainer', _systemCfg.projectSteps || ['التخطيط','التنفيذ','المراجعة','التسليم'], 'اسم الخطوة');
+
       try{
-        _systemCfg = await safeApi('getSystemSettings');
-        document.getElementById('systemCalendarId').value = _systemCfg.calendarId || '';
-        document.getElementById('systemInvoiceFolderId').value = _systemCfg.invoiceFolderId || '';
-
-        renderSimpleList('bookingTypesContainer', _systemCfg.bookingTypes || ['زواج','تغطية','إعلان'], 'نوع الحجز', 'bookingTypes');
-        renderSimpleList('bookingServicesContainer', _systemCfg.bookingExtraServices || ['صور','فيديو','درون'], 'اسم الخدمة', 'bookingExtraServices');
-        renderSimpleList('projectStepsContainer', _systemCfg.projectSteps || ['التخطيط','التنفيذ','المراجعة','التسليم'], 'اسم الخطوة', 'projectSteps');
-
-        try{
-          localStorage.setItem(APP_CONFIG.STORAGE.systemCfg || 'media_systemConfig', JSON.stringify(_systemCfg));
-        }catch(e){}
-        renderUsersSummary();
-      } finally {
-        _isHydratingSystemSettings = false;
-      }
+        localStorage.setItem(APP_CONFIG.STORAGE.systemCfg || 'media_systemConfig', JSON.stringify(_systemCfg));
+      }catch(e){}
+      _systemLoaded = true;
+      bindSystemAutosave();
+      renderUsersSummary();
     }
 
-    let _autoSaveTimer = null;
-    let _isHydratingSystemSettings = false;
-    let _isSavingSystemSettings = false;
-
-    function renderSimpleList(containerId, values, placeholder, groupKey){
+    function renderSimpleList(containerId, values, placeholder){
       const container = document.getElementById(containerId);
       const rows = Array.isArray(values) && values.length ? values : [''];
-      container.setAttribute('data-group', groupKey || '');
-      container.innerHTML = rows.map(v => `
-        <div class="setting-item">
-          <input type="text" class="form-control auto-system-setting" value="${esc(v || '')}" placeholder="${esc(placeholder)}" data-group="${esc(groupKey || '')}">
-          <button type="button" class="btn btn-outline-danger remove-setting-item" data-group="${esc(groupKey || '')}"><i class="fa-solid fa-trash"></i></button>
-        </div>
-      `).join('');
+      container.innerHTML = rows.map(v => createSimpleRowHtml(v || '', placeholder)).join('');
     }
 
-    function addBookingTypeItem(){ addSimpleRow('bookingTypesContainer', 'نوع الحجز', 'bookingTypes'); }
-    function addBookingServiceItem(){ addSimpleRow('bookingServicesContainer', 'اسم الخدمة', 'bookingExtraServices'); }
-    function addProjectStepItem(){ addSimpleRow('projectStepsContainer', 'اسم الخطوة', 'projectSteps'); }
+    function createSimpleRowHtml(value, placeholder){
+      return `
+        <div class="setting-item">
+          <input type="text" class="form-control auto-save-list" value="${esc(value || '')}" placeholder="${esc(placeholder)}">
+          <button type="button" class="btn btn-outline-danger remove-setting-row"><i class="fa-solid fa-trash"></i></button>
+        </div>
+      `;
+    }
 
-    function addSimpleRow(containerId, placeholder, groupKey){
+    function addBookingTypeItem(){ addSimpleRow('bookingTypesContainer', 'نوع الحجز'); }
+    function addBookingServiceItem(){ addSimpleRow('bookingServicesContainer', 'اسم الخدمة'); }
+    function addProjectStepItem(){ addSimpleRow('projectStepsContainer', 'اسم الخطوة'); }
+
+    function addSimpleRow(containerId, placeholder){
       const container = document.getElementById(containerId);
-      container.insertAdjacentHTML('beforeend', `
-        <div class="setting-item">
-          <input type="text" class="form-control auto-system-setting" value="" placeholder="${esc(placeholder)}" data-group="${esc(groupKey || '')}">
-          <button type="button" class="btn btn-outline-danger remove-setting-item" data-group="${esc(groupKey || '')}"><i class="fa-solid fa-trash"></i></button>
-        </div>
-      `);
-      const newInput = container.querySelector('.setting-item:last-child input');
-      if (newInput) newInput.focus();
-    }
-
-    function scheduleSystemSettingsSave(immediate = false){
-      if (_isHydratingSystemSettings) return;
-      clearTimeout(_autoSaveTimer);
-      if (immediate) {
-        saveSystemSettings(true);
-        return;
-      }
-      _autoSaveTimer = setTimeout(() => saveSystemSettings(true), 700);
+      container.insertAdjacentHTML('beforeend', createSimpleRowHtml('', placeholder));
+      bindSystemAutosave();
+      scheduleSystemSettingsSave();
     }
 
     function collectSimpleList(containerId){
@@ -739,30 +735,76 @@
         .filter(Boolean);
     }
 
-    async function saveSystemSettings(isAutoSave = false){
-      if (_isHydratingSystemSettings || _isSavingSystemSettings) return;
+    function defaultInvoiceShareText(){
+      return `السلام عليكم {{اسم_العميل}}
+هذه فاتورتكم الخاصة بحجز {{النوع}}
+التاريخ: {{التاريخ}}
+رابط الفاتورة:
+{{رابط_الفاتورة}}`;
+    }
+
+    function bindSystemAutosave(){
+      document.querySelectorAll('.auto-save-system').forEach(el => {
+        if (el.dataset.boundAutosave === '1') return;
+        const ev = (el.type === 'checkbox') ? 'change' : 'input';
+        el.addEventListener(ev, () => scheduleSystemSettingsSave());
+        el.dataset.boundAutosave = '1';
+      });
+
+      document.querySelectorAll('.auto-save-list').forEach(el => {
+        if (el.dataset.boundAutosave === '1') return;
+        el.addEventListener('input', () => scheduleSystemSettingsSave());
+        el.dataset.boundAutosave = '1';
+      });
+
+      document.querySelectorAll('.remove-setting-row').forEach(btn => {
+        if (btn.dataset.boundAutosave === '1') return;
+        btn.addEventListener('click', () => {
+          btn.parentElement.remove();
+          scheduleSystemSettingsSave();
+        });
+        btn.dataset.boundAutosave = '1';
+      });
+    }
+
+    function scheduleSystemSettingsSave(){
+      if (!_systemLoaded) return;
+      clearTimeout(_systemSaveTimer);
+      _systemSaveTimer = setTimeout(() => saveSystemSettings(true), 700);
+    }
+
+    async function saveSystemSettings(isAuto = false){
+      if (_systemSaving) return;
 
       const calendarId = document.getElementById('systemCalendarId').value.trim();
-      const invoiceFolderId = document.getElementById('systemInvoiceFolderId').value.trim();
+      const invoiceByLinkEnabled = document.getElementById('invoiceLinkEnabled').checked;
+      const invoiceWhatsappNumber = document.getElementById('invoiceWhatsappNumber').value.trim();
+      const invoiceShareText = document.getElementById('invoiceShareText').value.trim() || defaultInvoiceShareText();
       const projectSteps = collectSimpleList('projectStepsContainer');
       const bookingExtraServices = collectSimpleList('bookingServicesContainer');
       const bookingTypes = collectSimpleList('bookingTypesContainer');
-      const whatsappNumber = String(_systemCfg?.whatsappNumber || '').trim();
-      const agencyName = String(_systemCfg?.agencyName || APP_CONFIG.APP_NAME || 'وكالة ميديا').trim();
 
       if (!projectSteps.length){
-        if (!isAutoSave) Toast.warning('أضف خطوة مشروع واحدة على الأقل');
+        if (!isAuto) Toast.warning('أضف خطوة مشروع واحدة على الأقل');
         return;
       }
       if (!bookingTypes.length){
-        if (!isAutoSave) Toast.warning('أضف نوع حجز واحد على الأقل');
+        if (!isAuto) Toast.warning('أضف نوع حجز واحد على الأقل');
         return;
       }
 
-      _isSavingSystemSettings = true;
-      if (!isAutoSave) Spinner.show('جاري حفظ إعدادات النظام...');
+      _systemSaving = true;
       try{
-        const res = await safeApi('updateSystemSettings', calendarId, invoiceFolderId, projectSteps, bookingExtraServices, bookingTypes, whatsappNumber, agencyName);
+        const res = await safeApi(
+          'updateSystemSettings',
+          calendarId,
+          projectSteps,
+          bookingExtraServices,
+          bookingTypes,
+          invoiceByLinkEnabled,
+          invoiceWhatsappNumber,
+          invoiceShareText
+        );
         if (res && res.success === false){
           throw new Error(res.message || 'تعذر حفظ إعدادات النظام');
         }
@@ -770,23 +812,23 @@
         _systemCfg = {
           ..._systemCfg,
           calendarId,
-          invoiceFolderId,
           projectSteps,
           bookingExtraServices,
           bookingTypes,
-          whatsappNumber,
-          agencyName
+          invoiceByLinkEnabled,
+          invoiceWhatsappNumber,
+          invoiceShareText
         };
         try{
           localStorage.setItem(APP_CONFIG.STORAGE.systemCfg || 'media_systemConfig', JSON.stringify(_systemCfg));
         }catch(e){}
-        renderUsersSummary();
-        if (!isAutoSave) {
-          Toast.success(res.message || 'تم حفظ إعدادات النظام');
-        }
+
+        if (!isAuto) Toast.success(res.message || 'تم حفظ إعدادات النظام');
+      }catch(err){
+        if (!isAuto) throw err;
+        console.error(err);
       }finally{
-        _isSavingSystemSettings = false;
-        if (!isAutoSave) Spinner.hide();
+        _systemSaving = false;
       }
     }
 
@@ -847,27 +889,6 @@
     function wireEvents(){
       document.getElementById('usersSearch').addEventListener('input', applyUsersFilters);
       document.getElementById('usersStatusFilter').addEventListener('change', applyUsersFilters);
-
-      document.getElementById('systemCalendarId').addEventListener('input', () => scheduleSystemSettingsSave());
-      document.getElementById('systemCalendarId').addEventListener('blur', () => scheduleSystemSettingsSave(true));
-      document.getElementById('systemInvoiceFolderId').addEventListener('input', () => scheduleSystemSettingsSave());
-      document.getElementById('systemInvoiceFolderId').addEventListener('blur', () => scheduleSystemSettingsSave(true));
-
-      ['bookingTypesContainer','bookingServicesContainer','projectStepsContainer'].forEach(containerId => {
-        const container = document.getElementById(containerId);
-        container.addEventListener('input', (e) => {
-          if (e.target.matches('input')) scheduleSystemSettingsSave();
-        });
-        container.addEventListener('blur', (e) => {
-          if (e.target.matches('input')) scheduleSystemSettingsSave(true);
-        }, true);
-        container.addEventListener('click', (e) => {
-          const btn = e.target.closest('.remove-setting-item');
-          if (!btn) return;
-          btn.parentElement.remove();
-          scheduleSystemSettingsSave(true);
-        });
-      });
     }
 
     window.openUserModal = openUserModal;
@@ -875,7 +896,6 @@
     window.saveUser = saveUser;
     window.deleteUserUI = deleteUserUI;
     window.saveSystemSettings = saveSystemSettings;
-    window.scheduleSystemSettingsSave = scheduleSystemSettingsSave;
     window.addBookingTypeItem = addBookingTypeItem;
     window.addBookingServiceItem = addBookingServiceItem;
     window.addProjectStepItem = addProjectStepItem;
