@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
@@ -9,7 +10,7 @@
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;800;900&display=swap" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-  <script src="config-fixed.js"></script>
+  <script src="config-updated.js"></script>
 
   <style>
     :root{
@@ -244,6 +245,14 @@
               <div class="box">
                 <div class="box-head"><h3 class="box-title"><i class="fa-solid fa-link me-2"></i>الربط العام</h3></div>
                 <div class="box-body">
+                  <div class="mb-3">
+                    <label class="form-label fw-bold">اسم الجهة</label>
+                    <input id="systemAgencyName" class="form-control" placeholder="اسم الجهة أو الوكالة">
+                  </div>
+                  <div class="mb-3">
+                    <label class="form-label fw-bold">رقم واتساب الاستقبال</label>
+                    <input id="systemWhatsappNumber" class="form-control" inputmode="numeric" dir="ltr" placeholder="9665XXXXXXXX">
+                  </div>
                   <div class="mb-3">
                     <label class="form-label fw-bold">معرّف تقويم النظام</label>
                     <input id="systemCalendarId" class="form-control" placeholder="example@group.calendar.google.com">
@@ -672,6 +681,8 @@
 
     async function loadSystemSettings(){
       _systemCfg = await safeApi('getSystemSettings');
+      document.getElementById('systemAgencyName').value = _systemCfg.agencyName || APP_CONFIG.APP_NAME || 'وكالة ميديا';
+      document.getElementById('systemWhatsappNumber').value = _systemCfg.whatsappNumber || '';
       document.getElementById('systemCalendarId').value = _systemCfg.calendarId || '';
       document.getElementById('systemInvoiceFolderId').value = _systemCfg.invoiceFolderId || '';
 
@@ -717,12 +728,18 @@
     }
 
     async function saveSystemSettings(){
+      const agencyName = document.getElementById('systemAgencyName').value.trim();
+      const whatsappNumber = document.getElementById('systemWhatsappNumber').value.trim();
       const calendarId = document.getElementById('systemCalendarId').value.trim();
       const invoiceFolderId = document.getElementById('systemInvoiceFolderId').value.trim();
       const projectSteps = collectSimpleList('projectStepsContainer');
       const bookingExtraServices = collectSimpleList('bookingServicesContainer');
       const bookingTypes = collectSimpleList('bookingTypesContainer');
 
+      if (!agencyName){
+        Toast.warning('أدخل اسم الجهة');
+        return;
+      }
       if (!calendarId || !invoiceFolderId){
         Toast.warning('أدخل معرف التقويم ومعرف مجلد الفواتير');
         return;
@@ -738,10 +755,18 @@
 
       Spinner.show('جاري حفظ إعدادات النظام...');
       try{
-        const res = await safeApi('updateSystemSettings', calendarId, invoiceFolderId, projectSteps, bookingExtraServices, bookingTypes);
+        const res = await safeApi('updateSystemSettings', calendarId, invoiceFolderId, projectSteps, bookingExtraServices, bookingTypes, whatsappNumber, agencyName);
         if (res && res.success === false){
-          throw new Error(res.message || 'تعذر حفظ إعدادات النظام');
+          throw new Error(res.message || res.error || 'تعذر حفظ إعدادات النظام');
         }
+
+        const freshCfg = await safeApi('getSystemSettings');
+        _systemCfg = freshCfg || {};
+        try {
+          localStorage.setItem(APP_CONFIG.STORAGE.systemCfg || 'media_systemConfig', JSON.stringify(_systemCfg));
+          window.dispatchEvent(new CustomEvent('system:settings-updated', { detail: _systemCfg }));
+        } catch(e){}
+
         Toast.success(res.message || 'تم حفظ إعدادات النظام');
         await loadSystemSettings();
       }finally{
@@ -821,7 +846,12 @@
     window.toggleUserPagesMode = toggleUserPagesMode;
 
     document.addEventListener('DOMContentLoaded', async () => {
-      guardSession();
+      if (typeof PageInit !== 'undefined' && PageInit.start) {
+        const ok = await PageInit.start();
+        if (!ok) return;
+      } else {
+        guardSession();
+      }
       hydrateHero();
       renderAvailablePagesOptions();
       wireEvents();
