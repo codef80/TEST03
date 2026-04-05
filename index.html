@@ -464,38 +464,6 @@
     .modal-header {
       border-radius: var(--radius-lg) var(--radius-lg) 0 0;
     }
-
-    #mainApp.immersive-bookings .app-header,
-    #mainApp.immersive-bookings .bottom-nav,
-    #mainApp.immersive-bookings .sidebar {
-      display: none !important;
-    }
-
-    #mainApp.immersive-bookings .app-layout {
-      min-height: 100vh;
-    }
-
-    #mainApp.immersive-bookings .page-content {
-      padding: 0 !important;
-      overflow: hidden;
-    }
-
-    .page-frame {
-      width: 100%;
-      height: calc(100vh - 92px);
-      border: none;
-      display: none;
-    }
-
-    #mainApp.immersive-bookings .page-frame {
-      height: 100vh !important;
-    }
-
-    @media (max-width: 991px) {
-      .page-frame { height: calc(100vh - 128px); }
-      #mainApp.immersive-bookings .page-frame { height: 100vh !important; }
-    }
-
   </style>
 </head>
 <body>
@@ -745,11 +713,6 @@ function openPage(pageId) {
   if (!page) return;
 
   currentPage = pageId;
-  // لا ندخل وضع immersive لمجرد فتح صفحة الحجوزات؛
-  // بل فقط عندما يطلب مودال الحجز ذلك من داخل الصفحة.
-  if (pageId !== "bookings") {
-    document.getElementById("mainApp").classList.remove("immersive-bookings");
-  }
   updateNavActive();
 
   const loader = document.getElementById("pageLoader");
@@ -804,9 +767,14 @@ window.addEventListener("message", e => {
   const { type, payload } = e.data || {};
   if (type === "navigate") navigateTo(payload);
   if (type === "logout") doLogout();
-  if (type === "bookings:modal") {
-    const inBookings = currentPage === "bookings";
-    document.getElementById("mainApp").classList.toggle("immersive-bookings", !!(inBookings && e.data?.open));
+  if (type === "booking-modal-toggle") {
+    const isOpen = !!payload?.open;
+    const header = document.querySelector('.app-header');
+    const bottom = document.querySelector('.bottom-nav');
+    if (header) header.style.display = isOpen ? 'none' : '';
+    if (bottom) bottom.style.display = isOpen ? 'none' : '';
+    document.body.style.overflow = isOpen ? 'hidden' : '';
+    return;
   }
   if (type === "toast" && typeof Toast !== "undefined") {
     Toast[payload.level || "info"](payload.message);
