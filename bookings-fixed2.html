@@ -765,7 +765,14 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   // 2) Bootstrap Modal
   bModal = new bootstrap.Modal(document.getElementById("bModal"));
-  document.getElementById("bModal").addEventListener("hidden.bs.modal", resetForm);
+  document.getElementById("bModal").addEventListener("shown.bs.modal", () => {
+    try { window.parent.postMessage({ type: "bookings:modal", open: true }, "*"); } catch(e) {}
+  });
+  document.getElementById("bModal").addEventListener("hidden.bs.modal", () => {
+    try { window.parent.postMessage({ type: "bookings:modal", open: false }, "*"); } catch(e) {}
+    resetForm();
+    setTimeout(() => { if (cal) cal.updateSize(); }, 80);
+  });
   document.getElementById("bForm").addEventListener("submit", saveBooking);
   document.getElementById("typeFilter").addEventListener("change", e => {
     _selectedType = e.target.value || "";
