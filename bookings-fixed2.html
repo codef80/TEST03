@@ -410,17 +410,24 @@
     .kpi-grid{display:none !important}
     #pane-calendar{padding-top:.45rem}
     @media (max-width: 768px){
-      .tab-bar{padding:.45rem .5rem;position:sticky;top:0;z-index:90}
-      .tab-tools{width:100%;margin-inline-start:0}
-      .mini-search{flex:1;min-width:0;max-width:none}
-      .mini-select{min-width:68px;max-width:84px}
+      .tab-bar{padding:.4rem .45rem;position:sticky;top:0;z-index:90;flex-wrap:nowrap;overflow-x:auto}
+      .tab-tabs{gap:.25rem;flex-wrap:nowrap}
+      .tab-tools{display:flex;gap:.25rem;align-items:center;flex-wrap:nowrap;width:auto;min-width:max-content;margin-inline-start:auto}
+      .tb{padding:.34rem .62rem;font-size:.7rem}
+      .tb i{font-size:.68rem}
+      .mini-search{width:128px;min-width:128px;max-width:128px;height:32px;padding:.18rem .55rem;font-size:.68rem}
+      .mini-select{width:58px;min-width:58px;max-width:58px;height:32px;padding:.15rem 1.55rem .15rem .5rem;font-size:.68rem}
+      .icon-round{width:32px;height:32px;min-width:32px}
+      .icon-round i{font-size:.72rem}
     }
 
     /* ── Full booking modal inside page ── */
     .modal-dialog.modal-booking{max-width:none;width:100vw;height:100dvh;margin:0 !important}
     .modal-dialog.modal-booking .modal-content{height:100dvh;border-radius:0;box-shadow:none}
-    .modal-dialog.modal-booking .mb{max-height:none !important;height:calc(100dvh - 128px);overflow:auto}
+    .modal-dialog.modal-booking .mb{max-height:none !important;height:calc(100dvh - 128px);overflow:auto;overscroll-behavior:contain}
     .modal-dialog.modal-booking .modal-footer-sticky{padding:.75rem 1rem}
+    #bModal{z-index:20000}
+    #bModal + .modal-backdrop, .modal-backdrop.show{z-index:19990}
     @media (min-width: 769px){
       .modal-dialog.modal-booking{width:min(1280px,100vw);margin:0 auto !important}
       .modal-dialog.modal-booking .modal-content{height:100dvh;border-radius:0}
@@ -662,6 +669,14 @@ const n   = v => Utils.formatNum(v, 0);
 const np  = v => Utils.normalizePhone(v);
 const $s  = (id, v) => { const e = document.getElementById(id); if (e) e.textContent = v; };
 
+function notifyBookingModalState(isOpen) {
+  try {
+    if (window.parent && window.parent !== window) {
+      window.parent.postMessage({ type: "booking-modal-toggle", payload: { open: !!isOpen } }, "*");
+    }
+  } catch (e) {}
+}
+
 /* ══════════════════════════════════════════
    تهيئة الصفحة عند DOMContentLoaded
 ══════════════════════════════════════════ */
@@ -671,8 +686,9 @@ document.addEventListener("DOMContentLoaded", async () => {
   if (!Utils.guardSession()) return;
 
   // 2) Bootstrap Modal
-  bModal = new bootstrap.Modal(document.getElementById("bModal"));
-  document.getElementById("bModal").addEventListener("hidden.bs.modal", resetForm);
+  bModal = new bootstrap.Modal(document.getElementById("bModal"), { backdrop: true, keyboard: true, focus: false });
+  document.getElementById("bModal").addEventListener("hidden.bs.modal", () => { resetForm(); notifyBookingModalState(false); });
+  document.getElementById("bModal").addEventListener("shown.bs.modal", () => { notifyBookingModalState(true); const mb = document.querySelector("#bModal .mb"); if (mb) mb.scrollTop = 0; });
   document.getElementById("bForm").addEventListener("submit", saveBooking);
   document.getElementById("typeFilter").addEventListener("change", e => {
     _selectedType = e.target.value || "";
@@ -902,8 +918,10 @@ function openModal(date) {
   resetForm();
   document.getElementById("f-date").value = date;
   document.getElementById("m-ttl").textContent = "📅 " + date;
-  bModal.show();
   renderDayList(date);
+  bModal.show();
+  const mb = document.querySelector("#bModal .mb");
+  if (mb) requestAnimationFrame(() => { mb.scrollTop = 0; });
 }
 
 function getDayEvents(date) {
@@ -1095,6 +1113,8 @@ async function saveBooking(ev) {
     // تحديث التقويم والقائمة
     if (cal) cal.refetchEvents();
     renderDayList(date);
+    const mb = document.querySelector("#bModal .mb");
+    if (mb) mb.scrollTop = 0;
 
   } catch(e) {
     Swal.fire("خطأ", "تعذر حفظ الحجز — " + (e.message || ""), "error");
@@ -1148,7 +1168,12 @@ function actEdit(p) {
   document.getElementById("exp-rows").innerHTML = "";
   (p.expenses || []).forEach(e => addExpRow(e));
   calcFin();
-  document.getElementById("bForm").scrollIntoView({ behavior: "smooth", block: "start" });
+  const mb = document.querySelector("#bModal .mb");
+  const form = document.getElementById("bForm");
+  if (mb && form) {
+    const top = form.offsetTop - 12;
+    mb.scrollTo({ top, behavior: "smooth" });
+  }
 }
 
 async function actPaid(id, date) {
