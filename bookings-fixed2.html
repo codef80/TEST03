@@ -1,4 +1,5 @@
 
+
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
@@ -942,7 +943,7 @@ function renderDayList(date) {
                <i class="fas fa-bell"></i>
              </button>`
           : ""}
-        <button class="btn btn-info btn-sm text-white" onclick="actInv('${p.id}','${x(p.phone||"")}')">
+        <button class="btn btn-info btn-sm text-white" title="إصدار الفاتورة" onclick="actInv('${p.id}','${x(p.phone||"")}')">
           <i class="fas fa-receipt"></i>
         </button>
         <button class="btn btn-outline-warning btn-sm" onclick="actEdit(${JSON.stringify(p).replace(/"/g,"&quot;")})">
@@ -1185,24 +1186,15 @@ function actRemind(phone, name, rem) {
 }
 
 async function actInv(id, phone) {
-  Swal.fire({ title: "جاري إنشاء الفاتورة...", allowOutsideClick: false, didOpen: () => Swal.showLoading() });
+  Swal.fire({ title: "جاري إصدار الفاتورة...", allowOutsideClick: false, didOpen: () => Swal.showLoading() });
   try {
     const url = await API.run("generateInvoicePDF", id);
     Swal.close();
-    const templates = DataStore.templates || [];
-    const tmpl = templates.find(t => t.type === "invoice");
-    const cfg  = DataStore.systemConfig || {};
-    let txt;
-    if (tmpl && tmpl.text) {
-      txt = tmpl.text
-        .replace(/\{رابط_الفاتورة\}/g, url)
-        .replace(/\{اسم_الوكالة\}/g,  cfg.agencyName || "وكالة ميديا");
-    } else {
-      txt = `فاتورة حجزك:\n${url}\n\n${cfg.agencyName || "وكالة ميديا"}`;
-    }
-    window.open(`https://wa.me/${np(phone)}?text=${encodeURIComponent(txt)}`, "_blank");
+    const page = (APP_CONFIG?.PAGES?.invoice || 'invoice-fixed.html');
+    const qs = new URLSearchParams({ id: String(id || ''), url: String(url || ''), phone: String(phone || '') });
+    window.open(`${page}?${qs.toString()}`, '_blank');
   } catch(e) {
-    Swal.fire("خطأ", "تعذر إنشاء الفاتورة", "error");
+    Swal.fire("خطأ", e?.message || "تعذر إنشاء الفاتورة", "error");
   }
 }
 
