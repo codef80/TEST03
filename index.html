@@ -583,7 +583,11 @@ async function doLogin() {
   document.getElementById("loginStatus").textContent = "جاري التحقق...";
 
   try {
+    console.log("API exists?", typeof API);
+    console.log("API URL:", APP_CONFIG?.API_URL);
+
     const result = await API.run("verifyLoginCodeV2", code);
+
 
     if (result && result.success) {
       Session.save(result);
@@ -592,9 +596,9 @@ async function doLogin() {
       showLoginError(result?.message || "رمز الدخول غير صحيح");
     }
   } catch (e) {
-    showLoginError("تعذر الاتصال بالخادم");
-    console.error(e);
-  } finally {
+  console.error("LOGIN ERROR:", e);
+  showLoginError(e?.message || String(e) || "تعذر الاتصال بالخادم");
+} finally {
     btn.disabled = false;
     btn.innerHTML = '<i class="fas fa-sign-in-alt"></i> دخول';
     document.getElementById("loginStatus").textContent = "جاهز";
