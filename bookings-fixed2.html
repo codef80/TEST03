@@ -1189,7 +1189,10 @@ function actRemind(phone, name, rem) {
 }
 
 function buildInvoiceLink(id) {
-  return `${APP_CONFIG.API_URL}?action=invoice&id=${encodeURIComponent(id)}`;
+  const page = (APP_CONFIG.PAGES && APP_CONFIG.PAGES.invoice) || 'invoice-fixed.html';
+  const url = new URL(page, window.location.href);
+  url.searchParams.set('id', String(id || ''));
+  return url.toString();
 }
 
 function applyInvoiceTextTemplate(template, booking, link, cfg){
