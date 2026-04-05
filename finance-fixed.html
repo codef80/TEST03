@@ -1,4 +1,5 @@
 
+
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
@@ -10,7 +11,7 @@
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;800;900&display=swap" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-  <script src="config-fixed.js"></script>
+  <script src="config-updated.js"></script>
 
   <style>
     :root{
@@ -328,9 +329,16 @@
     let _yearlyTargets = [];
     let _lastBookingExpenseChange = null;
     let expenseModal, targetModal, projectValueModal;
+    let _financeBooted = false;
+    const _financeSectionsLoaded = { summary:false, expenses:false, bookingExpenses:false, projects:false, targets:false, report:false };
 
     document.addEventListener('DOMContentLoaded', async () => {
-      if (!guardSession()) return;
+      if (typeof PageInit !== 'undefined' && PageInit.start) {
+        const ok = await PageInit.start();
+        if (!ok) return;
+      } else if (!guardSession()) {
+        return;
+      }
       expenseModal = new bootstrap.Modal(document.getElementById('expenseModal'));
       targetModal = new bootstrap.Modal(document.getElementById('targetModal'));
       projectValueModal = new bootstrap.Modal(document.getElementById('projectValueModal'));
@@ -372,18 +380,57 @@
       document.getElementById('expenseForm').addEventListener('submit', onExpenseSubmit);
       document.getElementById('targetForm').addEventListener('submit', onTargetSubmit);
       document.getElementById('projectValueForm').addEventListener('submit', onProjectValueSubmit);
+
+      document.querySelectorAll('[data-bs-toggle="tab"]').forEach(btn => {
+        btn.addEventListener('shown.bs.tab', async (e) => {
+          const target = e.target.getAttribute('data-bs-target') || '';
+          if (target === '#tab-booking-expenses' && !_financeSectionsLoaded.bookingExpenses) await loadBookingExpenses();
+          if (target === '#tab-project-expenses' && !_financeSectionsLoaded.projects) {
+            await loadProjects();
+            await loadProjectExpensesDetailedData();
+          }
+          if (target === '#tab-project-report' && !_financeSectionsLoaded.report) await loadProjectReport();
+          if (target === '#tab-targets' && !_financeSectionsLoaded.targets) await loadTargets();
+          if (target === '#tab-project-expenses-detail' && !_financeSectionsLoaded.projects) {
+            await loadProjects();
+            await loadProjectExpensesDetailedData();
+          }
+        });
+      });
+
+      window.addEventListener('system:settings-updated', () => {
+        hydrateHero();
+        loadProjects().then(() => {
+          if (_financeSectionsLoaded.projects) renderProjectExpenses();
+          if (_financeSectionsLoaded.report) loadProjectReport();
+        }).catch(console.warn);
+      });
     }
 
     async function initPage(){
+      if (_financeBooted) return;
+      _financeBooted = true;
+
       await Promise.all([
-        loadFinanceSummary(),
-        loadExpenses(),
-        loadBookingExpenses(),
-        loadProjects(),
-        loadProjectExpensesDetailedData(),
-        loadTargets()
+        loadFinanceSummary(true),
+        loadExpenses()
       ]);
-      await loadProjectReport();
+
+      const defer = window.requestIdleCallback
+        ? (fn) => window.requestIdleCallback(fn, { timeout: 1200 })
+        : (fn) => setTimeout(fn, 250);
+
+      defer(async () => {
+        try {
+          await loadBookingExpenses();
+          await loadProjects();
+          await loadProjectExpensesDetailedData();
+          await loadTargets();
+          await loadProjectReport();
+        } catch (e) {
+          console.warn('finance background loading failed', e);
+        }
+      });
     }
 
     function num(v){ return Number(v || 0) || 0; }
@@ -396,9 +443,23 @@
 
     async function safeApi(fn, ...args){ return API.run(fn, ...args); }
 
-    async function loadFinanceSummary(){
+    async function loadFinanceSummary(useCacheFirst = false){
       try {
-        const s = await safeApi('getFinanceSummary', {});
+        if (useCacheFirst && typeof DataStore !== 'undefined' && DataStore.dashStats) {
+          const ds = DataStore.dashStats || {};
+          document.getElementById('sumRevenue').textContent = fmt(ds.totalRevenue || 0, 2);
+          document.getElementById('sumReceivables').textContent = fmt(ds.totalReceivables || 0, 2);
+          document.getElementById('sumNet').textContent = fmt(ds.netProfit || 0, 2);
+          document.getElementById('sumBookings').textContent = fmt(ds.totalBookings || 0);
+        }
+
+        let s = null;
+        if (typeof AppLoader !== 'undefined' && AppLoader.loadFinance) {
+          s = await AppLoader.loadFinance({});
+        } else {
+          s = await safeApi('getFinanceSummary', {});
+        }
+        _financeSectionsLoaded.summary = true;
         document.getElementById('sumRevenue').textContent = fmt(s.totalRevenue || 0, 2);
         document.getElementById('sumReceivables').textContent = fmt(s.totalDue || s.totalReceivables || 0, 2);
         document.getElementById('sumNet').textContent = fmt(s.net || s.netProfit || 0, 2);
@@ -408,6 +469,7 @@
 
     async function loadExpenses(){
       _expenses = await safeApi('getExpensesList');
+      _financeSectionsLoaded.expenses = true;
       renderExpensesSummary();
       renderExpenses();
     }
@@ -502,6 +564,7 @@
         page++;
       } while (true);
       _projectExpenses = items;
+      _financeSectionsLoaded.projects = true;
       renderProjectExpenses();
     }
 
