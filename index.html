@@ -1,5 +1,4 @@
 
-
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
@@ -465,6 +464,38 @@
     .modal-header {
       border-radius: var(--radius-lg) var(--radius-lg) 0 0;
     }
+
+    #mainApp.immersive-bookings .app-header,
+    #mainApp.immersive-bookings .bottom-nav,
+    #mainApp.immersive-bookings .sidebar {
+      display: none !important;
+    }
+
+    #mainApp.immersive-bookings .app-layout {
+      min-height: 100vh;
+    }
+
+    #mainApp.immersive-bookings .page-content {
+      padding: 0 !important;
+      overflow: hidden;
+    }
+
+    .page-frame {
+      width: 100%;
+      height: calc(100vh - 92px);
+      border: none;
+      display: none;
+    }
+
+    #mainApp.immersive-bookings .page-frame {
+      height: 100vh !important;
+    }
+
+    @media (max-width: 991px) {
+      .page-frame { height: calc(100vh - 128px); }
+      #mainApp.immersive-bookings .page-frame { height: 100vh !important; }
+    }
+
   </style>
 </head>
 <body>
@@ -555,7 +586,7 @@
 <script>
 const NAV_PAGES = [
   { id: "dashboard", label: "لوحة التحكم", icon: "fas fa-gauge", frame: "dashboard-fixed.html" },
-  { id: "bookings", label: "الحجوزات", icon: "fas fa-calendar-check", frame: "bookings-fixed2.html" },
+  { id: "bookings", label: "الحجوزات", icon: "fas fa-calendar-check", frame: "bookings-fixed2-immersive.html" },
   { id: "finance", label: "المصروفات والمالية", icon: "fas fa-chart-line", frame: "finance-fixed.html" },
   { id: "projects", label: "المشاريع", icon: "fas fa-diagram-project", frame: "projects-fixed.html" },
   { id: "settings", label: "الإعدادات", icon: "fas fa-gear", frame: "settings-fixed.html" }
@@ -583,11 +614,7 @@ async function doLogin() {
   document.getElementById("loginStatus").textContent = "جاري التحقق...";
 
   try {
-    console.log("API exists?", typeof API);
-    console.log("API URL:", APP_CONFIG?.API_URL);
-
     const result = await API.run("verifyLoginCodeV2", code);
-
 
     if (result && result.success) {
       Session.save(result);
@@ -596,9 +623,9 @@ async function doLogin() {
       showLoginError(result?.message || "رمز الدخول غير صحيح");
     }
   } catch (e) {
-  console.error("LOGIN ERROR:", e);
-  showLoginError(e?.message || String(e) || "تعذر الاتصال بالخادم");
-} finally {
+    showLoginError("تعذر الاتصال بالخادم");
+    console.error(e);
+  } finally {
     btn.disabled = false;
     btn.innerHTML = '<i class="fas fa-sign-in-alt"></i> دخول';
     document.getElementById("loginStatus").textContent = "جاهز";
@@ -718,6 +745,7 @@ function openPage(pageId) {
   if (!page) return;
 
   currentPage = pageId;
+  document.getElementById("mainApp").classList.toggle("immersive-bookings", pageId === "bookings");
   updateNavActive();
 
   const loader = document.getElementById("pageLoader");
