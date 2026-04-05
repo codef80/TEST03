@@ -10,7 +10,7 @@
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;800;900&display=swap" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-  <script src="config-updated.js"></script>
+  <script src="config-fixed.js"></script>
 
   <style>
     :root{
@@ -246,14 +246,6 @@
                 <div class="box-head"><h3 class="box-title"><i class="fa-solid fa-link me-2"></i>الربط العام</h3></div>
                 <div class="box-body">
                   <div class="mb-3">
-                    <label class="form-label fw-bold">اسم الجهة</label>
-                    <input id="systemAgencyName" class="form-control" placeholder="اسم الجهة أو الوكالة">
-                  </div>
-                  <div class="mb-3">
-                    <label class="form-label fw-bold">رقم واتساب الاستقبال</label>
-                    <input id="systemWhatsappNumber" class="form-control" inputmode="numeric" dir="ltr" placeholder="9665XXXXXXXX">
-                  </div>
-                  <div class="mb-3">
                     <label class="form-label fw-bold">معرّف تقويم النظام</label>
                     <input id="systemCalendarId" class="form-control" placeholder="example@group.calendar.google.com">
                   </div>
@@ -261,7 +253,7 @@
                     <label class="form-label fw-bold">معرّف مجلد الفواتير</label>
                     <input id="systemInvoiceFolderId" class="form-control" placeholder="Google Drive Folder ID">
                   </div>
-                  <button class="btn btn-main w-100" onclick="saveSystemSettings()"><i class="fa-solid fa-floppy-disk me-1"></i> حفظ إعدادات النظام</button>
+                  <div class="template-help">يتم الحفظ تلقائيًا بعد التعديل مباشرة.</div>
                 </div>
               </div>
             </div>
@@ -680,45 +672,65 @@
     }
 
     async function loadSystemSettings(){
-      _systemCfg = await safeApi('getSystemSettings');
-      document.getElementById('systemAgencyName').value = _systemCfg.agencyName || APP_CONFIG.APP_NAME || 'وكالة ميديا';
-      document.getElementById('systemWhatsappNumber').value = _systemCfg.whatsappNumber || '';
-      document.getElementById('systemCalendarId').value = _systemCfg.calendarId || '';
-      document.getElementById('systemInvoiceFolderId').value = _systemCfg.invoiceFolderId || '';
-
-      renderSimpleList('bookingTypesContainer', _systemCfg.bookingTypes || ['زواج','تغطية','إعلان'], 'نوع الحجز');
-      renderSimpleList('bookingServicesContainer', _systemCfg.bookingExtraServices || ['صور','فيديو','درون'], 'اسم الخدمة');
-      renderSimpleList('projectStepsContainer', _systemCfg.projectSteps || ['التخطيط','التنفيذ','المراجعة','التسليم'], 'اسم الخطوة');
-
+      _isHydratingSystemSettings = true;
       try{
-        localStorage.setItem(APP_CONFIG.STORAGE.systemCfg || 'media_systemConfig', JSON.stringify(_systemCfg));
-      }catch(e){}
-      renderUsersSummary();
+        _systemCfg = await safeApi('getSystemSettings');
+        document.getElementById('systemCalendarId').value = _systemCfg.calendarId || '';
+        document.getElementById('systemInvoiceFolderId').value = _systemCfg.invoiceFolderId || '';
+
+        renderSimpleList('bookingTypesContainer', _systemCfg.bookingTypes || ['زواج','تغطية','إعلان'], 'نوع الحجز', 'bookingTypes');
+        renderSimpleList('bookingServicesContainer', _systemCfg.bookingExtraServices || ['صور','فيديو','درون'], 'اسم الخدمة', 'bookingExtraServices');
+        renderSimpleList('projectStepsContainer', _systemCfg.projectSteps || ['التخطيط','التنفيذ','المراجعة','التسليم'], 'اسم الخطوة', 'projectSteps');
+
+        try{
+          localStorage.setItem(APP_CONFIG.STORAGE.systemCfg || 'media_systemConfig', JSON.stringify(_systemCfg));
+        }catch(e){}
+        renderUsersSummary();
+      } finally {
+        _isHydratingSystemSettings = false;
+      }
     }
 
-    function renderSimpleList(containerId, values, placeholder){
+    let _autoSaveTimer = null;
+    let _isHydratingSystemSettings = false;
+    let _isSavingSystemSettings = false;
+
+    function renderSimpleList(containerId, values, placeholder, groupKey){
       const container = document.getElementById(containerId);
       const rows = Array.isArray(values) && values.length ? values : [''];
+      container.setAttribute('data-group', groupKey || '');
       container.innerHTML = rows.map(v => `
         <div class="setting-item">
-          <input type="text" class="form-control" value="${esc(v || '')}" placeholder="${esc(placeholder)}">
-          <button type="button" class="btn btn-outline-danger" onclick="this.parentElement.remove()"><i class="fa-solid fa-trash"></i></button>
+          <input type="text" class="form-control auto-system-setting" value="${esc(v || '')}" placeholder="${esc(placeholder)}" data-group="${esc(groupKey || '')}">
+          <button type="button" class="btn btn-outline-danger remove-setting-item" data-group="${esc(groupKey || '')}"><i class="fa-solid fa-trash"></i></button>
         </div>
       `).join('');
     }
 
-    function addBookingTypeItem(){ addSimpleRow('bookingTypesContainer', 'نوع الحجز'); }
-    function addBookingServiceItem(){ addSimpleRow('bookingServicesContainer', 'اسم الخدمة'); }
-    function addProjectStepItem(){ addSimpleRow('projectStepsContainer', 'اسم الخطوة'); }
+    function addBookingTypeItem(){ addSimpleRow('bookingTypesContainer', 'نوع الحجز', 'bookingTypes'); }
+    function addBookingServiceItem(){ addSimpleRow('bookingServicesContainer', 'اسم الخدمة', 'bookingExtraServices'); }
+    function addProjectStepItem(){ addSimpleRow('projectStepsContainer', 'اسم الخطوة', 'projectSteps'); }
 
-    function addSimpleRow(containerId, placeholder){
+    function addSimpleRow(containerId, placeholder, groupKey){
       const container = document.getElementById(containerId);
       container.insertAdjacentHTML('beforeend', `
         <div class="setting-item">
-          <input type="text" class="form-control" value="" placeholder="${esc(placeholder)}">
-          <button type="button" class="btn btn-outline-danger" onclick="this.parentElement.remove()"><i class="fa-solid fa-trash"></i></button>
+          <input type="text" class="form-control auto-system-setting" value="" placeholder="${esc(placeholder)}" data-group="${esc(groupKey || '')}">
+          <button type="button" class="btn btn-outline-danger remove-setting-item" data-group="${esc(groupKey || '')}"><i class="fa-solid fa-trash"></i></button>
         </div>
       `);
+      const newInput = container.querySelector('.setting-item:last-child input');
+      if (newInput) newInput.focus();
+    }
+
+    function scheduleSystemSettingsSave(immediate = false){
+      if (_isHydratingSystemSettings) return;
+      clearTimeout(_autoSaveTimer);
+      if (immediate) {
+        saveSystemSettings(true);
+        return;
+      }
+      _autoSaveTimer = setTimeout(() => saveSystemSettings(true), 700);
     }
 
     function collectSimpleList(containerId){
@@ -727,50 +739,54 @@
         .filter(Boolean);
     }
 
-    async function saveSystemSettings(){
-      const agencyName = document.getElementById('systemAgencyName').value.trim();
-      const whatsappNumber = document.getElementById('systemWhatsappNumber').value.trim();
+    async function saveSystemSettings(isAutoSave = false){
+      if (_isHydratingSystemSettings || _isSavingSystemSettings) return;
+
       const calendarId = document.getElementById('systemCalendarId').value.trim();
       const invoiceFolderId = document.getElementById('systemInvoiceFolderId').value.trim();
       const projectSteps = collectSimpleList('projectStepsContainer');
       const bookingExtraServices = collectSimpleList('bookingServicesContainer');
       const bookingTypes = collectSimpleList('bookingTypesContainer');
+      const whatsappNumber = String(_systemCfg?.whatsappNumber || '').trim();
+      const agencyName = String(_systemCfg?.agencyName || APP_CONFIG.APP_NAME || 'وكالة ميديا').trim();
 
-      if (!agencyName){
-        Toast.warning('أدخل اسم الجهة');
-        return;
-      }
-      if (!calendarId || !invoiceFolderId){
-        Toast.warning('أدخل معرف التقويم ومعرف مجلد الفواتير');
-        return;
-      }
       if (!projectSteps.length){
-        Toast.warning('أضف خطوة مشروع واحدة على الأقل');
+        if (!isAutoSave) Toast.warning('أضف خطوة مشروع واحدة على الأقل');
         return;
       }
       if (!bookingTypes.length){
-        Toast.warning('أضف نوع حجز واحد على الأقل');
+        if (!isAutoSave) Toast.warning('أضف نوع حجز واحد على الأقل');
         return;
       }
 
-      Spinner.show('جاري حفظ إعدادات النظام...');
+      _isSavingSystemSettings = true;
+      if (!isAutoSave) Spinner.show('جاري حفظ إعدادات النظام...');
       try{
         const res = await safeApi('updateSystemSettings', calendarId, invoiceFolderId, projectSteps, bookingExtraServices, bookingTypes, whatsappNumber, agencyName);
         if (res && res.success === false){
-          throw new Error(res.message || res.error || 'تعذر حفظ إعدادات النظام');
+          throw new Error(res.message || 'تعذر حفظ إعدادات النظام');
         }
 
-        const freshCfg = await safeApi('getSystemSettings');
-        _systemCfg = freshCfg || {};
-        try {
+        _systemCfg = {
+          ..._systemCfg,
+          calendarId,
+          invoiceFolderId,
+          projectSteps,
+          bookingExtraServices,
+          bookingTypes,
+          whatsappNumber,
+          agencyName
+        };
+        try{
           localStorage.setItem(APP_CONFIG.STORAGE.systemCfg || 'media_systemConfig', JSON.stringify(_systemCfg));
-          window.dispatchEvent(new CustomEvent('system:settings-updated', { detail: _systemCfg }));
-        } catch(e){}
-
-        Toast.success(res.message || 'تم حفظ إعدادات النظام');
-        await loadSystemSettings();
+        }catch(e){}
+        renderUsersSummary();
+        if (!isAutoSave) {
+          Toast.success(res.message || 'تم حفظ إعدادات النظام');
+        }
       }finally{
-        Spinner.hide();
+        _isSavingSystemSettings = false;
+        if (!isAutoSave) Spinner.hide();
       }
     }
 
@@ -831,6 +847,27 @@
     function wireEvents(){
       document.getElementById('usersSearch').addEventListener('input', applyUsersFilters);
       document.getElementById('usersStatusFilter').addEventListener('change', applyUsersFilters);
+
+      document.getElementById('systemCalendarId').addEventListener('input', () => scheduleSystemSettingsSave());
+      document.getElementById('systemCalendarId').addEventListener('blur', () => scheduleSystemSettingsSave(true));
+      document.getElementById('systemInvoiceFolderId').addEventListener('input', () => scheduleSystemSettingsSave());
+      document.getElementById('systemInvoiceFolderId').addEventListener('blur', () => scheduleSystemSettingsSave(true));
+
+      ['bookingTypesContainer','bookingServicesContainer','projectStepsContainer'].forEach(containerId => {
+        const container = document.getElementById(containerId);
+        container.addEventListener('input', (e) => {
+          if (e.target.matches('input')) scheduleSystemSettingsSave();
+        });
+        container.addEventListener('blur', (e) => {
+          if (e.target.matches('input')) scheduleSystemSettingsSave(true);
+        }, true);
+        container.addEventListener('click', (e) => {
+          const btn = e.target.closest('.remove-setting-item');
+          if (!btn) return;
+          btn.parentElement.remove();
+          scheduleSystemSettingsSave(true);
+        });
+      });
     }
 
     window.openUserModal = openUserModal;
@@ -838,6 +875,7 @@
     window.saveUser = saveUser;
     window.deleteUserUI = deleteUserUI;
     window.saveSystemSettings = saveSystemSettings;
+    window.scheduleSystemSettingsSave = scheduleSystemSettingsSave;
     window.addBookingTypeItem = addBookingTypeItem;
     window.addBookingServiceItem = addBookingServiceItem;
     window.addProjectStepItem = addProjectStepItem;
@@ -846,12 +884,7 @@
     window.toggleUserPagesMode = toggleUserPagesMode;
 
     document.addEventListener('DOMContentLoaded', async () => {
-      if (typeof PageInit !== 'undefined' && PageInit.start) {
-        const ok = await PageInit.start();
-        if (!ok) return;
-      } else {
-        guardSession();
-      }
+      guardSession();
       hydrateHero();
       renderAvailablePagesOptions();
       wireEvents();
