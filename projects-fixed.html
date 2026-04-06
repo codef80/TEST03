@@ -113,10 +113,19 @@
     @media(max-width:420px){.card-list{grid-template-columns:1fr 1fr;gap:.5rem}}
     .mobile-card{border:1px solid var(--border);border-radius:1rem;background:#fff;padding:.75rem;box-shadow:var(--sh);min-height:100%}
     .mobile-card .head{display:flex;justify-content:space-between;gap:.75rem;align-items:flex-start;margin-bottom:.45rem}
-    .mobile-card .title{font-weight:900;color:var(--p);font-size:.86rem;line-height:1.35}
-    .mobile-card .line{font-size:.75rem;margin-top:.22rem;line-height:1.5}
+    .mobile-card .title{font-weight:900;color:var(--p);font-size:.86rem;line-height:1.35;flex:1;text-align:right}
+    .mobile-card .line{font-size:.75rem;margin-top:.22rem;line-height:1.65}
     .mobile-actions{display:flex;gap:.35rem;flex-wrap:wrap;margin-top:.65rem}
     .current-step{font-weight:800;color:var(--gold-dk)}
+    .date-dual{display:flex;flex-wrap:wrap;gap:.3rem .45rem;align-items:center}
+    .date-dual .sep{color:#94a3b8}
+    .expense-note{margin-top:.3rem;padding:.45rem .55rem;border:1px dashed var(--border);border-radius:.7rem;background:#f8fafc}
+    .expense-row{display:grid;grid-template-columns:1.6fr .9fr .8fr auto;gap:.5rem;align-items:center;margin-bottom:.55rem}
+    .expense-del{width:38px;height:38px;border-radius:.8rem;border:1px solid var(--border);background:var(--err-lt);color:var(--err);display:flex;align-items:center;justify-content:center;cursor:pointer}
+    .expense-del:hover{background:#fecaca}
+    .expense-head{display:flex;justify-content:space-between;align-items:center;gap:.6rem;margin-bottom:.8rem}
+    .text-soft{color:var(--muted)}
+    @media(max-width:768px){.expense-row{grid-template-columns:1fr 1fr}.expense-row .expense-field-full{grid-column:1/-1}.expense-row .expense-del{justify-self:end}}
 
     .table-wrap{width:100%;overflow:auto;border-radius:1rem;border:1px solid var(--border)}
     .table{margin-bottom:0}
@@ -258,13 +267,45 @@
     </div>
   </div>
 
+
+  <div class="modal fade" id="projectExpenseModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-scrollable modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header text-white" style="background:linear-gradient(135deg,var(--p),var(--gold))">
+          <h5 class="modal-title">مصروفات المشروع</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <div class="expense-head">
+            <div>
+              <div class="fw-bold" id="expenseProjectTitle">—</div>
+              <div class="small text-soft">يمكنك إضافة أكثر من مصروف ثم حفظها دفعة واحدة</div>
+            </div>
+            <button type="button" class="btn btn-soft" onclick="addExpenseRow()"><i class="fa-solid fa-plus me-1"></i> إضافة صف</button>
+          </div>
+          <input type="hidden" id="expenseProjectId">
+          <div id="projectExpensesRows"></div>
+          <div class="expense-note">
+            <strong>الإجمالي:</strong> <span id="expenseRowsTotal" class="text-num">0</span>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-soft" data-bs-dismiss="modal">إغلاق</button>
+          <button type="button" class="btn btn-main" onclick="saveProjectExpenses()">حفظ المصروفات</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
   <script>
     let _settings = {};
     let _steps = [];
     let _projects = [];
     let _filtered = [];
+    let _projectExpenses = [];
     let projectModal = null;
+    let projectExpenseModal = null;
 
     function fmt(v){ return Number(v || 0).toLocaleString('en-US'); }
     function esc(t){ return String(t ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#039;'); }
@@ -278,6 +319,10 @@
     function getProjectLink(p){ return String(p?.['رابط_المشروع'] ?? p?.['رابط المشروع'] ?? ''); }
     function getProjectStart(p){ return String(p?.['تاريخ_البداية'] ?? p?.['تاريخ بداية المشروع'] ?? ''); }
     function getProjectUpdated(p){ return String(p?.['تاريخ_آخر_تحديث'] ?? p?.['تاريخ آخر تحديث'] ?? ''); }
+    function toDateObj(v){ if(!v) return null; const s=String(v).trim().substring(0,10); const d=new Date(s); return isNaN(d) ? null : d; }
+    function formatGregorian(v){ const d=toDateObj(v); if(!d) return '—'; return new Intl.DateTimeFormat('en-CA',{year:'numeric',month:'2-digit',day:'2-digit'}).format(d); }
+    function formatHijri(v){ const d=toDateObj(v); if(!d) return '—'; try{ return new Intl.DateTimeFormat('ar-SA-u-ca-islamic-nu-latn',{year:'numeric',month:'2-digit',day:'2-digit'}).format(d) + ' هـ'; }catch(e){ return '—'; } }
+    function formatDualDate(v){ const g=formatGregorian(v); if(g==='—') return '—'; const h=formatHijri(v); return `<span class="text-num">${g}</span> <span class="sep">|</span> <span class="text-num">${h}</span>`; }
     function getProjectExpensesTotal(projectId){ return (_projectExpenses || []).filter(x => String(x.projectId||'') === String(projectId)).reduce((a,b)=>a+num(b.value),0); }
     function getProjectExpensesCount(projectId){ return (_projectExpenses || []).filter(x => String(x.projectId||'') === String(projectId)).length; }
     function getProjectValue(p){
@@ -320,6 +365,7 @@
 
     async function initPage(){
       projectModal = new bootstrap.Modal(document.getElementById('projectModal'));
+      projectExpenseModal = new bootstrap.Modal(document.getElementById('projectExpenseModal'));
       const session = Session.get ? Session.get() : {};
       document.getElementById('currentUserHero').textContent = session.userName || '—';
       showBg(true);
@@ -425,30 +471,27 @@
         const status = getProjectStatus(p);
         const statusClass = status === 'مكتمل' ? 'ok' : (status === 'قيد التنفيذ' ? 'warn' : 'base');
         const supervisor = getProjectSupervisor(p) || '—';
-        const start = getProjectStart(p) || '—';
-        const updated = getProjectUpdated(p) || '—';
+        const start = formatDualDate(getProjectStart(p));
+        const updated = formatDualDate(getProjectUpdated(p));
         const stepsDone = _steps.filter(step => boolVal(p?.[step])).length;
         const currentStep = getCurrentStep(p);
-        const link = getProjectLink(p);
         const expCount = getProjectExpensesCount(id);
         const expTotal = getProjectExpensesTotal(id);
 
         cards.insertAdjacentHTML('beforeend', `
           <div class="mobile-card">
             <div class="head">
-              <div>
-                <div class="title">${esc(name)}</div>
-                <div class="line"><span class="chip ${statusClass}">${esc(status)}</span></div>
-              </div>
+              <div class="title">${esc(name)}</div>
+              <div><span class="chip ${statusClass}">${esc(status)}</span></div>
             </div>
             <div class="line"><strong>اسم المشرف:</strong> ${esc(supervisor)}</div>
-            <div class="line"><strong>تاريخ البداية:</strong> ${esc(start)}</div>
-            <div class="line"><strong>آخر تحديث:</strong> ${esc(updated)}</div>
+            <div class="line"><strong>تاريخ البداية:</strong> <span class="date-dual">${start}</span></div>
+            <div class="line"><strong>آخر تحديث:</strong> <span class="date-dual">${updated}</span></div>
             <div class="line"><strong>الخطوات المنجزة:</strong> <span class="text-num">${fmt(stepsDone)} / ${fmt(_steps.length)}</span></div>
             <div class="line"><strong>الخطوة الحالية:</strong> <span class="current-step">${esc(currentStep)}</span></div>
             <div class="line"><strong>مصروفات المشروع:</strong> <span class="text-num">${fmt(expTotal)}</span> <span class="chip gray">${fmt(expCount)} سجل</span></div>
-            ${link ? `<div class="line"><a href="${esc(link)}" target="_blank" rel="noopener noreferrer">رابط المشروع</a></div>` : ''}
             <div class="mobile-actions">
+              <button class="btn btn-sm btn-outline-primary" onclick="openProjectExpenses('${esc(id)}')"><i class="fa-solid fa-plus"></i> إضافة مصروف</button>
               <button class="btn btn-sm btn-outline-warning" onclick="editProject('${esc(id)}')"><i class="fa-solid fa-pen"></i> تعديل</button>
               <button class="btn btn-sm btn-outline-danger" onclick="deleteProjectUI('${esc(id)}')"><i class="fa-solid fa-trash"></i> حذف</button>
             </div>
@@ -460,15 +503,15 @@
           <td>${esc(name)}</td>
           <td><span class="chip ${statusClass}">${esc(status)}</span></td>
           <td>${esc(supervisor)}</td>
-          <td>${esc(start)}</td>
-          <td>${esc(updated)}</td>
+          <td><span class="date-dual">${start}</span></td>
+          <td><span class="date-dual">${updated}</span></td>
           <td class="text-num">${fmt(stepsDone)} / ${fmt(_steps.length)}</td>
           <td>${esc(currentStep)}</td>
           <td>
             <div class="table-actions">
-              ${link ? `<a class="btn btn-sm btn-outline-primary" href="${esc(link)}" target="_blank" rel="noopener noreferrer"><i class="fa-solid fa-up-right-from-square"></i></a>` : ''}
-              <button class="btn btn-sm btn-outline-warning" onclick="editProject('${esc(id)}')"><i class="fa-solid fa-pen"></i></button>
-              <button class="btn btn-sm btn-outline-danger" onclick="deleteProjectUI('${esc(id)}')"><i class="fa-solid fa-trash"></i></button>
+              <button class="btn btn-sm btn-outline-primary" onclick="openProjectExpenses('${esc(id)}')"><i class="fa-solid fa-plus"></i> إضافة مصروف</button>
+              <button class="btn btn-sm btn-outline-warning" onclick="editProject('${esc(id)}')"><i class="fa-solid fa-pen"></i> تعديل</button>
+              <button class="btn btn-sm btn-outline-danger" onclick="deleteProjectUI('${esc(id)}')"><i class="fa-solid fa-trash"></i> حذف</button>
             </div>
           </td>
         `;
@@ -543,6 +586,92 @@
       }
     }
 
+    async function openProjectExpenses(id){
+      const project = (_projects || []).find(p => String(p.id || p['id'] || '') === String(id));
+      if (!project) return Toast.error('تعذر العثور على المشروع');
+      document.getElementById('expenseProjectId').value = id;
+      document.getElementById('expenseProjectTitle').textContent = getProjectName(project) || '—';
+      document.getElementById('projectExpensesRows').innerHTML = '<div class="empty">جاري تحميل المصروفات...</div>';
+      projectExpenseModal.show();
+      try{
+        const items = await safeApi('getProjectExpensesByProjectId', id);
+        renderExpenseRows(Array.isArray(items) ? items : []);
+      }catch(e){
+        document.getElementById('projectExpensesRows').innerHTML = '<div class="empty">تعذر تحميل مصروفات المشروع</div>';
+      }
+    }
+
+    function expenseRowTemplate(item = {}){
+      return `
+        <div class="expense-row">
+          <input type="text" class="form-control expense-reason expense-field-full" placeholder="السبب" value="${esc(item.reason || '')}">
+          <input type="number" min="0" step="0.01" class="form-control expense-value" placeholder="القيمة" value="${item.value != null ? esc(item.value) : ''}" oninput="updateExpenseRowsTotal()">
+          <select class="form-select expense-status">
+            <option value="معلق" ${(item.status || 'معلق') === 'معلق' ? 'selected' : ''}>معلق</option>
+            <option value="مسدد" ${(item.status || '') === 'مسدد' ? 'selected' : ''}>مسدد</option>
+          </select>
+          <button type="button" class="expense-del" onclick="removeExpenseRow(this)"><i class="fa-solid fa-trash"></i></button>
+        </div>
+      `;
+    }
+
+    function renderExpenseRows(items){
+      const wrap = document.getElementById('projectExpensesRows');
+      const rows = Array.isArray(items) && items.length ? items : [{}];
+      wrap.innerHTML = rows.map(expenseRowTemplate).join('');
+      updateExpenseRowsTotal();
+    }
+
+    function addExpenseRow(){
+      const wrap = document.getElementById('projectExpensesRows');
+      if (wrap.querySelector('.empty')) wrap.innerHTML = '';
+      wrap.insertAdjacentHTML('beforeend', expenseRowTemplate({}));
+      updateExpenseRowsTotal();
+    }
+
+    function removeExpenseRow(btn){
+      const wrap = document.getElementById('projectExpensesRows');
+      const rows = wrap.querySelectorAll('.expense-row');
+      if (rows.length <= 1){
+        rows[0]?.querySelector('.expense-reason')?.focus();
+        rows[0]?.querySelector('.expense-reason')?.setAttribute('value','');
+        if (rows[0]){ rows[0].querySelector('.expense-reason').value=''; rows[0].querySelector('.expense-value').value=''; rows[0].querySelector('.expense-status').value='معلق'; }
+      } else {
+        btn.closest('.expense-row')?.remove();
+      }
+      updateExpenseRowsTotal();
+    }
+
+    function collectExpenseRows(){
+      return Array.from(document.querySelectorAll('#projectExpensesRows .expense-row')).map(row => ({
+        reason: row.querySelector('.expense-reason')?.value?.trim() || '',
+        value: Number(row.querySelector('.expense-value')?.value || 0),
+        status: row.querySelector('.expense-status')?.value || 'معلق'
+      })).filter(x => x.reason || x.value > 0);
+    }
+
+    function updateExpenseRowsTotal(){
+      const total = collectExpenseRows().reduce((sum, item) => sum + Number(item.value || 0), 0);
+      document.getElementById('expenseRowsTotal').textContent = fmt(total);
+    }
+
+    async function saveProjectExpenses(){
+      const projectId = document.getElementById('expenseProjectId').value.trim();
+      const project = (_projects || []).find(p => String(p.id || p['id'] || '') === String(projectId));
+      if (!projectId || !project) return Toast.error('تعذر تحديد المشروع');
+      const expenses = collectExpenseRows();
+      Spinner.show('جاري حفظ مصروفات المشروع...');
+      try{
+        await safeApi('replaceProjectExpenses', projectId, getProjectName(project), expenses);
+        Toast.success('تم حفظ مصروفات المشروع');
+        projectExpenseModal.hide();
+        await preloadProjectExpenses();
+        await loadProjects({silent:true});
+      }finally{
+        Spinner.hide();
+      }
+    }
+
     async function deleteProjectUI(id){
       const ok = await Swal.fire({
         title:'حذف المشروع؟',
@@ -565,6 +694,11 @@
     }
 
     window.openProjectModal = openProjectModal;
+    window.openProjectExpenses = openProjectExpenses;
+    window.addExpenseRow = addExpenseRow;
+    window.removeExpenseRow = removeExpenseRow;
+    window.updateExpenseRowsTotal = updateExpenseRowsTotal;
+    window.saveProjectExpenses = saveProjectExpenses;
     window.editProject = editProject;
     window.saveProject = saveProject;
     window.deleteProjectUI = deleteProjectUI;
