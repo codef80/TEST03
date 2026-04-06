@@ -169,7 +169,7 @@
 
 <script>
 const PUBLIC_CFG = {
-  completePage: 'booking-complete-new.html',
+  completePage: 'complete-booking.html',
   whatsappFallback: '966500000000',
   allowTypesLabel: 'كل الأنواع'
 };
@@ -192,15 +192,18 @@ function apiRun(fn, ...args){
   return fetch(`${apiUrl}?${params.toString()}`).then(r=>r.json());
 }
 function esc(t){return String(t ?? '').replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]));}
-function normalizePhone(raw){
-  let s = String(raw || '').replace(/\s/g,'').replace(/^\+/,'').replace(/^'/,'');
-  if (s.startsWith('966') && s.length === 12) return s;
-  if (s.startsWith('05') && s.length === 10) return '966' + s.slice(1);
-  if (s.startsWith('5') && s.length === 9) return '966' + s;
-  return s || PUBLIC_CFG.whatsappFallback;
-}
+function normalizePhone(raw){ let s = String(raw || '').replace(/\s/g,'').replace(/^\+/,'').replace(/^'/,''); if (s.startsWith('966') && s.length === 12) return s; if (s.startsWith('05') && s.length === 10) return '966' + s.slice(1); if (s.startsWith('5') && s.length === 9) return '966' + s; return s || PUBLIC_CFG.whatsappFallback; }
 function fmtDate(d){ if(!d) return '—'; const x = new Date(d); if(isNaN(x)) return d; return new Intl.DateTimeFormat('ar-SA',{year:'numeric',month:'long',day:'numeric'}).format(x); }
 function dayKey(date){ return typeof date === 'string' ? date.slice(0,10) : new Date(date).toISOString().slice(0,10); }
+function getDisplayName(){ return state.system?.publicDisplayName || state.system?.agencyName || 'وكالة ميديا'; }
+function getContactNumber(){ return state.system?.publicContactNumber || state.system?.invoiceWhatsappNumber || state.system?.whatsappNumber || PUBLIC_CFG.whatsappFallback; }
+function getAllowedTypes(){
+  const all = Array.isArray(state.system?.bookingTypes) ? state.system.bookingTypes.filter(Boolean) : [];
+  const selected = Array.isArray(state.system?.publicBookingTypes) ? state.system.publicBookingTypes : ['__ALL__'];
+  if(!selected.length || selected.includes('__ALL__') || selected.includes('all')) return all;
+  const out = all.filter(t => selected.includes(t));
+  return out.length ? out : all;
+}
 function getFilteredEvents(){
   const t = state.selectedType;
   const place = state.place.trim();
@@ -222,7 +225,7 @@ function statusClass(key){ return key === 'busy' ? 'st-busy' : key === 'partial'
 function eventColorByCount(count){ return count >= 2 ? '#dc2626' : count === 1 ? '#d97706' : '#059669'; }
 function fillTypeOptions(){
   const sel = document.getElementById('typeFilter');
-  const types = (state.system?.bookingTypes || []).filter(Boolean);
+  const types = getAllowedTypes();
   sel.innerHTML = `<option value="__all__">${PUBLIC_CFG.allowTypesLabel}</option>` + types.map(t => `<option value="${esc(t)}">${esc(t)}</option>`).join('');
   sel.value = '__all__';
   state.selectedType = '__all__';
@@ -241,108 +244,29 @@ function renderCalendar(){
     events(fetchInfo, successCallback){
       const start = new Date(fetchInfo.startStr), end = new Date(fetchInfo.endStr);
       const arr = [];
-      const seen = new Set();
       const current = new Date(start);
       while(current < end){
         const k = current.toISOString().slice(0,10);
         const st = getDayStatus(k);
         const cnt = getDayEvents(k).length;
         arr.push({ id:'s-'+k, start:k, allDay:true, title: st.label + (cnt ? ` (${cnt})` : ''), color:eventColorByCount(cnt), textColor:'#fff' });
-        seen.add(k); current.setDate(current.getDate()+1);
+        current.setDate(current.getDate()+1);
       }
       successCallback(arr);
     }
   });
   state.calendar.render();
 }
-function updateMonthStats(start, end){
-  let busy=0, free=0, count=0;
-  const current = new Date(start);
-  while(current < end){
-    const k = current.toISOString().slice(0,10);
-    const c = getDayEvents(k).length;
-    if (c >= 2) busy++; else free++;
-    count += c;
-    current.setDate(current.getDate()+1);
-  }
-  document.getElementById('busyDays').textContent = String(busy);
-  document.getElementById('freeDays').textContent = String(free);
-  document.getElementById('bookingsCount').textContent = String(count);
-}
-function renderDayEvents(dateStr){
-  const box = document.getElementById('dayEvents');
-  const items = getDayEvents(dateStr);
-  if (!items.length){ box.innerHTML = `<div class="text-muted">لا توجد حجوزات ظاهرة في هذا اليوم حسب الفلترة الحالية.</div>`; return; }
-  box.innerHTML = items.map(ev => {
-    const p = ev.extendedProps || {};
-    return `<div class="event-item"><div class="event-title">${esc(p.type || ev.title || 'حجز')}</div><div class="event-meta"><span><i class="fa-solid fa-location-dot"></i> ${esc(p.place || '—')}</span><span><i class="fa-solid fa-clock"></i> ${esc(p.time || 'غير محدد')}</span></div></div>`;
-  }).join('');
-}
-function selectDate(dateStr){
-  state.selectedDate = dateStr;
-  document.getElementById('selectedDateInput').value = dateStr;
-  document.getElementById('selectedDateLabel').textContent = fmtDate(dateStr);
-  const st = getDayStatus(dateStr);
-  const badge = document.getElementById('selectedStatusBadge');
-  badge.className = `status-badge ${statusClass(st.key)}`;
-  badge.innerHTML = `<i class="fa-solid ${st.icon}"></i>${st.label}`;
-  document.getElementById('selectedAdvice').textContent = st.advice;
-  document.getElementById('selectedCount').textContent = String(getDayEvents(dateStr).length);
-  document.getElementById('selectedPlaceLabel').textContent = state.place.trim() || '—';
-  renderDayEvents(dateStr);
-}
-function buildCompleteUrl(){
-  const q = new URLSearchParams({ date: state.selectedDate || '', type: state.selectedType === '__all__' ? '' : state.selectedType || '', place: state.place.trim() || '' });
-  return `${PUBLIC_CFG.completePage}?${q.toString()}`;
-}
-function goComplete(){
-  if (!state.selectedDate){
-    Swal.fire({ icon:'info', title:'اختر التاريخ أولاً', text:'حدد يومًا مناسبًا من التقويم أو من حقل التاريخ.' });
-    return;
-  }
-  window.location.href = buildCompleteUrl();
-}
-function quickContact(){
-  const num = normalizePhone(state.system?.whatsappNumber || state.system?.invoiceWhatsappNumber || PUBLIC_CFG.whatsappFallback);
-  const txt = `السلام عليكم\nأرغب بالاستفسار عن التوفر${state.selectedDate ? ` بتاريخ ${state.selectedDate}` : ''}${state.selectedType && state.selectedType !== '__all__' ? ` لنوع ${state.selectedType}` : ''}${state.place ? ` في ${state.place}` : ''}.`;
-  window.open(`https://wa.me/${num}?text=${encodeURIComponent(txt)}`, '_blank');
-}
-function applyFilters(){
-  state.selectedType = document.getElementById('typeFilter').value || '__all__';
-  state.place = document.getElementById('placeFilter').value || '';
-  document.getElementById('activeTypeText').textContent = state.selectedType === '__all__' ? PUBLIC_CFG.allowTypesLabel : state.selectedType;
-  document.getElementById('selectedTypeLabel').textContent = state.selectedType === '__all__' ? PUBLIC_CFG.allowTypesLabel : state.selectedType;
-  if (state.calendar) state.calendar.refetchEvents();
-  if (state.selectedDate) selectDate(state.selectedDate);
-}
-async function loadData(){
-  document.getElementById('calendar').innerHTML = `<div class="loader">جاري تحميل البيانات...</div>`;
-  const [settings, events] = await Promise.all([
-    apiRun('getSystemSettings').catch(()=>({ success:true, agencyName:'وكالة ميديا', bookingTypes:['زواج','تغطية','إعلان'], whatsappNumber:PUBLIC_CFG.whatsappFallback })),
-    apiRun('getEvents').catch(()=>[])
-  ]);
-  state.system = settings || {};
-  state.events = Array.isArray(events) ? events : [];
-  document.getElementById('agencyName').textContent = state.system.agencyName || 'وكالة ميديا';
-  document.getElementById('waNumberText').textContent = state.system.whatsappNumber || state.system.invoiceWhatsappNumber || PUBLIC_CFG.whatsappFallback;
-  fillTypeOptions();
-  renderCalendar();
-  const today = new Date().toISOString().slice(0,10);
-  selectDate(today);
-  document.getElementById('selectedDateInput').value = today;
-}
-
-document.getElementById('typeFilter').addEventListener('change', applyFilters);
-document.getElementById('placeFilter').addEventListener('input', applyFilters);
-document.getElementById('selectedDateInput').addEventListener('change', e => { if(e.target.value) selectDate(e.target.value); });
-document.getElementById('goCompleteBtn').addEventListener('click', goComplete);
-document.getElementById('completeBtn').addEventListener('click', goComplete);
-document.getElementById('contactBtn').addEventListener('click', quickContact);
-window.addEventListener('focus', () => { if (state.calendar) state.calendar.refetchEvents(); });
-loadData().catch(err => {
-  console.error(err);
-  Swal.fire({ icon:'error', title:'تعذر تحميل الصفحة', text:'تحقق من رابط الـ API أو إعدادات النشر.' });
-});
+function updateMonthStats(start, end){ let busy=0, free=0, count=0; const current = new Date(start); while(current < end){ const k = current.toISOString().slice(0,10); const c = getDayEvents(k).length; if (c >= 2) busy++; else free++; count += c; current.setDate(current.getDate()+1);} document.getElementById('busyDays').textContent = String(busy); document.getElementById('freeDays').textContent = String(free); document.getElementById('bookingsCount').textContent = String(count); }
+function renderDayEvents(dateStr){ const box = document.getElementById('dayEvents'); const items = getDayEvents(dateStr); if (!items.length){ box.innerHTML = `<div class="text-muted">لا توجد حجوزات ظاهرة في هذا اليوم حسب الفلترة الحالية.</div>`; return; } box.innerHTML = items.map(ev => { const p = ev.extendedProps || {}; return `<div class="event-item"><div class="event-title">${esc(p.type || ev.title || 'حجز')}</div><div class="event-meta"><span><i class="fa-solid fa-location-dot"></i> ${esc(p.place || '—')}</span><span><i class="fa-solid fa-clock"></i> ${esc(p.time || 'غير محدد')}</span></div></div>`; }).join(''); }
+function selectDate(dateStr){ state.selectedDate = dateStr; document.getElementById('selectedDateInput').value = dateStr; document.getElementById('selectedDateLabel').textContent = fmtDate(dateStr); const st = getDayStatus(dateStr); const badge = document.getElementById('selectedStatusBadge'); badge.className = `status-badge ${statusClass(st.key)}`; badge.innerHTML = `<i class="fa-solid ${st.icon}"></i>${st.label}`; document.getElementById('selectedAdvice').textContent = st.advice; document.getElementById('selectedCount').textContent = String(getDayEvents(dateStr).length); document.getElementById('selectedPlaceLabel').textContent = state.place.trim() || '—'; renderDayEvents(dateStr); }
+function buildCompleteUrl(){ const page = state.system?.publicCompleteUrl || PUBLIC_CFG.completePage; const q = new URLSearchParams({ date: state.selectedDate || '', type: state.selectedType === '__all__' ? '' : state.selectedType || '', place: state.place.trim() || '' }); return `${page}?${q.toString()}`; }
+function goComplete(){ if (!state.selectedDate){ Swal.fire({ icon:'info', title:'اختر التاريخ أولاً', text:'حدد يومًا مناسبًا من التقويم أو من حقل التاريخ.' }); return; } window.location.href = buildCompleteUrl(); }
+function quickContact(){ const num = normalizePhone(getContactNumber()); const txt = `السلام عليكم
+أرغب بالاستفسار عن التوفر${state.selectedDate ? ` بتاريخ ${state.selectedDate}` : ''}${state.selectedType && state.selectedType !== '__all__' ? ` لنوع ${state.selectedType}` : ''}${state.place ? ` في ${state.place}` : ''}.`; window.open(`https://wa.me/${num}?text=${encodeURIComponent(txt)}`, '_blank'); }
+function applyFilters(){ state.selectedType = document.getElementById('typeFilter').value || '__all__'; state.place = document.getElementById('placeFilter').value || ''; document.getElementById('activeTypeText').textContent = state.selectedType === '__all__' ? PUBLIC_CFG.allowTypesLabel : state.selectedType; document.getElementById('selectedTypeLabel').textContent = state.selectedType === '__all__' ? PUBLIC_CFG.allowTypesLabel : state.selectedType; if (state.calendar) state.calendar.refetchEvents(); if (state.selectedDate) selectDate(state.selectedDate); }
+async function loadData(){ document.getElementById('calendar').innerHTML = `<div class="loader">جاري تحميل البيانات...</div>`; const [settings, events] = await Promise.all([ apiRun('getSystemSettings').catch(()=>({ success:true, agencyName:'وكالة ميديا', bookingTypes:['زواج','تغطية','إعلان'], whatsappNumber:PUBLIC_CFG.whatsappFallback, publicBookingTypes:['__ALL__'] })), apiRun('getEvents').catch(()=>[]) ]); state.system = settings || {}; state.events = Array.isArray(events) ? events : []; document.getElementById('agencyName').textContent = getDisplayName(); document.getElementById('waNumberText').textContent = getContactNumber(); fillTypeOptions(); renderCalendar(); const today = new Date().toISOString().slice(0,10); selectDate(today); document.getElementById('selectedDateInput').value = today; }
+document.getElementById('typeFilter').addEventListener('change', applyFilters); document.getElementById('placeFilter').addEventListener('input', applyFilters); document.getElementById('selectedDateInput').addEventListener('change', e => { if(e.target.value) selectDate(e.target.value); }); document.getElementById('goCompleteBtn').addEventListener('click', goComplete); document.getElementById('completeBtn').addEventListener('click', goComplete); document.getElementById('contactBtn').addEventListener('click', quickContact); window.addEventListener('focus', () => { if (state.calendar) state.calendar.refetchEvents(); }); loadData().catch(err => { console.error(err); Swal.fire({ icon:'error', title:'تعذر تحميل الصفحة', text:'تحقق من رابط الـ API أو إعدادات النشر.' }); });
 </script>
 </body>
 </html>
