@@ -1,0 +1,141 @@
+
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>C3 — إكمال الحجز</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.rtl.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800;900&display=swap">
+  <link rel="icon" type="image/png" href="apple-touch-icon.png">
+  <link rel="shortcut icon" href="apple-touch-icon.png">
+  <link rel="apple-touch-icon" href="apple-touch-icon.png">
+  <meta name="apple-mobile-web-app-title" content="وكالة ميديا">
+  <meta name="theme-color" content="#014979">
+  <script src="config-fixed.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <style>
+    :root{--p:#014979;--pdk:#013560;--gold:#c6a43f;--bg:#f1f5f9;--card:#fff;--txt:#0f172a;--muted:#64748b;--border:rgba(15,23,42,.08);--sh:0 8px 24px rgba(15,23,42,.08);--r:1.2rem}
+    *{box-sizing:border-box}html,body{margin:0;padding:0;background:var(--bg);color:var(--txt);font-family:'Tajawal',sans-serif}body{padding:1rem}.wrap{max-width:760px;margin:0 auto}.head{background:linear-gradient(135deg,#00243f,#014979 60%,#026aa7);color:#fff;border-radius:1.4rem;padding:1.1rem 1.2rem;box-shadow:var(--sh);margin-bottom:1rem}.title{font-size:1.3rem;font-weight:900;margin:0 0 .25rem}.sub{margin:0;color:rgba(255,255,255,.9);font-size:.95rem}.box{background:var(--card);border:1px solid var(--border);border-radius:var(--r);box-shadow:var(--sh);overflow:hidden}.box-h{padding:.95rem 1rem;border-bottom:1px solid var(--border);font-weight:900;color:var(--p);display:flex;align-items:center;gap:.45rem}.box-b{padding:1rem}.grid{display:grid;grid-template-columns:1fr 1fr;gap:.8rem}.form-label{font-weight:800;font-size:.88rem}.form-control,.form-select,textarea{border-radius:.9rem;padding:.75rem .9rem;border-color:#dbe4ee}.form-control:focus,.form-select:focus,textarea:focus{border-color:rgba(1,73,121,.35);box-shadow:0 0 0 .2rem rgba(1,73,121,.12)}textarea{min-height:92px;resize:vertical}.chips{display:flex;gap:.5rem;flex-wrap:wrap}.srv{display:inline-flex;align-items:center;gap:.35rem;padding:.45rem .75rem;border-radius:999px;background:#fff;border:1px solid var(--border);cursor:pointer;font-weight:700}.srv input{margin:0}.btn{border-radius:.9rem;font-weight:800;padding:.76rem 1rem}.btn-main{background:var(--p);border-color:var(--p);color:#fff}.btn-main:hover{background:var(--pdk);border-color:var(--pdk);color:#fff}.btn-soft{background:#fff;border:1px solid var(--border);color:#334155}.btn-soft:hover{background:#f8fafc}.note{margin-top:1rem;padding:.9rem 1rem;border-radius:1rem;background:#f8fafc;border:1px solid var(--border);color:#334155;line-height:1.8}.actions{display:flex;gap:.55rem;flex-wrap:wrap;margin-top:1rem}
+    @media (max-width:768px){body{padding:.7rem}.grid{grid-template-columns:1fr}.actions .btn{flex:1}}
+  </style>
+</head>
+<body>
+<div class="wrap">
+  <section class="head">
+    <h1 class="title">إكمال الحجز</h1>
+    <p class="sub">أدخل بياناتك بشكل سريع، وبعد تجهيز طلب الحجز مباشرة انقر على إرسال الطلب لإرساله عبر الواتس اب للتعميد.</p>
+  </section>
+  <section class="box">
+    <div class="box-h"><i class="fa-solid fa-file-signature"></i> إكمال الحجز</div>
+    <div class="box-b">
+      <form id="bookingForm">
+        <div class="grid mb-3">
+          <div>
+            <label class="form-label">الاسم</label>
+            <input id="name" class="form-control" required>
+          </div>
+          <div>
+            <label class="form-label">رقم التواصل</label>
+            <input id="phone" class="form-control" inputmode="tel" dir="ltr" required>
+          </div>
+          <div>
+            <label class="form-label">نوع الحجز</label>
+            <select id="type" class="form-select" required></select>
+          </div>
+          <div>
+            <label class="form-label">التاريخ</label>
+            <input id="date" type="date" class="form-control" required>
+          </div>
+          <div>
+            <label class="form-label">الوقت</label>
+            <input id="time" type="time" class="form-control">
+          </div>
+          <div>
+            <label class="form-label">المكان</label>
+            <input id="place" class="form-control" placeholder="الشالية / الموقع / المناسبة">
+          </div>
+        </div>
+        <div class="mb-3">
+          <label class="form-label">الخدمات الإضافية</label>
+          <div id="servicesWrap" class="chips"></div>
+        </div>
+        <div class="mb-2">
+          <label class="form-label">تفاصيل إضافية</label>
+          <textarea id="details" class="form-control" placeholder="أي ملاحظات مهمة بخصوص الحجز"></textarea>
+        </div>
+        <div class="note" id="clientNote">سيتم إرسال الطلب مباشرة عبر الواتس اب إلى مالك النظام ليتم تعميده ومراجعته معك.</div>
+        <div class="actions">
+          <button class="btn btn-main" type="submit"><i class="fa-brands fa-whatsapp me-1"></i> إرسال الطلب</button>
+          <a id="backBtn" class="btn btn-soft" href="C1.html"><i class="fa-solid fa-arrow-right me-1"></i> العودة</a>
+        </div>
+      </form>
+    </div>
+  </section>
+</div>
+<script>
+(function () {
+  const logo = (window.APP_CONFIG && APP_CONFIG.APP_LOGO) || "https://i.ibb.co/N6TXzy3q/image.png";
+  const appName = (window.APP_CONFIG && APP_CONFIG.APP_NAME) || "وكالة ميديا";
+  function setLink(rel, href, sizes) { let link = document.querySelector(`link[rel="${rel}"]`); if (!link) { link = document.createElement("link"); link.rel = rel; document.head.appendChild(link);} link.href = href; if (sizes) link.sizes = sizes; }
+  setLink("icon", logo); setLink("shortcut icon", logo); setLink("apple-touch-icon", logo, "180x180");
+  let metaTheme = document.querySelector('meta[name="theme-color"]'); if (!metaTheme) { metaTheme = document.createElement("meta"); metaTheme.name = "theme-color"; document.head.appendChild(metaTheme); } metaTheme.content = "#014979";
+  let metaApple = document.querySelector('meta[name="apple-mobile-web-app-title"]'); if (!metaApple) { metaApple = document.createElement("meta"); metaApple.name = "apple-mobile-web-app-title"; document.head.appendChild(metaApple);} metaApple.content = appName;
+})();
+
+const state = { cfg:null };
+function normalizePhone(raw){ let s=String(raw||'').replace(/\s/g,'').replace(/^\+/,'').replace(/^'/,''); if(s.startsWith('966')&&s.length===12)return s; if(s.startsWith('05')&&s.length===10)return '966'+s.slice(1); if(s.startsWith('5')&&s.length===9)return '966'+s; return s; }
+function safeTypes(cfg){ const arr = Array.isArray(cfg?.publicBookingTypes) && !cfg.publicBookingTypes.includes('__ALL__') ? cfg.publicBookingTypes : (cfg?.bookingTypes || []); return arr.length ? arr : ['حجز']; }
+function services(cfg){ return Array.isArray(cfg?.bookingExtraServices) ? cfg.bookingExtraServices : []; }
+function escText(v){ return String(v ?? '').trim(); }
+function fillTemplate(template, vars){ let text = String(template || ''); Object.keys(vars).forEach(k => { text = text.split(`{{${k}}}`).join(vars[k] ?? ''); }); return text; }
+function getParam(name){ return new URLSearchParams(location.search).get(name) || ''; }
+
+function renderTypeAndServices(){
+  const typeSel = document.getElementById('type');
+  typeSel.innerHTML = '<option value="">اختر نوع الحجز</option>' + safeTypes(state.cfg).map(t=>`<option value="${String(t).replace(/"/g,'&quot;')}">${t}</option>`).join('');
+  const wrap = document.getElementById('servicesWrap');
+  const list = services(state.cfg);
+  wrap.innerHTML = list.length ? list.map((s,i)=>`<label class="srv"><input type="checkbox" value="${String(s).replace(/"/g,'&quot;')}" id="srv_${i}"> ${s}</label>`).join('') : '<span class="text-muted">لا توجد خدمات إضافية محددة</span>';
+}
+function applyPrefill(){ const d=getParam('date'); const t=getParam('type'); if(d) document.getElementById('date').value=d; if(t) document.getElementById('type').value=t; const back = document.referrer || (state.cfg?.publicAvailabilityUrl || 'C1.html'); document.getElementById('backBtn').href = back; }
+function collectServices(){ return Array.from(document.querySelectorAll('#servicesWrap input:checked')).map(x=>x.value); }
+
+async function boot(){
+  try {
+    const init = await API.runWithRetry('getInitData',2);
+    state.cfg = init?.systemConfig || {};
+    renderTypeAndServices();
+    applyPrefill();
+    const displayName = state.cfg?.publicDisplayName || state.cfg?.agencyName || APP_CONFIG.APP_NAME || 'وكالة ميديا';
+    document.getElementById('clientNote').textContent = 'أدخل بياناتك بشكل سريع، وبعد تجهيز طلب الحجز مباشرة انقر على إرسال الطلب لإرساله عبر الواتس اب للتعميد.';
+    document.title = `C3 — إكمال الحجز | ${displayName}`;
+  } catch(err){ console.error(err); Swal.fire('خطأ','تعذر تحميل إعدادات الصفحة','error'); }
+}
+
+document.getElementById('bookingForm').addEventListener('submit', function(e){
+  e.preventDefault();
+  const contact = state.cfg?.publicContactNumber || state.cfg?.whatsappNumber || '';
+  if(!contact){ return Swal.fire('تنبيه','رقم التواصل غير محدد في الإعدادات','warning'); }
+  const data = {
+    'اسم_الوكالة': escText(state.cfg?.publicDisplayName || state.cfg?.agencyName || APP_CONFIG.APP_NAME || 'وكالة ميديا'),
+    'اسم_العميل': escText(document.getElementById('name').value),
+    'رقم_التواصل': escText(document.getElementById('phone').value),
+    'النوع': escText(document.getElementById('type').value),
+    'التاريخ': escText(document.getElementById('date').value),
+    'الوقت': escText(document.getElementById('time').value),
+    'المكان': escText(document.getElementById('place').value),
+    'الخدمات_الإضافية': collectServices().join('، '),
+    'التفاصيل': escText(document.getElementById('details').value)
+  };
+  if(!data['اسم_العميل'] || !data['رقم_التواصل'] || !data['النوع'] || !data['التاريخ']){ return Swal.fire('تنبيه','أكمل الحقول الأساسية أولًا','warning'); }
+  const template = state.cfg?.publicBookingTemplate || `السلام عليكم {{اسم_الوكالة}}\nأرغب في إكمال حجز جديد\nالاسم: {{اسم_العميل}}\nالنوع: {{النوع}}\nالتاريخ: {{التاريخ}}\nالوقت: {{الوقت}}\nالمكان: {{المكان}}\nالخدمات الإضافية: {{الخدمات_الإضافية}}\nرقم التواصل: {{رقم_التواصل}}\nالتفاصيل: {{التفاصيل}}`;
+  const text = fillTemplate(template, data);
+  const url = `https://wa.me/${normalizePhone(contact)}?text=${encodeURIComponent(text)}`;
+  window.open(url, '_blank', 'noopener');
+});
+boot();
+</script>
+</body>
+</html>
