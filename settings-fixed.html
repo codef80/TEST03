@@ -978,7 +978,7 @@
       document.getElementById('tplAssignedTaskReminder').value = t.assigned_task_reminder || defs.assigned_task_reminder;
     }
 
-    async async function saveTemplates(){
+    async function saveTemplates(){
       const payload = {
         booking_payment_reminder: document.getElementById('tplBookingPaymentReminder').value.trim(),
         booking_invoice_send: document.getElementById('tplBookingInvoiceSend').value.trim(),
