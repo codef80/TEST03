@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <title>C2 — التحقق من التوفر</title>
+  <title>C2 — التحقق من التوفر بالتاريخ</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.rtl.min.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800;900&display=swap">
@@ -14,70 +14,125 @@
   <meta name="apple-mobile-web-app-title" content="وكالة ميديا">
   <meta name="theme-color" content="#014979">
   <script src="config-fixed.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   <style>
-    :root{--p:#014979;--pdk:#013560;--ok:#059669;--err:#dc2626;--bg:#f1f5f9;--card:#fff;--txt:#0f172a;--muted:#64748b;--border:rgba(15,23,42,.08);--sh:0 8px 24px rgba(15,23,42,.08);--r:1.2rem}
-    *{box-sizing:border-box}html,body{margin:0;padding:0;background:var(--bg);color:var(--txt);font-family:'Tajawal',sans-serif}body{padding:1rem}.wrap{max-width:760px;margin:0 auto}.head{background:linear-gradient(135deg,#00243f,#014979 60%,#026aa7);color:#fff;border-radius:1.4rem;padding:1.1rem 1.2rem;box-shadow:var(--sh);margin-bottom:1rem}.title{font-size:1.3rem;font-weight:900;margin:0 0 .25rem}.sub{margin:0;color:rgba(255,255,255,.9);font-size:.95rem}
-    .box{background:var(--card);border:1px solid var(--border);border-radius:var(--r);box-shadow:var(--sh);overflow:hidden}.box-h{padding:.95rem 1rem;border-bottom:1px solid var(--border);font-weight:900;color:var(--p);display:flex;align-items:center;gap:.45rem}.box-b{padding:1rem}.grid{display:grid;grid-template-columns:1fr 1fr auto;gap:.65rem}.form-control,.form-select{border-radius:.9rem;padding:.75rem .9rem;border-color:#dbe4ee}.form-control:focus,.form-select:focus{border-color:rgba(1,73,121,.35);box-shadow:0 0 0 .2rem rgba(1,73,121,.12)}
-    .btn{border-radius:.9rem;font-weight:800;padding:.76rem 1rem}.btn-main{background:var(--p);border-color:var(--p);color:#fff}.btn-main:hover{background:var(--pdk);border-color:var(--pdk);color:#fff}.btn-soft{background:#fff;border:1px solid var(--border);color:#334155}.btn-soft:hover{background:#f8fafc}.status{margin-top:1rem;border:1px solid var(--border);border-radius:1rem;padding:1rem;background:#fff}.badge-x{display:inline-flex;align-items:center;gap:.35rem;border-radius:999px;padding:.32rem .7rem;font-size:.8rem;font-weight:800}.ok{background:#d1fae5;color:#065f46}.err{background:#fee2e2;color:#991b1b}.muted{background:#f1f5f9;color:#475569}.hint{color:var(--muted);font-size:.88rem}.actions{display:flex;gap:.55rem;flex-wrap:wrap;margin-top:1rem}.loader{display:none;align-items:center;gap:.5rem;color:var(--muted);margin-top:.8rem}
-    @media (max-width:768px){body{padding:.7rem}.grid{grid-template-columns:1fr}.actions .btn{flex:1}}
+    :root{--p:#014979;--pdk:#013560;--p-lt:#e8f4fd;--gold:#c6a43f;--gold-lt:#fdf6e3;--gold-dk:#a68a2e;--bg:#f1f5f9;--card:#fff;--txt:#0f172a;--muted:#64748b;--border:rgba(15,23,42,.08);--sh:0 8px 24px rgba(15,23,42,.08);--r:1.1rem}
+    *{box-sizing:border-box}html,body{margin:0;padding:0;background:var(--bg);color:var(--txt);font-family:'Tajawal',sans-serif}body{padding:1rem}.wrap{max-width:760px;margin:0 auto}
+    .head{background:linear-gradient(135deg,#00243f,#014979 60%,#026aa7);color:#fff;border-radius:1.35rem;padding:1.1rem 1.2rem;box-shadow:var(--sh);margin-bottom:1rem}.title{font-size:1.35rem;font-weight:900;margin:0 0 .25rem}.sub{margin:0;color:rgba(255,255,255,.9);font-size:.95rem}
+    .box{background:var(--card);border:1px solid var(--border);border-radius:var(--r);box-shadow:var(--sh);overflow:hidden}.box-h{padding:.95rem 1rem;border-bottom:1px solid var(--border);font-weight:900;color:var(--p);display:flex;align-items:center;gap:.45rem}.box-b{padding:1rem}.grid{display:grid;grid-template-columns:1fr auto;gap:.65rem;margin-bottom:1rem}.form-control{border-radius:.9rem;padding:.75rem .9rem;border-color:#dbe4ee}.form-control:focus{border-color:rgba(1,73,121,.35);box-shadow:0 0 0 .2rem rgba(1,73,121,.12)}
+    .btn{border-radius:.9rem;font-weight:800;padding:.72rem 1rem}.btn-main{background:var(--p);border-color:var(--p);color:#fff}.btn-main:hover{background:var(--pdk);border-color:var(--pdk);color:#fff}.btn-soft{background:#fff;border:1px solid var(--border);color:#334155}.btn-soft:hover{background:#f8fafc}.btn-main:disabled{opacity:.55}
+    .status{margin-top:1rem;border:1px solid var(--border);border-radius:1rem;padding:1rem;background:#fff}.status-head{font-weight:900;margin-bottom:.55rem}.status-line{display:flex;align-items:center;gap:.55rem;flex-wrap:wrap}.badge-x{display:inline-flex;align-items:center;gap:.35rem;border-radius:999px;padding:.32rem .7rem;font-size:.8rem;font-weight:800}.ok{background:#d1fae5;color:#065f46}.err{background:#fee2e2;color:#991b1b}.muted{background:#f1f5f9;color:#475569}.actions{display:flex;gap:.55rem;flex-wrap:wrap;margin-top:.9rem}.hint{color:var(--muted);font-size:.85rem;margin-top:.3rem}
+    .mh{background:linear-gradient(135deg,var(--p),#026aa7);color:#fff;padding:.9rem 1rem;border-radius:1.1rem 1.1rem 0 0;font-weight:900}.mbody{padding:1rem;background:#f8fafc}.fs{background:#fff;border:1px solid var(--border);border-radius:.9rem;padding:.8rem;margin-bottom:.7rem}.fl{font-size:.76rem;font-weight:800;color:var(--txt);margin-bottom:.32rem;display:block}.g2{display:grid;grid-template-columns:1fr 1fr;gap:.55rem}.tg-grp{display:flex;flex-wrap:wrap;gap:.38rem}.tg{padding:.38rem .78rem;border-radius:999px;border:1.5px solid var(--border);background:var(--bg);color:var(--muted);font-size:.76rem;font-weight:700;cursor:pointer;transition:all .13s;user-select:none}.tg.st{background:var(--p);color:#fff;border-color:var(--p);box-shadow:0 2px 8px rgba(1,73,121,.25)}.tg.ss{background:var(--gold-lt);color:var(--gold-dk);border-color:var(--gold)}.note{margin-top:.2rem;padding:.85rem .95rem;border-radius:.9rem;background:#fff;border:1px solid var(--border);font-size:.9rem;color:#334155;line-height:1.8}
+    @media (max-width:768px){body{padding:.7rem}.grid,.g2{grid-template-columns:1fr}.actions .btn{flex:1}}
   </style>
 </head>
 <body>
 <div class="wrap">
   <section class="head">
     <h1 class="title">التحقق من التوفر</h1>
-    <p class="sub">اختر اليوم المناسب لك، ثم انتقل مباشرة إلى صفحة .</p>
+    <p class="sub">اختر اليوم المناسب لك، ثم أكمل الحجز من نفس الصفحة مباشرة.</p>
   </section>
   <section class="box">
-    <div class="box-h"><i class="fa-solid fa-magnifying-glass-calendar"></i> التحقق من التوفر</div>
+    <div class="box-h"><i class="fa-solid fa-calendar-days"></i> التحقق من التوفر بالتاريخ</div>
     <div class="box-b">
       <div class="grid">
-        <select id="typeSelect" class="form-select"></select>
         <input id="dateInput" type="date" class="form-control">
-        <button id="checkBtn" class="btn btn-main" type="button"><i class="fa-solid fa-search me-1"></i> بحث</button>
+        <button id="checkBtn" class="btn btn-soft" type="button"><i class="fa-solid fa-magnifying-glass me-1"></i> بحث</button>
       </div>
-      <div class="loader" id="loader"><i class="fa-solid fa-spinner fa-spin"></i> جاري فحص التوفر...</div>
       <div class="status">
-        <div class="mb-2 fw-bold">حالة اليوم المختار</div>
-        <div class="d-flex align-items-center gap-2 flex-wrap mb-2">
-          <span class="badge-x muted" id="statusBadge"><i class="fa-regular fa-calendar"></i> اختر تاريخًا أولًا</span>
+        <div class="status-head">حالة اليوم المختار</div>
+        <div class="status-line">
+          <span class="badge-x muted" id="statusBadge"><i class="fa-regular fa-calendar"></i> لم يتم البحث بعد</span>
+          <span id="statusText" class="hint">اختر التاريخ ثم اضغط بحث لعرض حالة التوفر.</span>
         </div>
-        <div class="hint" id="statusText">حدد التاريخ ثم اضغط بحث لمعرفة حالة التوفر.</div>
         <div class="actions">
-          <a id="completeBtn" class="btn btn-main disabled" href="#" aria-disabled="true"><i class="fa-brands fa-whatsapp me-1"></i> إكمال الحجز</a>
+          <button id="completeBtn" class="btn btn-main" type="button" disabled><i class="fa-solid fa-file-signature me-1"></i> إكمال الحجز</button>
           <a id="contactBtn" class="btn btn-soft" href="#" target="_blank" rel="noopener"><i class="fa-solid fa-phone me-1"></i> تواصل سريع</a>
         </div>
       </div>
     </div>
   </section>
 </div>
+
+<div class="modal fade" id="bookingModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-xl modal-dialog-scrollable modal-dialog-centered">
+    <div class="modal-content" style="border:none;border-radius:1.1rem;overflow:hidden">
+      <div class="mh d-flex align-items-center justify-content-between">
+        <div><i class="fa-solid fa-file-signature me-2"></i>إكمال الحجز</div>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="mbody">
+        <form id="bookingForm" autocomplete="off">
+          <div class="fs">
+            <label class="fl"><i class="fa-solid fa-tag" style="color:var(--p)"></i> نوع الحجز</label>
+            <div id="typeBtns" class="tg-grp"></div>
+            <input type="hidden" id="typeValue" required>
+          </div>
+          <div class="fs">
+            <label class="fl"><i class="fa-solid fa-user" style="color:var(--p)"></i> بيانات العميل</label>
+            <div class="g2" style="margin-bottom:.5rem">
+              <div><label class="fl">الاسم *</label><input id="name" class="form-control" required></div>
+              <div><label class="fl">رقم التواصل *</label><input id="phone" class="form-control" dir="ltr" inputmode="tel" required></div>
+            </div>
+            <div class="g2">
+              <div><label class="fl">التاريخ *</label><input id="date" type="date" class="form-control" required readonly></div>
+              <div><label class="fl">الوقت</label><input id="time" type="time" class="form-control"></div>
+            </div>
+          </div>
+          <div class="fs">
+            <div class="g2">
+              <div><label class="fl"><i class="fa-solid fa-location-dot" style="color:var(--p)"></i> المكان</label><input id="place" class="form-control" placeholder="الشالية / الموقع / المناسبة"></div>
+              <div><label class="fl"><i class="fa-solid fa-phone" style="color:#059669"></i> تواصل المالك</label><div class="note" id="contactInfo">سيتم إرسال الطلب مباشرة إلى مالك النظام عبر الواتس اب.</div></div>
+            </div>
+          </div>
+          <div class="fs">
+            <label class="fl"><i class="fa-solid fa-camera" style="color:var(--gold-dk)"></i> الخدمات الإضافية</label>
+            <div id="serviceBtns" class="tg-grp"></div>
+          </div>
+          <div class="fs">
+            <label class="fl"><i class="fa-solid fa-align-right" style="color:var(--muted)"></i> تفاصيل إضافية</label>
+            <textarea id="details" class="form-control" rows="3" style="resize:none"></textarea>
+          </div>
+          <div class="note">أدخل بياناتك بشكل سريع، وبعد تجهيز طلب الحجز مباشرة انقر على إرسال الطلب لإرساله عبر الواتس اب للتعميد.</div>
+          <div class="actions mt-3">
+            <button class="btn btn-main" type="submit"><i class="fa-brands fa-whatsapp me-1"></i> إرسال الطلب</button>
+            <button class="btn btn-soft" type="button" data-bs-dismiss="modal">إغلاق</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
 <script>
 (function () {
   const logo = (window.APP_CONFIG && APP_CONFIG.APP_LOGO) || "https://i.ibb.co/N6TXzy3q/image.png";
   const appName = (window.APP_CONFIG && APP_CONFIG.APP_NAME) || "وكالة ميديا";
-  function setLink(rel, href, sizes) { let link = document.querySelector(`link[rel="${rel}"]`); if (!link) { link = document.createElement("link"); link.rel = rel; document.head.appendChild(link);} link.href = href; if (sizes) link.sizes = sizes; }
+  function setLink(rel, href, sizes) { let link = document.querySelector(`link[rel="${rel}"]`); if (!link) { link = document.createElement("link"); link.rel = rel; document.head.appendChild(link); } link.href = href; if (sizes) link.sizes = sizes; }
   setLink("icon", logo); setLink("shortcut icon", logo); setLink("apple-touch-icon", logo, "180x180");
   let metaTheme = document.querySelector('meta[name="theme-color"]'); if (!metaTheme) { metaTheme = document.createElement("meta"); metaTheme.name = "theme-color"; document.head.appendChild(metaTheme); } metaTheme.content = "#014979";
-  let metaApple = document.querySelector('meta[name="apple-mobile-web-app-title"]'); if (!metaApple) { metaApple = document.createElement("meta"); metaApple.name = "apple-mobile-web-app-title"; document.head.appendChild(metaApple);} metaApple.content = appName;
+  let metaApple = document.querySelector('meta[name="apple-mobile-web-app-title"]'); if (!metaApple) { metaApple = document.createElement("meta"); metaApple.name = "apple-mobile-web-app-title"; document.head.appendChild(metaApple); } metaApple.content = appName;
 })();
 
-const state = { cfg:null, events:[] };
+const state = { cfg:null, events:[], selectedDate:'', selectedType:'', modal:null };
 function normalizePhone(raw){ let s=String(raw||'').replace(/\s/g,'').replace(/^\+/,'').replace(/^'/,''); if(s.startsWith('966')&&s.length===12)return s; if(s.startsWith('05')&&s.length===10)return '966'+s.slice(1); if(s.startsWith('5')&&s.length===9)return '966'+s; return s; }
-function fmtDateAr(dateStr){ const d=new Date(dateStr+'T00:00:00'); return d.toLocaleDateString('ar-SA',{year:'numeric',month:'long',day:'numeric'}); }
 function safeTypes(cfg){ const arr = Array.isArray(cfg?.publicBookingTypes) && !cfg.publicBookingTypes.includes('__ALL__') ? cfg.publicBookingTypes : (cfg?.bookingTypes || []); return arr.length ? arr : ['حجز']; }
-function available(dateStr){ return !state.events.some(e => (e.start || e.date || '').substring(0,10) === dateStr); }
-function getCompleteHref(dateStr){ const url = new URL(state.cfg?.publicCompleteUrl || 'c3.html', window.location.href); url.searchParams.set('date', dateStr); const type = document.getElementById('typeSelect').value; if(type) url.searchParams.set('type', type); return url.toString(); }
-function setStatus(kind, text, dateStr=''){
-  const badge = document.getElementById('statusBadge'); const body = document.getElementById('statusText'); const btn = document.getElementById('completeBtn');
-  if(kind==='ok'){ badge.className='badge-x ok'; badge.innerHTML='<i class="fa-solid fa-check"></i> متاح'; body.textContent=text; btn.classList.remove('disabled'); btn.removeAttribute('aria-disabled'); btn.href = getCompleteHref(dateStr); }
-  else if(kind==='err'){ badge.className='badge-x err'; badge.innerHTML='<i class="fa-solid fa-xmark"></i> غير متاح'; body.textContent=text; btn.classList.add('disabled'); btn.setAttribute('aria-disabled','true'); btn.href='#'; }
-  else { badge.className='badge-x muted'; badge.innerHTML='<i class="fa-regular fa-calendar"></i> اختر تاريخًا أولًا'; body.textContent=text; btn.classList.add('disabled'); btn.setAttribute('aria-disabled','true'); btn.href='#'; }
-}
-function renderTypes(){ const sel=document.getElementById('typeSelect'); sel.innerHTML='<option value="">اختر نوع الحجز</option>' + safeTypes(state.cfg).map(t=>`<option value="${String(t).replace(/"/g,'&quot;')}">${t}</option>`).join(''); }
-async function boot(){ try{ const init = await API.runWithRetry('getInitData',2); state.cfg=init?.systemConfig||{}; renderTypes(); document.getElementById('contactBtn').href = (state.cfg?.publicContactNumber || state.cfg?.whatsappNumber) ? `https://wa.me/${normalizePhone(state.cfg.publicContactNumber || state.cfg.whatsappNumber)}` : '#'; API.runWithRetry('getPublicEvents',2).then(r=>{ state.events = Array.isArray(r)?r:[]; }).catch(console.error); }catch(err){ console.error(err); Swal.fire('خطأ','تعذر تحميل إعدادات الصفحة','error'); } }
-async function checkAvailability(){ const dateStr = document.getElementById('dateInput').value; if(!dateStr){ return Swal.fire('تنبيه','اختر التاريخ أولًا','warning'); } const loader=document.getElementById('loader'); loader.style.display='flex'; try{ if(!state.events.length){ const events = await API.runWithRetry('getPublicEvents',2); state.events = Array.isArray(events)?events:[]; } if(available(dateStr)) setStatus('ok', `اليوم ${fmtDateAr(dateStr)} متاح حاليًا. يمكنك الانتقال مباشرة إلى صفحة إكمال الحجز.`, dateStr); else setStatus('err', `اليوم ${fmtDateAr(dateStr)} محجوز حاليًا. اختر يومًا آخر أو تواصل مباشرة.`); } catch(err){ console.error(err); Swal.fire('خطأ','تعذر فحص التوفر','error'); } finally{ loader.style.display='none'; } }
-document.getElementById('checkBtn').addEventListener('click', checkAvailability); document.getElementById('completeBtn').addEventListener('click', function(e){ if(this.classList.contains('disabled')) e.preventDefault(); });
+function services(cfg){ return Array.isArray(cfg?.bookingExtraServices) ? cfg.bookingExtraServices : []; }
+function esc(v){ return String(v ?? '').trim(); }
+function fillTemplate(template, vars){ let text = String(template || ''); Object.keys(vars).forEach(k => { text = text.split(`{{${k}}}`).join(vars[k] ?? ''); }); return text; }
+function getContactUrl(){ const phone = state.cfg?.publicContactNumber || state.cfg?.whatsappNumber || ''; return phone ? `https://wa.me/${normalizePhone(phone)}` : '#'; }
+function activeType(){ return document.getElementById('typeValue').value || state.selectedType || safeTypes(state.cfg)[0] || ''; }
+function dayEvents(dateStr){ return state.events.filter(e => String(e.start||'').slice(0,10)===dateStr); }
+function isDateAvailable(dateStr){ const type = activeType(); const sameDay = dayEvents(dateStr); if(!sameDay.length) return true; if(!type) return false; return !sameDay.some(e => String(e.extendedProps?.type || e.title || '').includes(type)); }
+function bindToggleButtons(containerId, items, mode){ const el=document.getElementById(containerId); el.innerHTML=items.map(v=>`<button class="tg" type="button" data-value="${String(v).replace(/"/g,'&quot;')}">${v}</button>`).join(''); el.querySelectorAll('.tg').forEach(btn=>btn.addEventListener('click',()=>{ if(mode==='single'){ el.querySelectorAll('.tg').forEach(x=>x.classList.remove('st')); btn.classList.add('st'); document.getElementById('typeValue').value=btn.dataset.value; state.selectedType=btn.dataset.value; updateStatus(); } else { btn.classList.toggle('ss'); } })); if(mode==='single' && el.querySelector('.tg')) el.querySelector('.tg').click(); }
+function selectedServices(){ return Array.from(document.querySelectorAll('#serviceBtns .tg.ss')).map(x=>x.dataset.value); }
+function renderModalData(){ bindToggleButtons('typeBtns', safeTypes(state.cfg), 'single'); bindToggleButtons('serviceBtns', services(state.cfg), 'multi'); document.getElementById('contactInfo').textContent = state.cfg?.publicContactNumber ? `سيتم إرسال الطلب إلى واتس اب المالك: ${state.cfg.publicContactNumber}` : 'سيتم إرسال الطلب مباشرة إلى مالك النظام عبر الواتس اب.'; }
+function updateStatus(){ const badge=document.getElementById('statusBadge'), text=document.getElementById('statusText'), btn=document.getElementById('completeBtn'); if(!state.selectedDate){ badge.className='badge-x muted'; badge.innerHTML='<i class="fa-regular fa-calendar"></i> لم يتم البحث بعد'; text.textContent='اختر التاريخ ثم اضغط بحث لعرض حالة التوفر.'; btn.disabled=true; return; } const ok=isDateAvailable(state.selectedDate); if(ok){ badge.className='badge-x ok'; badge.innerHTML='<i class="fa-solid fa-circle-check"></i> متاح'; text.textContent='اليوم المختار متاح حاليًا ويمكنك إكمال الحجز.'; btn.disabled=false; } else { badge.className='badge-x err'; badge.innerHTML='<i class="fa-solid fa-ban"></i> غير متاح'; text.textContent='هذا اليوم مشغول حسب النوع المختار حاليًا.'; btn.disabled=true; } }
+async function boot(){ state.modal = new bootstrap.Modal(document.getElementById('bookingModal')); try { const init=await API.runWithRetry('getInitData',2); state.cfg=init?.systemConfig||{}; document.getElementById('contactBtn').href=getContactUrl(); renderModalData(); const data=await API.runWithRetry('getPublicEvents',2); state.events=Array.isArray(data?.events)?data.events:[]; } catch(err){ console.error(err); Swal.fire('خطأ','تعذر تحميل بيانات التوفر','error'); } }
+document.getElementById('checkBtn').addEventListener('click', ()=> { const d=document.getElementById('dateInput').value; if(!d) return Swal.fire('تنبيه','اختر التاريخ أولًا','warning'); state.selectedDate=d; updateStatus(); });
+document.getElementById('completeBtn').addEventListener('click', ()=> { if(!state.selectedDate || !isDateAvailable(state.selectedDate)) return; document.getElementById('date').value = state.selectedDate; state.modal.show(); });
+document.getElementById('bookingForm').addEventListener('submit', function(e){ e.preventDefault(); const contact = state.cfg?.publicContactNumber || state.cfg?.whatsappNumber || ''; if(!contact) return Swal.fire('تنبيه','رقم التواصل غير محدد في الإعدادات','warning'); const data = {'اسم_الوكالة': esc(state.cfg?.publicDisplayName || state.cfg?.agencyName || APP_CONFIG.APP_NAME || 'وكالة ميديا'),'اسم_العميل': esc(document.getElementById('name').value),'رقم_التواصل': esc(document.getElementById('phone').value),'النوع': esc(document.getElementById('typeValue').value),'التاريخ': esc(document.getElementById('date').value),'الوقت': esc(document.getElementById('time').value),'المكان': esc(document.getElementById('place').value),'الخدمات_الإضافية': selectedServices().join('، '),'التفاصيل': esc(document.getElementById('details').value)}; if(!data['اسم_العميل'] || !data['رقم_التواصل'] || !data['النوع'] || !data['التاريخ']) return Swal.fire('تنبيه','أكمل الحقول الأساسية أولًا','warning'); const template = state.cfg?.publicBookingTemplate || `السلام عليكم {{اسم_الوكالة}}\nأرغب في إكمال حجز جديد\nالاسم: {{اسم_العميل}}\nالنوع: {{النوع}}\nالتاريخ: {{التاريخ}}\nالوقت: {{الوقت}}\nالمكان: {{المكان}}\nالخدمات الإضافية: {{الخدمات_الإضافية}}\nرقم التواصل: {{رقم_التواصل}}\nالتفاصيل: {{التفاصيل}}`; const text=fillTemplate(template,data); window.open(`https://wa.me/${normalizePhone(contact)}?text=${encodeURIComponent(text)}`,'_blank','noopener'); });
 boot();
 </script>
 </body>
