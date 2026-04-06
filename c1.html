@@ -81,7 +81,7 @@ const state = { cfg:null, events:[], selectedDate:'', calendar:null };
 function normalizePhone(raw){ let s=String(raw||'').replace(/\s/g,'').replace(/^\+/,'').replace(/^'/,''); if(s.startsWith('966')&&s.length===12)return s; if(s.startsWith('05')&&s.length===10)return '966'+s.slice(1); if(s.startsWith('5')&&s.length===9)return '966'+s; return s; }
 function fmtDateAr(dateStr){ if(!dateStr) return ''; const d=new Date(dateStr+'T00:00:00'); return d.toLocaleDateString('ar-SA',{year:'numeric',month:'long',day:'numeric'}); }
 function safeTypes(cfg){ const arr = Array.isArray(cfg?.publicBookingTypes) && !cfg.publicBookingTypes.includes('__ALL__') ? cfg.publicBookingTypes : (cfg?.bookingTypes || []); return arr.length ? arr : ['حجز']; }
-function getCompleteUrl(){ return state.cfg?.publicCompleteUrl || 'C3.html'; }
+function getCompleteUrl(){ return state.cfg?.publicCompleteUrl || 'c3.html'; }
 function getContactUrl(){ const phone = state.cfg?.publicContactNumber || state.cfg?.whatsappNumber || ''; return phone ? `https://wa.me/${normalizePhone(phone)}` : '#'; }
 function isAvailable(dateStr){ return !state.events.some(e => (e.start || e.date || '').substring(0,10) === dateStr); }
 function selectedType(){ return document.getElementById('typeSelect').value || ''; }
