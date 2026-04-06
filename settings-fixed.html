@@ -241,22 +241,30 @@
                 <div class="box-body">
                   <div class="mb-3 p-3" style="background:#f8fafc;border:1px solid var(--border);border-radius:1rem">
                     <div class="fw-bold mb-2">التعبئة التلقائية للروابط</div>
-                    <div class="text-muted" style="font-size:.84rem">نعم، حقلا الرابطين يتعبآن تلقائيًا بالمسارين <span class="text-num">availability.html</span> و<span class="text-num">complete-booking.html</span> بناءً على رابط الموقع الحالي. ويمكنك استبدالهما يدويًا بأي روابط مخصصة.</div>
+                    <div class="text-muted" style="font-size:.84rem">نعم، حقول الروابط تتعبأ تلقائيًا بالمسارات <span class="text-num">C1.html</span> و<span class="text-num">C2.html</span> و<span class="text-num">C3.html</span> بناءً على رابط الموقع الحالي، ويمكنك استبدالها يدويًا بأي روابط مخصصة.</div>
                   </div>
 
                   <div class="row g-3">
                     <div class="col-lg-6">
-                      <label class="form-label fw-bold">رابط صفحة التحقق من التوفر</label>
+                      <label class="form-label fw-bold">رابط صفحة C1 — التحقق من التوفر بالتقويم</label>
                       <div class="input-group">
-                        <input id="publicAvailabilityUrl" class="form-control" dir="ltr" placeholder="https://example.github.io/availability.html">
+                        <input id="publicAvailabilityUrl" class="form-control" dir="ltr" placeholder="https://example.github.io/C1.html">
                         <button type="button" class="btn btn-soft" onclick="openPublicPageLink('publicAvailabilityUrl')"><i class="fa-solid fa-up-right-from-square"></i></button>
                         <button type="button" class="btn btn-soft" onclick="copyPublicPageLink('publicAvailabilityUrl')"><i class="fa-regular fa-copy"></i></button>
                       </div>
                     </div>
                     <div class="col-lg-6">
-                      <label class="form-label fw-bold">رابط صفحة إكمال الحجز</label>
+                      <label class="form-label fw-bold">رابط صفحة C2 — التحقق من التوفر بالتاريخ</label>
                       <div class="input-group">
-                        <input id="publicCompleteUrl" class="form-control" dir="ltr" placeholder="https://example.github.io/complete-booking.html">
+                        <input id="publicDateCheckUrl" class="form-control" dir="ltr" placeholder="https://example.github.io/C2.html">
+                        <button type="button" class="btn btn-soft" onclick="openPublicPageLink('publicDateCheckUrl')"><i class="fa-solid fa-up-right-from-square"></i></button>
+                        <button type="button" class="btn btn-soft" onclick="copyPublicPageLink('publicDateCheckUrl')"><i class="fa-regular fa-copy"></i></button>
+                      </div>
+                    </div>
+                    <div class="col-lg-6">
+                      <label class="form-label fw-bold">رابط صفحة C3 — إتمام الحجز</label>
+                      <div class="input-group">
+                        <input id="publicCompleteUrl" class="form-control" dir="ltr" placeholder="https://example.github.io/C3.html">
                         <button type="button" class="btn btn-soft" onclick="openPublicPageLink('publicCompleteUrl')"><i class="fa-solid fa-up-right-from-square"></i></button>
                         <button type="button" class="btn btn-soft" onclick="copyPublicPageLink('publicCompleteUrl')"><i class="fa-regular fa-copy"></i></button>
                       </div>
@@ -277,7 +285,7 @@
                   </div>
 
                   <div class="d-flex gap-2 flex-wrap mt-3">
-                    <button class="btn btn-main" onclick="savePublicPagesSettings()"><i class="fa-solid fa-floppy-disk me-1"></i> حفظ إعدادات الصفحات العامة</button>
+                    <button class="btn btn-main" onclick="savePublicPagesSettings()"><i class="fa-solid fa-floppy-disk me-1"></i> حفظ إعدادات صفحات C1 / C2 / C3</button>
                     <button class="btn btn-soft" onclick="fillPublicPageDefaults()"><i class="fa-solid fa-wand-magic-sparkles me-1"></i> تعبئة تلقائية</button>
                   </div>
                 </div>
@@ -750,8 +758,9 @@
       const base = window.location.pathname ? window.location.pathname.replace(/\/[^\/]*$/, '/') : '/';
       const join = (name) => origin ? new URL(name, origin + base).toString() : name;
       return {
-        availabilityUrl: join('availability.html'),
-        completeUrl: join('complete-booking.html'),
+        availabilityUrl: join('C1.html'),
+        dateCheckUrl: join('C2.html'),
+        completeUrl: join('C3.html'),
         contactNumber: (_systemCfg && (_systemCfg.invoiceWhatsappNumber || _systemCfg.whatsappNumber)) || '',
         agencyLabel: (_systemCfg && _systemCfg.agencyName) || 'وكالة ميديا',
         allowedBookingTypes: Array.isArray(_systemCfg?.bookingTypes) ? [..._systemCfg.bookingTypes] : ['زواج','تغطية','إعلان']
@@ -766,6 +775,7 @@
       const defs = defaultPublicPagesSettings();
       const merged = { ...defs, ...cfg };
       document.getElementById('publicAvailabilityUrl').value = merged.availabilityUrl || '';
+      document.getElementById('publicDateCheckUrl').value = merged.dateCheckUrl || '';
       document.getElementById('publicCompleteUrl').value = merged.completeUrl || '';
       document.getElementById('publicContactNumber').value = merged.contactNumber || '';
       document.getElementById('publicAgencyLabel').value = merged.agencyLabel || '';
@@ -792,18 +802,20 @@
     function savePublicPagesSettings(){
       const payload = {
         availabilityUrl: document.getElementById('publicAvailabilityUrl').value.trim(),
+        dateCheckUrl: document.getElementById('publicDateCheckUrl').value.trim(),
         completeUrl: document.getElementById('publicCompleteUrl').value.trim(),
         contactNumber: document.getElementById('publicContactNumber').value.trim(),
         agencyLabel: document.getElementById('publicAgencyLabel').value.trim(),
         allowedBookingTypes: collectPublicBookingTypes()
       };
       localStorage.setItem(getPublicPagesStorageKey(), JSON.stringify(payload));
-      Toast.success('تم حفظ إعدادات الصفحات العامة محليًا');
+      Toast.success('تم حفظ إعدادات صفحات C1 / C2 / C3 محليًا');
     }
 
     function fillPublicPagesWithDefaults(){
       const defs = defaultPublicPagesSettings();
       document.getElementById('publicAvailabilityUrl').value = defs.availabilityUrl || '';
+      document.getElementById('publicDateCheckUrl').value = defs.dateCheckUrl || '';
       document.getElementById('publicCompleteUrl').value = defs.completeUrl || '';
       document.getElementById('publicContactNumber').value = defs.contactNumber || '';
       document.getElementById('publicAgencyLabel').value = defs.agencyLabel || '';
@@ -890,6 +902,7 @@
           invoiceWhatsappNumber,
           invoiceShareText,
           publicCfg.availabilityUrl,
+          publicCfg.dateCheckUrl,
           publicCfg.completeUrl,
           publicCfg.displayName,
           publicCfg.contactNumber,
@@ -910,6 +923,7 @@
           invoiceWhatsappNumber,
           invoiceShareText,
           publicAvailabilityUrl: publicCfg.availabilityUrl,
+          publicDateCheckUrl: publicCfg.dateCheckUrl,
           publicCompleteUrl: publicCfg.completeUrl,
           publicDisplayName: publicCfg.displayName,
           publicContactNumber: publicCfg.contactNumber,
@@ -1034,8 +1048,9 @@
       const originPath = window.location.href.split('#')[0].split('?')[0];
       const base = originPath.substring(0, originPath.lastIndexOf('/') + 1);
       return {
-        availabilityUrl: base + 'availability.html',
-        completeUrl: base + 'complete-booking.html'
+        availabilityUrl: base + 'C1.html',
+        dateCheckUrl: base + 'C2.html',
+        completeUrl: base + 'C3.html'
       };
     }
 
@@ -1073,6 +1088,7 @@
       const defs = getDefaultPublicPageUrls();
       return {
         availabilityUrl: document.getElementById('publicAvailabilityUrl').value.trim() || defs.availabilityUrl,
+        dateCheckUrl: document.getElementById('publicDateCheckUrl').value.trim() || defs.dateCheckUrl,
         completeUrl: document.getElementById('publicCompleteUrl').value.trim() || defs.completeUrl,
         displayName: document.getElementById('publicDisplayName').value.trim(),
         contactNumber: document.getElementById('publicContactNumber').value.trim(),
@@ -1083,6 +1099,7 @@
     function loadPublicPagesSettings(){
       const defs = getDefaultPublicPageUrls();
       document.getElementById('publicAvailabilityUrl').value = (_systemCfg && _systemCfg.publicAvailabilityUrl) || defs.availabilityUrl;
+      document.getElementById('publicDateCheckUrl').value = (_systemCfg && (_systemCfg.publicDateCheckUrl || _systemCfg.publicAvailabilityDateUrl)) || defs.dateCheckUrl;
       document.getElementById('publicCompleteUrl').value = (_systemCfg && _systemCfg.publicCompleteUrl) || defs.completeUrl;
       document.getElementById('publicDisplayName').value = (_systemCfg && _systemCfg.publicDisplayName) || (_systemCfg && _systemCfg.agencyName) || (document.getElementById('agencyNameHero')?.textContent || '');
       document.getElementById('publicContactNumber').value = (_systemCfg && (_systemCfg.publicContactNumber || _systemCfg.invoiceWhatsappNumber || _systemCfg.whatsappNumber)) || '';
