@@ -107,98 +107,32 @@
   </div>
 
 <script>
-const PAGE_CFG = {
-  whatsappFallback:'966500000000',
-  publicSettingsKeys:['media_publicPagesSettings','media_publicPagesConfig'],
-  templatesKey:'media_templates'
-};
-let systemCfg = { agencyName:'وكالة ميديا', bookingTypes:['زواج','تغطية','إعلان'], whatsappNumber:PAGE_CFG.whatsappFallback };
-let publicCfg = { availabilityUrl:'availability.html', completeUrl:'complete-booking.html', displayName:'', agencyLabel:'', contactNumber:'', bookingTypes:['__ALL__'] };
-let messageTpl = 'السلام عليكم
+const PAGE_CFG = { whatsappFallback:'966500000000' };
+let systemCfg = { agencyName:'وكالة ميديا', bookingTypes:['زواج','تغطية','إعلان'], whatsappNumber:PAGE_CFG.whatsappFallback, publicBookingTypes:['__ALL__'] };
+let messageTpl = `السلام عليكم
 أرغب بإكمال حجز جديد بالتفاصيل التالية:
 
-الاسم: {اسم_العميل}
-الجوال: {رقم_الجوال}
-التاريخ المطلوب: {التاريخ}
-نوع الحجز: {النوع}
-المكان: {المكان}
-الوقت: {الوقت}
-التفاصيل: {التفاصيل}
-اسم الجهة: {اسم_الوكالة}';
-function apiRun(fn, ...args){
-  if (window.API && typeof API.run === 'function') return API.run(fn, ...args);
-  const apiUrl = (window.APP_CONFIG && APP_CONFIG.API_URL) || '';
-  const params = new URLSearchParams({ fn });
-  args.forEach((a,i)=> params.append('p'+i, typeof a === 'object' ? JSON.stringify(a) : String(a ?? '')));
-  return fetch(`${apiUrl}?${params.toString()}`).then(r=>r.json());
-}
+الاسم: {{اسم_العميل}}
+الجوال: {{رقم_الجوال}}
+التاريخ المطلوب: {{التاريخ}}
+نوع الحجز: {{النوع}}
+المكان: {{المكان}}
+الوقت: {{الوقت}}
+التفاصيل: {{التفاصيل}}
+اسم الجهة: {{اسم_الوكالة}}`;
+function apiRun(fn, ...args){ if (window.API && typeof API.run === 'function') return API.run(fn, ...args); const apiUrl = (window.APP_CONFIG && APP_CONFIG.API_URL) || ''; const params = new URLSearchParams({ fn }); args.forEach((a,i)=> params.append('p'+i, typeof a === 'object' ? JSON.stringify(a) : String(a ?? ''))); return fetch(`${apiUrl}?${params.toString()}`).then(r=>r.json()); }
 function qp(name){ return new URLSearchParams(location.search).get(name) || ''; }
 function normalizePhone(raw){ let s = String(raw || '').replace(/\s/g,'').replace(/^\+/,'').replace(/^'/,''); if (s.startsWith('966') && s.length===12) return s; if (s.startsWith('05') && s.length===10) return '966'+s.slice(1); if (s.startsWith('5') && s.length===9) return '966'+s; return s || PAGE_CFG.whatsappFallback; }
-function safeJson(v){ try{return JSON.parse(v);}catch(e){return null;} }
-function getSavedPublicCfg(){
-  for(const key of PAGE_CFG.publicSettingsKeys){
-    const raw = localStorage.getItem(key);
-    const parsed = raw ? safeJson(raw) : null;
-    if(parsed && typeof parsed === 'object') return parsed;
-  }
-  return {};
-}
-function getSavedTemplates(){
-  const parsed = safeJson(localStorage.getItem(PAGE_CFG.templatesKey) || '{}');
-  return parsed && typeof parsed === 'object' ? parsed : {};
-}
-function getAllowedTypes(){
-  const list = Array.isArray(publicCfg.bookingTypes) ? publicCfg.bookingTypes : [];
-  const all = (systemCfg.bookingTypes || []).filter(Boolean);
-  if(!list.length || list.includes('__ALL__') || list.includes('all')) return all;
-  const out = all.filter(t => list.includes(t));
-  return out.length ? out : all;
-}
-function getDisplayName(){ return publicCfg.displayName || publicCfg.agencyLabel || systemCfg.agencyName || 'وكالة ميديا'; }
-function getContactNumber(){ return publicCfg.contactNumber || systemCfg.whatsappNumber || PAGE_CFG.whatsappFallback; }
+function getAllowedTypes(){ const list = Array.isArray(systemCfg.publicBookingTypes) ? systemCfg.publicBookingTypes : ['__ALL__']; const all = (systemCfg.bookingTypes || []).filter(Boolean); if(!list.length || list.includes('__ALL__') || list.includes('all')) return all; const out = all.filter(t => list.includes(t)); return out.length ? out : all; }
+function getDisplayName(){ return systemCfg.publicDisplayName || systemCfg.agencyName || 'وكالة ميديا'; }
+function getContactNumber(){ return systemCfg.publicContactNumber || systemCfg.invoiceWhatsappNumber || systemCfg.whatsappNumber || PAGE_CFG.whatsappFallback; }
 function fillTemplate(tpl, vars){ let out = String(tpl || ''); Object.entries(vars).forEach(([k,v]) => { out = out.split(`{${k}}`).join(String(v ?? '')); out = out.split(`{{${k}}}`).join(String(v ?? '')); }); return out; }
 function fillTypes(){ const sel = document.getElementById('reqType'); const types = getAllowedTypes(); sel.innerHTML = types.map(t => `<option value="${t}">${t}</option>`).join(''); if(qp('type') && types.includes(qp('type'))) sel.value = qp('type'); updateSummary(); }
 function updateSummary(){ document.getElementById('sumDate').textContent = document.getElementById('reqDate').value || '—'; document.getElementById('sumType').textContent = document.getElementById('reqType').value || '—'; document.getElementById('sumPlace').textContent = document.getElementById('reqPlace').value || '—'; document.getElementById('sumTime').textContent = document.getElementById('reqTime').value || '—'; document.getElementById('sumPhone').textContent = document.getElementById('custPhone').value || '—'; }
-function buildMessage(){
-  const vars = {
-    اسم_العميل: document.getElementById('custName').value.trim(),
-    رقم_الجوال: document.getElementById('custPhone').value.trim(),
-    التاريخ: document.getElementById('reqDate').value,
-    النوع: document.getElementById('reqType').value,
-    المكان: document.getElementById('reqPlace').value.trim(),
-    الوقت: document.getElementById('reqTime').value || 'غير محدد',
-    التفاصيل: document.getElementById('reqDetails').value.trim() || 'لا يوجد',
-    اسم_الوكالة: getDisplayName()
-  };
-  return fillTemplate(messageTpl, vars);
-}
-async function init(){
-  publicCfg = Object.assign(publicCfg, getSavedPublicCfg());
-  const savedTpl = getSavedTemplates();
-  if(savedTpl.booking_complete_request) messageTpl = savedTpl.booking_complete_request;
-  try{ const data = await apiRun('getSystemSettings'); if(data && data.success) systemCfg = Object.assign(systemCfg, data); }catch(e){ console.warn(e); }
-  document.getElementById('agencyName').textContent = getDisplayName();
-  document.getElementById('waNum').textContent = getContactNumber();
-  document.getElementById('reqDate').value = qp('date');
-  document.getElementById('reqPlace').value = qp('place');
-  const backLink = document.querySelector('a[data-back-link]') || document.querySelector('.btn-gold');
-  if(backLink) backLink.href = publicCfg.availabilityUrl || 'availability.html';
-  fillTypes();
-  updateSummary();
-}
+function buildMessage(){ const vars = { اسم_العميل: document.getElementById('custName').value.trim(), رقم_الجوال: document.getElementById('custPhone').value.trim(), رقم_التواصل: getContactNumber(), التاريخ: document.getElementById('reqDate').value, النوع: document.getElementById('reqType').value, المكان: document.getElementById('reqPlace').value.trim(), الوقت: document.getElementById('reqTime').value || 'غير محدد', التفاصيل: document.getElementById('reqDetails').value.trim() || 'لا يوجد', اسم_الوكالة: getDisplayName() }; return fillTemplate(messageTpl, vars); }
+async function init(){ try{ const data = await apiRun('getSystemSettings'); if(data && data.success) systemCfg = Object.assign(systemCfg, data); }catch(e){ console.warn(e); } if(systemCfg.publicBookingTemplate) messageTpl = systemCfg.publicBookingTemplate; document.getElementById('agencyName').textContent = getDisplayName(); document.getElementById('waNum').textContent = getContactNumber(); document.getElementById('reqDate').value = qp('date'); document.getElementById('reqPlace').value = qp('place'); const backLink = document.querySelector('a[data-back-link]') || document.querySelector('.btn-gold'); if(backLink) backLink.href = systemCfg.publicAvailabilityUrl || 'availability.html'; fillTypes(); updateSummary(); }
 ['custName','custPhone','reqDate','reqType','reqPlace','reqTime','reqDetails'].forEach(id => document.addEventListener('input', e => { if(e.target.id===id) updateSummary(); }));
-document.getElementById('bookingForm').addEventListener('submit', (e)=>{
-  e.preventDefault();
-  const name = document.getElementById('custName').value.trim();
-  const phone = document.getElementById('custPhone').value.trim();
-  const date = document.getElementById('reqDate').value;
-  const type = document.getElementById('reqType').value;
-  const ok = document.getElementById('confirmInfo').checked;
-  if(!name || !phone || !date || !type){ Swal.fire({icon:'warning', title:'أكمل البيانات المطلوبة'}); return; }
-  if(!ok){ Swal.fire({icon:'info', title:'أكد صحة البيانات أولاً'}); return; }
-  const wa = normalizePhone(getContactNumber());
-  window.open(`https://wa.me/${wa}?text=${encodeURIComponent(buildMessage())}`, '_blank');
-});
+document.getElementById('bookingForm').addEventListener('submit', (e)=>{ e.preventDefault(); const name = document.getElementById('custName').value.trim(); const phone = document.getElementById('custPhone').value.trim(); const date = document.getElementById('reqDate').value; const type = document.getElementById('reqType').value; const ok = document.getElementById('confirmInfo').checked; if(!name || !phone || !date || !type){ Swal.fire({icon:'warning', title:'أكمل البيانات المطلوبة'}); return; } if(!ok){ Swal.fire({icon:'info', title:'أكد صحة البيانات أولاً'}); return; } const wa = normalizePhone(getContactNumber()); window.open(`https://wa.me/${wa}?text=${encodeURIComponent(buildMessage())}`, '_blank'); });
 init();
 </script>
 </body>
