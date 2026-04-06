@@ -44,40 +44,6 @@
     }
     .top-link.active{background:linear-gradient(135deg,var(--p),var(--gold));color:#fff;border-color:transparent;box-shadow:0 8px 18px rgba(1,73,121,.22)}
 
-    .hero{
-      background:linear-gradient(135deg,#00243f 0%, #014979 52%, #026aa7 100%);
-      color:#fff;border-radius:1.5rem;padding:1.25rem 1.35rem;box-shadow:0 16px 36px rgba(1,73,121,.23);
-      margin-bottom:1rem;position:relative;overflow:hidden;
-    }
-    .hero::before{
-      content:"";position:absolute;inset-inline-end:-60px;top:-40px;width:180px;height:180px;border-radius:50%;
-      background:radial-gradient(circle, rgba(255,255,255,.2), transparent 68%);
-    }
-    .hero-title{font-weight:900;font-size:1.4rem;margin:0 0 .35rem}
-    .hero-sub{margin:0;color:rgba(255,255,255,.88);font-size:.92rem}
-    .hero-meta{margin-top:.85rem;display:flex;gap:.5rem;flex-wrap:wrap}
-    .hero-chip{
-      display:inline-flex;align-items:center;gap:.35rem;padding:.35rem .75rem;border-radius:999px;
-      background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.18);font-size:.8rem;font-weight:700
-    }
-
-    .summary-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:.75rem;margin-bottom:1rem}
-    @media(max-width:992px){ .summary-grid{grid-template-columns:repeat(2,minmax(0,1fr))} }
-    @media(max-width:560px){ .summary-grid{grid-template-columns:1fr} }
-    .summary-card{
-      background:var(--card);border:1px solid var(--border);border-radius:1.25rem;box-shadow:var(--sh);padding:1rem;position:relative;overflow:hidden
-    }
-    .summary-card::before{
-      content:"";position:absolute;inset-inline-start:0;top:0;width:100%;height:4px;background:linear-gradient(90deg,var(--p),#38bdf8)
-    }
-    .summary-card.k2::before{ background:linear-gradient(90deg,var(--ok),#34d399) }
-    .summary-card.k3::before{ background:linear-gradient(90deg,var(--gold-dk),var(--gold)) }
-    .summary-card.k4::before{ background:linear-gradient(90deg,var(--pur),#a78bfa) }
-    .summary-label{font-size:.8rem;color:var(--muted);font-weight:700}
-    .summary-value{font-size:1.55rem;font-weight:900;margin:.25rem 0 .1rem}
-    .summary-note{font-size:.76rem;color:var(--muted)}
-    .summary-icon{position:absolute;inset-inline-end:-4px;bottom:-10px;font-size:3.4rem;opacity:.06;pointer-events:none}
-
     .box{
       background:var(--card);border:1px solid var(--border);border-radius:1.25rem;box-shadow:var(--sh);margin-bottom:1rem;overflow:hidden
     }
@@ -153,45 +119,8 @@
   </style>
 </head>
 <body>
-  
-  <section class="hero">
-    <h1 class="hero-title"><i class="fa-solid fa-gear me-2"></i>الإعدادات</h1>
-    <p class="hero-sub">مركز التحكم في المستخدمين، أنواع الحجوزات، الخدمات الإضافية، خطوات المشاريع، إعدادات التقويم ومجلد الفواتير، وقوالب الإرسال.</p>
-    <div class="hero-meta">
-      <span class="hero-chip"><i class="fa-solid fa-building"></i> <span id="agencyNameHero">وكالة ميديا</span></span>
-      <span class="hero-chip"><i class="fa-solid fa-user"></i> <span id="currentUserHero">—</span></span>
-      <span class="hero-chip"><i class="fa-solid fa-gear"></i> مركز الإعدادات</span>
-    </div>
-  </section>
 
-  <section class="summary-grid">
-    <div class="summary-card">
-      <div class="summary-label">عدد المستخدمين</div>
-      <div class="summary-value text-num" id="sumUsers">0</div>
-      <div class="summary-note">كل المستخدمين</div>
-      <i class="fa-solid fa-users summary-icon"></i>
-    </div>
-    <div class="summary-card k2">
-      <div class="summary-label">المستخدمون الفعّالون</div>
-      <div class="summary-value text-num" id="sumActiveUsers">0</div>
-      <div class="summary-note">بحالة فعال</div>
-      <i class="fa-solid fa-user-check summary-icon"></i>
-    </div>
-    <div class="summary-card k3">
-      <div class="summary-label">أنواع الحجوزات</div>
-      <div class="summary-value text-num" id="sumBookingTypes">0</div>
-      <div class="summary-note">من إعدادات النظام</div>
-      <i class="fa-solid fa-tags summary-icon"></i>
-    </div>
-    <div class="summary-card k4">
-      <div class="summary-label">خطوات المشاريع</div>
-      <div class="summary-value text-num" id="sumProjectSteps">0</div>
-      <div class="summary-note">من إعدادات النظام</div>
-      <i class="fa-solid fa-list-check summary-icon"></i>
-    </div>
-  </section>
-
-  <div class="box">
+<div class="box">
     <div class="box-head">
       <h2 class="box-title"><i class="fa-solid fa-sliders me-2"></i>أقسام الإعدادات</h2>
     </div>
@@ -241,7 +170,8 @@
           <div id="usersEmptyState" class="empty d-none">لا توجد نتائج مطابقة.</div>
         </div>
 
-        <div class="tab-pane fade" id="tab-system" role="tabpanel">
+        
+<div class="tab-pane fade" id="tab-system" role="tabpanel">
           <div class="row g-3">
             <div class="col-lg-6">
               <div class="box">
@@ -255,15 +185,10 @@
                     <input class="form-check-input auto-save-system" type="checkbox" id="invoiceLinkEnabled" style="width:3rem;height:1.4rem">
                     <label class="form-check-label fw-bold me-2" for="invoiceLinkEnabled">تفعيل الفاتورة بالرابط</label>
                   </div>
-                  <div class="mb-3">
-                    <label class="form-label fw-bold">رقم واتساب الفاتورة الافتراضي</label>
-                    <input id="invoiceWhatsappNumber" class="form-control auto-save-system" dir="ltr" placeholder="9665xxxxxxxx">
-                    <div class="template-help">اختياري — إذا تُرك فارغًا يتم الإرسال إلى رقم العميل نفسه.</div>
-                  </div>
                   <div class="mb-0">
-                    <label class="form-label fw-bold">نص مشاركة الفاتورة الافتراضي</label>
-                    <textarea id="invoiceShareText" class="form-control auto-save-system" rows="5" placeholder="السلام عليكم {{اسم_العميل}}&#10;هذه فاتورتكم:&#10;{{رابط_الفاتورة}}"></textarea>
-                    <div class="template-help">المتاحات: {{اسم_العميل}} - {{النوع}} - {{التاريخ}} - {{المكان}} - {{المبلغ}} - {{المتبقي}} - {{رابط_الفاتورة}} - {{اسم_الوكالة}}</div>
+                    <label class="form-label fw-bold">رقم واتساب الفاتورة الافتراضي</label>
+                    <input id="invoiceWhatsappNumber" class="form-control auto-save-system text-num" dir="ltr" placeholder="9665xxxxxxxx">
+                    <div class="template-help">نص مشاركة الفاتورة أصبح موحدًا داخل تبويب القوالب باسم <strong>قالب إرسال الفاتورة</strong>.</div>
                   </div>
                 </div>
               </div>
@@ -299,8 +224,12 @@
               </div>
             </div>
 
-            
-
+            <div class="col-12">
+              <div class="d-flex gap-2 flex-wrap justify-content-end">
+                <button class="btn btn-main" onclick="saveSystemSettings(false)"><i class="fa-solid fa-floppy-disk me-1"></i> حفظ إعدادات النظام</button>
+                <button class="btn btn-soft" onclick="loadSystemSettings()"><i class="fa-solid fa-rotate me-1"></i> إعادة التحميل</button>
+              </div>
+            </div>
           </div>
         </div>
 
@@ -394,9 +323,6 @@
             </div>
           </div>
 
-          <div class="empty mt-3">
-            هذه القوالب محفوظة حاليًا في <strong>localStorage</strong> حتى نضيف لها حفظًا خلفيًا مستقلًا في الباك إند.
-          </div>
         </div>
       </div>
     </div>
@@ -475,7 +401,7 @@
     ];
 
     function esc(t){ return String(t ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#039;'); }
-    function fmt(v){ return Number(v || 0).toLocaleString('ar-SA'); }
+    function fmt(v){ return Number(v || 0).toLocaleString('en-US'); }
 
     function guardSession(){
   // محاولة الحصول على الجلسة من localStorage
@@ -518,8 +444,10 @@
       const cfgRaw = localStorage.getItem(APP_CONFIG.STORAGE.systemCfg || 'media_systemConfig');
       let cfg = {};
       try{ cfg = JSON.parse(cfgRaw || '{}'); }catch(e){ cfg = {}; }
-      document.getElementById('currentUserHero').textContent = session.userName || 'مستخدم النظام';
-      document.getElementById('agencyNameHero').textContent = cfg.agencyName || APP_CONFIG.APP_NAME || 'وكالة ميديا';
+      const userEl = document.getElementById('currentUserHero');
+      const agencyEl = document.getElementById('agencyNameHero');
+      if (userEl) userEl.textContent = session.userName || 'مستخدم النظام';
+      if (agencyEl) agencyEl.textContent = cfg.agencyName || APP_CONFIG.APP_NAME || 'وكالة ميديا';
     }
 
     function renderAvailablePagesOptions(){
@@ -575,10 +503,15 @@
     }
 
     function renderUsersSummary(){
-      document.getElementById('sumUsers').textContent = fmt(_users.length);
-      document.getElementById('sumActiveUsers').textContent = fmt((_users || []).filter(x => x.status === 'فعال').length);
-      document.getElementById('sumBookingTypes').textContent = fmt((_systemCfg.bookingTypes || []).length);
-      document.getElementById('sumProjectSteps').textContent = fmt((_systemCfg.projectSteps || []).length);
+      const sumUsers = document.getElementById('sumUsers');
+      const sumActiveUsers = document.getElementById('sumActiveUsers');
+      const sumBookingTypes = document.getElementById('sumBookingTypes');
+      const sumProjectSteps = document.getElementById('sumProjectSteps');
+      if (!sumUsers || !sumActiveUsers || !sumBookingTypes || !sumProjectSteps) return;
+      sumUsers.textContent = fmt(_users.length);
+      sumActiveUsers.textContent = fmt((_users || []).filter(x => x.status === 'فعال').length);
+      sumBookingTypes.textContent = fmt((_systemCfg.bookingTypes || []).length);
+      sumProjectSteps.textContent = fmt((_systemCfg.projectSteps || []).length);
     }
 
     function userPagesText(user){
@@ -753,7 +686,7 @@
       document.getElementById('systemCalendarId').value = _systemCfg.calendarId || '';
       document.getElementById('invoiceLinkEnabled').checked = _systemCfg.invoiceByLinkEnabled !== false;
       document.getElementById('invoiceWhatsappNumber').value = _systemCfg.invoiceWhatsappNumber || '';
-      document.getElementById('invoiceShareText').value = _systemCfg.invoiceShareText || defaultInvoiceShareText();
+      if (document.getElementById('tplBookingInvoiceSend')) document.getElementById('tplBookingInvoiceSend').value = _systemCfg.invoiceShareText || defaultTemplates().booking_invoice_send;
 
       renderSimpleList('bookingTypesContainer', _systemCfg.bookingTypes || ['زواج','تغطية','إعلان'], 'نوع الحجز');
       renderSimpleList('bookingServicesContainer', _systemCfg.bookingExtraServices || ['صور','فيديو','درون'], 'اسم الخدمة');
@@ -929,7 +862,7 @@
       const calendarId = document.getElementById('systemCalendarId').value.trim();
       const invoiceByLinkEnabled = document.getElementById('invoiceLinkEnabled').checked;
       const invoiceWhatsappNumber = document.getElementById('invoiceWhatsappNumber').value.trim();
-      const invoiceShareText = document.getElementById('invoiceShareText').value.trim() || defaultInvoiceShareText();
+      const invoiceShareText = document.getElementById('tplBookingInvoiceSend').value.trim() || defaultTemplates().booking_invoice_send;
       const projectSteps = collectSimpleList('projectStepsContainer');
       const bookingExtraServices = collectSimpleList('bookingServicesContainer');
       const bookingTypes = collectSimpleList('bookingTypesContainer');
@@ -1041,14 +974,15 @@
       const defs = defaultTemplates();
       document.getElementById('tplBookingPaymentReminder').value = t.booking_payment_reminder || defs.booking_payment_reminder;
       document.getElementById('tplBookingInvoiceSend').value = t.booking_invoice_send || defs.booking_invoice_send;
-      document.getElementById('tplBookingCompleteRequest').value = (_systemCfg && _systemCfg.publicBookingTemplate) || defs.booking_complete_request;
+      document.getElementById('tplBookingCompleteRequest').value = ((_systemCfg && _systemCfg.publicBookingTemplate) || t.booking_complete_request || defs.booking_complete_request);
       document.getElementById('tplAssignedTaskReminder').value = t.assigned_task_reminder || defs.assigned_task_reminder;
     }
 
-    async function saveTemplates(){
+    async async function saveTemplates(){
       const payload = {
         booking_payment_reminder: document.getElementById('tplBookingPaymentReminder').value.trim(),
         booking_invoice_send: document.getElementById('tplBookingInvoiceSend').value.trim(),
+        booking_complete_request: document.getElementById('tplBookingCompleteRequest').value.trim(),
         assigned_task_reminder: document.getElementById('tplAssignedTaskReminder').value.trim()
       };
       localStorage.setItem(APP_CONFIG.STORAGE.templates || 'media_templates', JSON.stringify(payload));
