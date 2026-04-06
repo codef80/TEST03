@@ -1,0 +1,84 @@
+
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>C2 — التحقق من التوفر</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.rtl.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800;900&display=swap">
+  <link rel="icon" type="image/png" href="apple-touch-icon.png">
+  <link rel="shortcut icon" href="apple-touch-icon.png">
+  <link rel="apple-touch-icon" href="apple-touch-icon.png">
+  <meta name="apple-mobile-web-app-title" content="وكالة ميديا">
+  <meta name="theme-color" content="#014979">
+  <script src="config-fixed.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <style>
+    :root{--p:#014979;--pdk:#013560;--ok:#059669;--err:#dc2626;--bg:#f1f5f9;--card:#fff;--txt:#0f172a;--muted:#64748b;--border:rgba(15,23,42,.08);--sh:0 8px 24px rgba(15,23,42,.08);--r:1.2rem}
+    *{box-sizing:border-box}html,body{margin:0;padding:0;background:var(--bg);color:var(--txt);font-family:'Tajawal',sans-serif}body{padding:1rem}.wrap{max-width:760px;margin:0 auto}.head{background:linear-gradient(135deg,#00243f,#014979 60%,#026aa7);color:#fff;border-radius:1.4rem;padding:1.1rem 1.2rem;box-shadow:var(--sh);margin-bottom:1rem}.title{font-size:1.3rem;font-weight:900;margin:0 0 .25rem}.sub{margin:0;color:rgba(255,255,255,.9);font-size:.95rem}
+    .box{background:var(--card);border:1px solid var(--border);border-radius:var(--r);box-shadow:var(--sh);overflow:hidden}.box-h{padding:.95rem 1rem;border-bottom:1px solid var(--border);font-weight:900;color:var(--p);display:flex;align-items:center;gap:.45rem}.box-b{padding:1rem}.grid{display:grid;grid-template-columns:1fr 1fr auto;gap:.65rem}.form-control,.form-select{border-radius:.9rem;padding:.75rem .9rem;border-color:#dbe4ee}.form-control:focus,.form-select:focus{border-color:rgba(1,73,121,.35);box-shadow:0 0 0 .2rem rgba(1,73,121,.12)}
+    .btn{border-radius:.9rem;font-weight:800;padding:.76rem 1rem}.btn-main{background:var(--p);border-color:var(--p);color:#fff}.btn-main:hover{background:var(--pdk);border-color:var(--pdk);color:#fff}.btn-soft{background:#fff;border:1px solid var(--border);color:#334155}.btn-soft:hover{background:#f8fafc}.status{margin-top:1rem;border:1px solid var(--border);border-radius:1rem;padding:1rem;background:#fff}.badge-x{display:inline-flex;align-items:center;gap:.35rem;border-radius:999px;padding:.32rem .7rem;font-size:.8rem;font-weight:800}.ok{background:#d1fae5;color:#065f46}.err{background:#fee2e2;color:#991b1b}.muted{background:#f1f5f9;color:#475569}.hint{color:var(--muted);font-size:.88rem}.actions{display:flex;gap:.55rem;flex-wrap:wrap;margin-top:1rem}.loader{display:none;align-items:center;gap:.5rem;color:var(--muted);margin-top:.8rem}
+    @media (max-width:768px){body{padding:.7rem}.grid{grid-template-columns:1fr}.actions .btn{flex:1}}
+  </style>
+</head>
+<body>
+<div class="wrap">
+  <section class="head">
+    <h1 class="title">التحقق من التوفر</h1>
+    <p class="sub">اختر اليوم المناسب لك، ثم انتقل مباشرة إلى صفحة إكمال الحجز.</p>
+  </section>
+  <section class="box">
+    <div class="box-h"><i class="fa-solid fa-magnifying-glass-calendar"></i> التحقق من التوفر</div>
+    <div class="box-b">
+      <div class="grid">
+        <select id="typeSelect" class="form-select"></select>
+        <input id="dateInput" type="date" class="form-control">
+        <button id="checkBtn" class="btn btn-main" type="button"><i class="fa-solid fa-search me-1"></i> بحث</button>
+      </div>
+      <div class="loader" id="loader"><i class="fa-solid fa-spinner fa-spin"></i> جاري فحص التوفر...</div>
+      <div class="status">
+        <div class="mb-2 fw-bold">حالة اليوم المختار</div>
+        <div class="d-flex align-items-center gap-2 flex-wrap mb-2">
+          <span class="badge-x muted" id="statusBadge"><i class="fa-regular fa-calendar"></i> اختر تاريخًا أولًا</span>
+        </div>
+        <div class="hint" id="statusText">حدد التاريخ ثم اضغط بحث لمعرفة حالة التوفر.</div>
+        <div class="actions">
+          <a id="completeBtn" class="btn btn-main disabled" href="#" aria-disabled="true"><i class="fa-brands fa-whatsapp me-1"></i> إكمال الحجز</a>
+          <a id="contactBtn" class="btn btn-soft" href="#" target="_blank" rel="noopener"><i class="fa-solid fa-phone me-1"></i> تواصل سريع</a>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+<script>
+(function () {
+  const logo = (window.APP_CONFIG && APP_CONFIG.APP_LOGO) || "https://i.ibb.co/N6TXzy3q/image.png";
+  const appName = (window.APP_CONFIG && APP_CONFIG.APP_NAME) || "وكالة ميديا";
+  function setLink(rel, href, sizes) { let link = document.querySelector(`link[rel="${rel}"]`); if (!link) { link = document.createElement("link"); link.rel = rel; document.head.appendChild(link);} link.href = href; if (sizes) link.sizes = sizes; }
+  setLink("icon", logo); setLink("shortcut icon", logo); setLink("apple-touch-icon", logo, "180x180");
+  let metaTheme = document.querySelector('meta[name="theme-color"]'); if (!metaTheme) { metaTheme = document.createElement("meta"); metaTheme.name = "theme-color"; document.head.appendChild(metaTheme); } metaTheme.content = "#014979";
+  let metaApple = document.querySelector('meta[name="apple-mobile-web-app-title"]'); if (!metaApple) { metaApple = document.createElement("meta"); metaApple.name = "apple-mobile-web-app-title"; document.head.appendChild(metaApple);} metaApple.content = appName;
+})();
+
+const state = { cfg:null, events:[] };
+function normalizePhone(raw){ let s=String(raw||'').replace(/\s/g,'').replace(/^\+/,'').replace(/^'/,''); if(s.startsWith('966')&&s.length===12)return s; if(s.startsWith('05')&&s.length===10)return '966'+s.slice(1); if(s.startsWith('5')&&s.length===9)return '966'+s; return s; }
+function fmtDateAr(dateStr){ const d=new Date(dateStr+'T00:00:00'); return d.toLocaleDateString('ar-SA',{year:'numeric',month:'long',day:'numeric'}); }
+function safeTypes(cfg){ const arr = Array.isArray(cfg?.publicBookingTypes) && !cfg.publicBookingTypes.includes('__ALL__') ? cfg.publicBookingTypes : (cfg?.bookingTypes || []); return arr.length ? arr : ['حجز']; }
+function available(dateStr){ return !state.events.some(e => (e.start || e.date || '').substring(0,10) === dateStr); }
+function getCompleteHref(dateStr){ const url = new URL(state.cfg?.publicCompleteUrl || 'C3.html', window.location.href); url.searchParams.set('date', dateStr); const type = document.getElementById('typeSelect').value; if(type) url.searchParams.set('type', type); return url.toString(); }
+function setStatus(kind, text, dateStr=''){
+  const badge = document.getElementById('statusBadge'); const body = document.getElementById('statusText'); const btn = document.getElementById('completeBtn');
+  if(kind==='ok'){ badge.className='badge-x ok'; badge.innerHTML='<i class="fa-solid fa-check"></i> متاح'; body.textContent=text; btn.classList.remove('disabled'); btn.removeAttribute('aria-disabled'); btn.href = getCompleteHref(dateStr); }
+  else if(kind==='err'){ badge.className='badge-x err'; badge.innerHTML='<i class="fa-solid fa-xmark"></i> غير متاح'; body.textContent=text; btn.classList.add('disabled'); btn.setAttribute('aria-disabled','true'); btn.href='#'; }
+  else { badge.className='badge-x muted'; badge.innerHTML='<i class="fa-regular fa-calendar"></i> اختر تاريخًا أولًا'; body.textContent=text; btn.classList.add('disabled'); btn.setAttribute('aria-disabled','true'); btn.href='#'; }
+}
+function renderTypes(){ const sel=document.getElementById('typeSelect'); sel.innerHTML='<option value="">اختر نوع الحجز</option>' + safeTypes(state.cfg).map(t=>`<option value="${String(t).replace(/"/g,'&quot;')}">${t}</option>`).join(''); }
+async function boot(){ try{ const init = await API.runWithRetry('getInitData',2); state.cfg=init?.systemConfig||{}; renderTypes(); document.getElementById('contactBtn').href = (state.cfg?.publicContactNumber || state.cfg?.whatsappNumber) ? `https://wa.me/${normalizePhone(state.cfg.publicContactNumber || state.cfg.whatsappNumber)}` : '#'; API.runWithRetry('getPublicEvents',2).then(r=>{ state.events = Array.isArray(r)?r:[]; }).catch(console.error); }catch(err){ console.error(err); Swal.fire('خطأ','تعذر تحميل إعدادات الصفحة','error'); } }
+async function checkAvailability(){ const dateStr = document.getElementById('dateInput').value; if(!dateStr){ return Swal.fire('تنبيه','اختر التاريخ أولًا','warning'); } const loader=document.getElementById('loader'); loader.style.display='flex'; try{ if(!state.events.length){ const events = await API.runWithRetry('getPublicEvents',2); state.events = Array.isArray(events)?events:[]; } if(available(dateStr)) setStatus('ok', `اليوم ${fmtDateAr(dateStr)} متاح حاليًا. يمكنك الانتقال مباشرة إلى صفحة إكمال الحجز.`, dateStr); else setStatus('err', `اليوم ${fmtDateAr(dateStr)} محجوز حاليًا. اختر يومًا آخر أو تواصل مباشرة.`); } catch(err){ console.error(err); Swal.fire('خطأ','تعذر فحص التوفر','error'); } finally{ loader.style.display='none'; } }
+document.getElementById('checkBtn').addEventListener('click', checkAvailability); document.getElementById('completeBtn').addEventListener('click', function(e){ if(this.classList.contains('disabled')) e.preventDefault(); });
+boot();
+</script>
+</body>
+</html>
