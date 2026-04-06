@@ -27,7 +27,7 @@
 <div class="wrap">
   <section class="head">
     <h1 class="title">التحقق من التوفر</h1>
-    <p class="sub">اختر اليوم المناسب لك، ثم انتقل مباشرة إلى صفحة إكمال الحجز.</p>
+    <p class="sub">اختر اليوم المناسب لك، ثم انتقل مباشرة إلى صفحة .</p>
   </section>
   <section class="box">
     <div class="box-h"><i class="fa-solid fa-magnifying-glass-calendar"></i> التحقق من التوفر</div>
@@ -67,7 +67,7 @@ function normalizePhone(raw){ let s=String(raw||'').replace(/\s/g,'').replace(/^
 function fmtDateAr(dateStr){ const d=new Date(dateStr+'T00:00:00'); return d.toLocaleDateString('ar-SA',{year:'numeric',month:'long',day:'numeric'}); }
 function safeTypes(cfg){ const arr = Array.isArray(cfg?.publicBookingTypes) && !cfg.publicBookingTypes.includes('__ALL__') ? cfg.publicBookingTypes : (cfg?.bookingTypes || []); return arr.length ? arr : ['حجز']; }
 function available(dateStr){ return !state.events.some(e => (e.start || e.date || '').substring(0,10) === dateStr); }
-function getCompleteHref(dateStr){ const url = new URL(state.cfg?.publicCompleteUrl || 'C3.html', window.location.href); url.searchParams.set('date', dateStr); const type = document.getElementById('typeSelect').value; if(type) url.searchParams.set('type', type); return url.toString(); }
+function getCompleteHref(dateStr){ const url = new URL(state.cfg?.publicCompleteUrl || 'c3.html', window.location.href); url.searchParams.set('date', dateStr); const type = document.getElementById('typeSelect').value; if(type) url.searchParams.set('type', type); return url.toString(); }
 function setStatus(kind, text, dateStr=''){
   const badge = document.getElementById('statusBadge'); const body = document.getElementById('statusText'); const btn = document.getElementById('completeBtn');
   if(kind==='ok'){ badge.className='badge-x ok'; badge.innerHTML='<i class="fa-solid fa-check"></i> متاح'; body.textContent=text; btn.classList.remove('disabled'); btn.removeAttribute('aria-disabled'); btn.href = getCompleteHref(dateStr); }
