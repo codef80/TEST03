@@ -844,7 +844,7 @@
         ...project,
         id,
         'اسم المشروع': getProjectName(project),
-        'قيمة المشروع': value === '' ? '' : Number(value),
+        'قيمة_المشروع': value === '' ? '' : Number(value),
         'إنهاء المشروع': boolVal(project['إنهاء المشروع']) || boolVal(project['إنهاء_المشروع'])
       };
       busy('جاري حفظ قيمة المشروع...');
