@@ -1,5 +1,6 @@
 
 
+
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
@@ -65,6 +66,13 @@
 
     .nav-pills .nav-link{border-radius:999px;font-weight:800;color:var(--muted);border:1px solid rgba(148,163,184,.35);background:rgba(255,255,255,.75);box-shadow:0 4px 10px rgba(15,23,42,.05)}
     .nav-pills .nav-link.active{background:linear-gradient(135deg,var(--p),var(--gold));color:#fff;border-color:transparent}
+    .finance-main-tabs{display:flex;gap:.55rem;flex-wrap:wrap;margin-bottom:1rem}
+    .finance-main-tabs .nav-link{padding:.7rem 1rem;font-size:.84rem}
+    .finance-subtabs{display:flex;gap:.5rem;flex-wrap:wrap;margin-bottom:1rem}
+    .finance-subtabs .nav-link{padding:.55rem .9rem;font-size:.8rem}
+    .payment-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:.65rem;margin-bottom:1rem}
+    @media(max-width:992px){ .payment-grid{grid-template-columns:repeat(2,minmax(0,1fr))} }
+    @media(max-width:560px){ .payment-grid{grid-template-columns:1fr} }
 
     .mini-stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:.65rem;margin-bottom:1rem}
     @media(max-width:992px){ .mini-stats{grid-template-columns:repeat(2,minmax(0,1fr))} }
@@ -116,29 +124,14 @@
   </style>
 </head>
 <body>
-  <section class="hero">
-    <h1 class="hero-title"><i class="fa-solid fa-wallet me-2"></i>المالية والمصروفات</h1>
-    <p class="hero-sub">صفحة مالية معاد بناؤها بالكامل، مع إدارة قيمة المشروع من تبويب تقرير المشاريع، وكل الأرقام معروضة بالإنجليزية.</p>
-    <div class="hero-meta">
-      <span class="hero-chip"><i class="fa-solid fa-building"></i> <span id="agencyNameHero">وكالة ميديا</span></span>
-      <span class="hero-chip"><i class="fa-solid fa-user"></i> <span id="currentUserHero">—</span></span>
-      <span class="hero-chip"><i class="fa-solid fa-calendar-days"></i> <span id="todayText">—</span></span>
-    </div>
-  </section>
-
-  <section class="summary-grid">
-    <div class="summary-card"><div class="summary-label">إجمالي الإيرادات</div><div class="summary-value text-num" id="sumRevenue">0</div><div class="summary-note">من ملخص المالية</div><i class="fa-solid fa-sack-dollar summary-icon"></i></div>
-    <div class="summary-card k2"><div class="summary-label">المستحقات</div><div class="summary-value text-num" id="sumReceivables">0</div><div class="summary-note">المتبقي على العملاء</div><i class="fa-solid fa-file-invoice-dollar summary-icon"></i></div>
-    <div class="summary-card k3"><div class="summary-label">صافي الربح</div><div class="summary-value text-num" id="sumNet">0</div><div class="summary-note">بعد المصروفات</div><i class="fa-solid fa-coins summary-icon"></i></div>
-    <div class="summary-card k4"><div class="summary-label">عدد الحجوزات</div><div class="summary-value text-num" id="sumBookings">0</div><div class="summary-note">للاطلاع العام</div><i class="fa-solid fa-calendar-check summary-icon"></i></div>
-  </section>
 
   <div class="box">
     <div class="box-head"><h2 class="box-title"><i class="fa-solid fa-layer-group me-2"></i>أقسام المالية</h2></div>
     <div class="box-body">
-      <ul class="nav nav-pills gap-2 mb-3" role="tablist">
+      <ul class="nav nav-pills finance-main-tabs" role="tablist">
         <li class="nav-item"><button class="nav-link active" data-bs-toggle="tab" data-bs-target="#tab-expenses" type="button"><i class="fa-solid fa-money-bill-wave me-1"></i> المصروفات العامة</button></li>
         <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-booking-expenses" type="button"><i class="fa-solid fa-receipt me-1"></i> مصروفات الحجوزات</button></li>
+        <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-payment-followup" type="button"><i class="fa-solid fa-wallet me-1"></i> متابعة السداد</button></li>
         <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-project-expenses" type="button"><i class="fa-solid fa-diagram-project me-1"></i> مصروفات المشاريع</button></li>
         <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-targets" type="button"><i class="fa-solid fa-bullseye me-1"></i> المستهدفات</button></li>
       </ul>
@@ -185,6 +178,46 @@
               <thead><tr><th>الحجز</th><th>السبب</th><th>النوع</th><th>القيمة</th><th>التاريخ</th><th>الحالة</th><th>إجراءات</th></tr></thead>
               <tbody id="bookingExpensesTbody"></tbody>
             </table>
+          </div>
+        </div>
+
+        <div class="tab-pane fade" id="tab-payment-followup">
+          <div class="payment-grid">
+            <div class="mini-card"><div class="t">عدد الحجوزات غير المكتملة</div><div class="v text-num" id="payUnpaidCount">0</div><div class="s">بحاجة متابعة</div></div>
+            <div class="mini-card"><div class="t">إجمالي المبالغ المتبقية</div><div class="v text-num" id="payUnpaidRemaining">0</div><div class="s">المتبقي على العملاء</div></div>
+            <div class="mini-card"><div class="t">عدد الحجوزات المكتملة</div><div class="v text-num" id="payPaidCount">0</div><div class="s">مكتمل السداد</div></div>
+            <div class="mini-card"><div class="t">إجمالي المبالغ المحصلة</div><div class="v text-num" id="payPaidCollected">0</div><div class="s">من الحجوزات المكتملة</div></div>
+          </div>
+
+          <ul class="nav nav-pills finance-subtabs" role="tablist">
+            <li class="nav-item"><button class="nav-link active" data-bs-toggle="tab" data-bs-target="#payment-unpaid" type="button"><i class="fa-solid fa-hourglass-half me-1"></i> غير مكتملة السداد</button></li>
+            <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#payment-paid" type="button"><i class="fa-solid fa-circle-check me-1"></i> مكتملة السداد</button></li>
+          </ul>
+
+          <div class="tab-content">
+            <div class="tab-pane fade show active" id="payment-unpaid">
+              <div class="toolbar">
+                <div class="toolbar-group"><button class="btn btn-soft" onclick="loadPaymentFollowups(true)"><i class="fa-solid fa-rotate me-1"></i> تحديث</button></div>
+                <div class="toolbar-group"><input type="text" id="paymentSearch" class="form-control" placeholder="بحث بالاسم أو الجوال أو التاريخ..." style="min-width:240px"></div>
+              </div>
+              <div class="card-list hidden-desktop" id="paymentUnpaidCards"></div>
+              <div class="table-wrap hidden-mobile">
+                <table class="table table-striped align-middle">
+                  <thead><tr><th>العميل</th><th>الجوال</th><th>التاريخ</th><th>الإجمالي</th><th>المدفوع</th><th>المتبقي</th><th>إجراءات</th></tr></thead>
+                  <tbody id="paymentUnpaidTbody"></tbody>
+                </table>
+              </div>
+            </div>
+
+            <div class="tab-pane fade" id="payment-paid">
+              <div class="card-list hidden-desktop" id="paymentPaidCards"></div>
+              <div class="table-wrap hidden-mobile">
+                <table class="table table-striped align-middle">
+                  <thead><tr><th>العميل</th><th>الجوال</th><th>التاريخ</th><th>الإجمالي</th><th>المدفوع</th><th>الحالة</th></tr></thead>
+                  <tbody id="paymentPaidTbody"></tbody>
+                </table>
+              </div>
+            </div>
           </div>
         </div>
 
@@ -327,10 +360,12 @@
     let _projectReport = [];
     let _targets = [];
     let _yearlyTargets = [];
+    let _paymentFollowups = [];
     let _lastBookingExpenseChange = null;
     let expenseModal, targetModal, projectValueModal;
     let _financeBooted = false;
-    const _financeSectionsLoaded = { summary:false, expenses:false, bookingExpenses:false, projects:false, targets:false, report:false };
+    let _financeRefreshTimer = null;
+    const _financeSectionsLoaded = { summary:false, expenses:false, bookingExpenses:false, paymentFollowup:false, projects:false, targets:false, report:false };
 
     document.addEventListener('DOMContentLoaded', async () => {
       if (typeof PageInit !== 'undefined' && PageInit.start) {
@@ -342,7 +377,6 @@
       expenseModal = new bootstrap.Modal(document.getElementById('expenseModal'));
       targetModal = new bootstrap.Modal(document.getElementById('targetModal'));
       projectValueModal = new bootstrap.Modal(document.getElementById('projectValueModal'));
-      hydrateHero();
       wireEvents();
       await initPage();
     });
@@ -377,6 +411,7 @@
       document.getElementById('projectExpenseProjectFilter').addEventListener('change', renderProjectExpenses);
       document.getElementById('projectExpenseStatusFilter').addEventListener('change', renderProjectExpenses);
       document.getElementById('projectReportSearch').addEventListener('input', renderProjectReport);
+      document.getElementById('paymentSearch').addEventListener('input', renderPaymentFollowups);
       document.getElementById('expenseForm').addEventListener('submit', onExpenseSubmit);
       document.getElementById('targetForm').addEventListener('submit', onTargetSubmit);
       document.getElementById('projectValueForm').addEventListener('submit', onProjectValueSubmit);
@@ -385,6 +420,7 @@
         btn.addEventListener('shown.bs.tab', async (e) => {
           const target = e.target.getAttribute('data-bs-target') || '';
           if (target === '#tab-booking-expenses' && !_financeSectionsLoaded.bookingExpenses) await loadBookingExpenses();
+          if (target === '#tab-payment-followup' && !_financeSectionsLoaded.paymentFollowup) await loadPaymentFollowups();
           if (target === '#tab-project-expenses' && !_financeSectionsLoaded.projects) {
             await loadProjects();
             await loadProjectExpensesDetailedData();
@@ -399,11 +435,15 @@
       });
 
       window.addEventListener('system:settings-updated', () => {
-        hydrateHero();
         loadProjects().then(() => {
           if (_financeSectionsLoaded.projects) renderProjectExpenses();
           if (_financeSectionsLoaded.report) loadProjectReport();
         }).catch(console.warn);
+      });
+      window.addEventListener('focus', () => refreshPaymentSensitiveSections(true));
+      document.addEventListener('visibilitychange', () => { if (!document.hidden) refreshPaymentSensitiveSections(true); });
+      window.addEventListener('storage', (e) => {
+        if (e.key === 'media_bookings_updated_at' || e.key === 'media_finance_refresh_hint') refreshPaymentSensitiveSections(true);
       });
     }
 
@@ -415,6 +455,7 @@
         loadFinanceSummary(true),
         loadExpenses()
       ]);
+      startBackgroundRefresh();
 
       const defer = window.requestIdleCallback
         ? (fn) => window.requestIdleCallback(fn, { timeout: 1200 })
@@ -423,6 +464,7 @@
       defer(async () => {
         try {
           await loadBookingExpenses();
+          await loadPaymentFollowups();
           await loadProjects();
           await loadProjectExpensesDetailedData();
           await loadTargets();
@@ -440,6 +482,22 @@
     function toast(icon, title){ Swal.fire({ toast:true, position:'top', icon, title, timer:1800, showConfirmButton:false }); }
     function busy(title){ Swal.fire({ title, allowOutsideClick:false, didOpen:()=>Swal.showLoading() }); }
     function done(){ Swal.close(); }
+    function getLocalSystemConfig(){ try { return JSON.parse(localStorage.getItem(APP_CONFIG.STORAGE.systemCfg || 'media_systemConfig') || '{}'); } catch(e) { return {}; } }
+    function signalFinanceRefresh(){ try { localStorage.setItem('media_finance_refresh_hint', String(Date.now())); } catch(e) {} }
+    function signalBookingsRefresh(){ try { localStorage.setItem('media_bookings_updated_at', String(Date.now())); } catch(e) {} }
+    function startBackgroundRefresh(){
+      if (_financeRefreshTimer) return;
+      _financeRefreshTimer = setInterval(() => {
+        if (!document.hidden) refreshPaymentSensitiveSections(true);
+      }, 25000);
+    }
+    async function refreshPaymentSensitiveSections(silent = false){
+      try {
+        await loadFinanceSummary(false);
+        if (_financeSectionsLoaded.bookingExpenses) await loadBookingExpenses();
+        if (_financeSectionsLoaded.paymentFollowup) await loadPaymentFollowups(true);
+      } catch (e) { if (!silent) console.warn(e); }
+    }
 
     async function safeApi(fn, ...args){ return API.run(fn, ...args); }
 
@@ -515,6 +573,7 @@
     async function loadBookingExpenses(){
       const result = await safeApi('getBookingExpenseReasons', { page:1, pageSize:500 });
       _bookingExpenseItems = result.items || [];
+      _financeSectionsLoaded.bookingExpenses = true;
       renderBookingExpenses();
     }
 
@@ -540,6 +599,106 @@
 
     async function setBookingExpenseStatusUI(bookingRow, reasonIndex, status, prevStatus){ busy('جاري تحديث الحالة...'); try { await safeApi('setBookingExpenseStatus', { bookingRow, reasonIndex, status }); _lastBookingExpenseChange = { bookingRow, reasonIndex, prevStatus }; document.getElementById('undoBookingExpenseBtn').style.display = 'inline-flex'; await loadBookingExpenses(); done(); toast('success','تم تحديث الحالة'); } catch(e){ done(); Swal.fire('خطأ','تعذر تحديث الحالة','error'); } }
     async function undoBookingExpenseStatus(){ if(!_lastBookingExpenseChange) return; busy('جاري التراجع...'); try { await safeApi('setBookingExpenseStatus', { bookingRow:_lastBookingExpenseChange.bookingRow, reasonIndex:_lastBookingExpenseChange.reasonIndex, status:_lastBookingExpenseChange.prevStatus || 'معلق' }); _lastBookingExpenseChange = null; document.getElementById('undoBookingExpenseBtn').style.display = 'none'; await loadBookingExpenses(); done(); toast('success','تم التراجع'); } catch(e){ done(); Swal.fire('خطأ','تعذر التراجع','error'); } }
+
+    async function loadPaymentFollowups(force = false){
+      let events = [];
+      if (!force && typeof DataStore !== 'undefined' && Array.isArray(DataStore.bookings) && DataStore.bookings.length) {
+        events = DataStore.bookings;
+      } else {
+        events = await safeApi('getEvents');
+      }
+      _paymentFollowups = Array.isArray(events) ? events.map(ev => ({
+        id: ev.id || ev?.extendedProps?.id || '',
+        name: ev?.extendedProps?.name || ev.title || '',
+        phone: ev?.extendedProps?.phone || '',
+        date: ev.start || ev?.extendedProps?.date || '',
+        amount: num(ev?.extendedProps?.amount),
+        deposit: num(ev?.extendedProps?.deposit),
+        remaining: num(ev?.extendedProps?.remaining),
+        type: ev?.extendedProps?.type || '',
+        place: ev?.extendedProps?.place || ''
+      })) : [];
+      _financeSectionsLoaded.paymentFollowup = true;
+      renderPaymentFollowups();
+    }
+
+    function renderPaymentFollowups(){
+      const q = (document.getElementById('paymentSearch')?.value || '').trim().toLowerCase();
+      const rows = _paymentFollowups.filter(r => !q || [r.name, r.phone, r.date, r.type, r.place].some(v => String(v||'').toLowerCase().includes(q)));
+      const unpaid = rows.filter(r => num(r.remaining) > 0).sort((a,b) => String(a.date||'').localeCompare(String(b.date||'')));
+      const paid = rows.filter(r => num(r.remaining) <= 0).sort((a,b) => String(b.date||'').localeCompare(String(a.date||'')));
+      document.getElementById('payUnpaidCount').textContent = fmt(unpaid.length);
+      document.getElementById('payUnpaidRemaining').textContent = fmt(unpaid.reduce((a,b)=>a+num(b.remaining),0),2);
+      document.getElementById('payPaidCount').textContent = fmt(paid.length);
+      document.getElementById('payPaidCollected').textContent = fmt(paid.reduce((a,b)=>a+num(b.deposit || b.amount),0),2);
+
+      const unpaidCards = document.getElementById('paymentUnpaidCards');
+      const unpaidTbody = document.getElementById('paymentUnpaidTbody');
+      const paidCards = document.getElementById('paymentPaidCards');
+      const paidTbody = document.getElementById('paymentPaidTbody');
+      unpaidCards.innerHTML = ''; unpaidTbody.innerHTML = '';
+      paidCards.innerHTML = ''; paidTbody.innerHTML = '';
+
+      if (!unpaid.length){
+        unpaidCards.innerHTML = '<div class="empty">لا توجد حجوزات غير مكتملة السداد.</div>';
+        unpaidTbody.innerHTML = '<tr><td colspan="7" class="text-center py-4 text-muted">لا توجد بيانات</td></tr>';
+      } else {
+        unpaid.forEach(r => {
+          const reminderBtn = `<button class="btn btn-sm btn-outline-warning" onclick="sendPaymentReminder('${esc(r.id)}')"><i class="fa-brands fa-whatsapp me-1"></i> تذكير بالسداد</button>`;
+          const paidBtn = `<button class="btn btn-sm btn-outline-success" onclick="markBookingPaidUI('${esc(r.id)}')"><i class="fa-solid fa-circle-check me-1"></i> مكتمل السداد</button>`;
+          unpaidCards.insertAdjacentHTML('beforeend', `<div class="mobile-card"><div class="head"><div><div class="title">${esc(r.name || 'عميل')}</div><div class="meta"><span>${esc(r.phone || '—')}</span><span>${esc(r.date || '—')}</span></div></div><span class="chip warn">متبقي ${fmt(r.remaining,2)}</span></div><div class="line"><strong>الإجمالي:</strong> <span class="text-num">${fmt(r.amount,2)}</span></div><div class="line"><strong>المدفوع:</strong> <span class="text-num">${fmt(r.deposit,2)}</span></div><div class="line"><strong>المتبقي:</strong> <span class="text-num">${fmt(r.remaining,2)}</span></div><div class="mobile-actions">${reminderBtn}${paidBtn}</div></div>`);
+          unpaidTbody.insertAdjacentHTML('beforeend', `<tr><td>${esc(r.name || '')}</td><td class="text-num">${esc(r.phone || '')}</td><td>${esc(r.date || '')}</td><td class="text-num">${fmt(r.amount,2)}</td><td class="text-num">${fmt(r.deposit,2)}</td><td class="text-num">${fmt(r.remaining,2)}</td><td><div class="table-actions">${reminderBtn}${paidBtn}</div></td></tr>`);
+        });
+      }
+
+      if (!paid.length){
+        paidCards.innerHTML = '<div class="empty">لا توجد حجوزات مكتملة السداد.</div>';
+        paidTbody.innerHTML = '<tr><td colspan="6" class="text-center py-4 text-muted">لا توجد بيانات</td></tr>';
+      } else {
+        paid.forEach(r => {
+          paidCards.insertAdjacentHTML('beforeend', `<div class="mobile-card"><div class="head"><div><div class="title">${esc(r.name || 'عميل')}</div><div class="meta"><span>${esc(r.phone || '—')}</span><span>${esc(r.date || '—')}</span></div></div><span class="chip ok">مكتمل السداد</span></div><div class="line"><strong>الإجمالي:</strong> <span class="text-num">${fmt(r.amount,2)}</span></div><div class="line"><strong>المدفوع:</strong> <span class="text-num">${fmt(r.deposit || r.amount,2)}</span></div></div>`);
+          paidTbody.insertAdjacentHTML('beforeend', `<tr><td>${esc(r.name || '')}</td><td class="text-num">${esc(r.phone || '')}</td><td>${esc(r.date || '')}</td><td class="text-num">${fmt(r.amount,2)}</td><td class="text-num">${fmt(r.deposit || r.amount,2)}</td><td><span class="chip ok">مكتمل السداد</span></td></tr>`);
+        });
+      }
+    }
+
+    function buildPaymentReminderText(item){
+      const cfg = getLocalSystemConfig();
+      return [
+        `السلام عليكم ${item.name ? item.name : ''}`.trim(),
+        `نذكركم بالمبلغ المتبقي على الحجز: ${fmt(item.remaining,2)} ريال`,
+        item.date ? `تاريخ الحجز: ${item.date}` : '',
+        item.type ? `نوع الحجز: ${item.type}` : '',
+        cfg.agencyName ? `مع ${cfg.agencyName}` : ''
+      ].filter(Boolean).join('\n');
+    }
+
+    function sendPaymentReminder(id){
+      const item = _paymentFollowups.find(x => String(x.id) === String(id));
+      if (!item) return;
+      const phone = String(item.phone || '').trim();
+      if (!phone) { Swal.fire('تنبيه','لا يوجد رقم جوال لهذا الحجز','info'); return; }
+      const text = buildPaymentReminderText(item);
+      const url = (typeof Utils !== 'undefined' && Utils.waLink) ? Utils.waLink(phone, text) : `https://wa.me/${phone}?text=${encodeURIComponent(text)}`;
+      window.open(url, '_blank');
+    }
+
+    async function markBookingPaidUI(id){
+      const ok = await Swal.fire({ title:'تأكيد السداد', text:'سيتم اعتبار هذا الحجز مكتمل السداد.', icon:'question', showCancelButton:true, confirmButtonText:'نعم', cancelButtonText:'إلغاء' });
+      if (!ok.isConfirmed) return;
+      busy('جاري تحديث الحجز...');
+      try {
+        await safeApi('markPaid', id);
+        signalBookingsRefresh();
+        await refreshPaymentSensitiveSections(true);
+        await loadPaymentFollowups(true);
+        done();
+        toast('success','تم اعتماد الحجز كمكتمل السداد');
+      } catch (e) {
+        done();
+        Swal.fire('خطأ','تعذر تحديث حالة السداد','error');
+      }
+    }
 
     function getProjectId(project){ return String(project?.id || project?.['id'] || ''); }
     function getProjectName(project){ return String(project?.['اسم_المشروع'] ?? project?.['اسم المشروع'] ?? project?.name ?? ''); }
