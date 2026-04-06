@@ -121,6 +121,23 @@
     .hidden-mobile{display:table}
     .hidden-desktop{display:none}
     @media(max-width:991.98px){.hidden-mobile{display:none !important}.hidden-desktop{display:block !important}}
+
+    .finance-main-tabs,.finance-subtabs,.project-subtabs,.targets-subtabs{
+      display:flex;gap:.55rem;flex-wrap:wrap;margin-bottom:1rem
+    }
+    .finance-main-tabs .nav-link,.finance-subtabs .nav-link,.project-subtabs .nav-link,.targets-subtabs .nav-link{
+      border-radius:999px;font-weight:800;color:var(--muted);border:1px solid rgba(148,163,184,.35);background:rgba(255,255,255,.92);box-shadow:0 4px 10px rgba(15,23,42,.05);padding:.62rem 1rem
+    }
+    .finance-main-tabs .nav-link.active,.finance-subtabs .nav-link.active,.project-subtabs .nav-link.active,.targets-subtabs .nav-link.active{
+      background:linear-gradient(135deg,var(--p),var(--gold));color:#fff;border-color:transparent
+    }
+    .section-divider{
+      margin:1rem 0 1.1rem;padding:.9rem 1rem;border:1px solid var(--border);border-radius:1rem;
+      background:linear-gradient(180deg,#fff 0%,#f8fafc 100%);box-shadow:var(--sh)
+    }
+    .section-divider .title{font-weight:900;color:var(--p);margin-bottom:.2rem;display:flex;align-items:center;gap:.45rem}
+    .section-divider .note{font-size:.78rem;color:var(--muted);margin:0}
+
   </style>
 </head>
 <body>
@@ -222,7 +239,11 @@
         </div>
 
         <div class="tab-pane fade" id="tab-project-expenses">
-          <ul class="nav nav-pills gap-2 mb-3" role="tablist">
+          <div class="section-divider">
+            <div class="title"><i class="fa-solid fa-diagram-project"></i> قسم مصروفات المشاريع</div>
+            <p class="note">هنا تجد عرضين منفصلين بشكل أوضح: عرض تفصيلي لكل مصروف، وعرض إجمالي لتقرير المشاريع وقيمها ومتبقيها.</p>
+          </div>
+          <ul class="nav nav-pills project-subtabs" role="tablist">
             <li class="nav-item"><button class="nav-link active" data-bs-toggle="tab" data-bs-target="#tab-project-expenses-detail" type="button"><i class="fa-solid fa-list-ul me-1"></i> التفصيلي</button></li>
             <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-project-report" type="button"><i class="fa-solid fa-chart-pie me-1"></i> تقرير المشاريع</button></li>
           </ul>
@@ -241,7 +262,7 @@
                   <select id="projectExpenseProjectFilter" class="form-select" style="min-width:240px"></select>
                   <select id="projectExpenseStatusFilter" class="form-select" style="min-width:170px"><option value="">كل الحالات</option><option value="مسدد">مسدد</option><option value="معلق">معلق</option></select>
                 </div>
-                <div class="toolbar-group"><button class="btn btn-soft" onclick="loadProjectExpensesDetailedData()"><i class="fa-solid fa-rotate me-1"></i> تحديث</button></div>
+                <div class="toolbar-group"><button class="btn btn-soft" onclick="refreshProjectsSection()"><i class="fa-solid fa-rotate me-1"></i> تحديث</button></div>
               </div>
 
               <div class="card-list hidden-desktop" id="projectExpensesCards"></div>
@@ -263,7 +284,7 @@
 
               <div class="toolbar">
                 <div class="toolbar-group"><input type="text" id="projectReportSearch" class="form-control" placeholder="بحث باسم المشروع..." style="min-width:240px"></div>
-                <div class="toolbar-group"><button class="btn btn-soft" onclick="loadProjectReport()"><i class="fa-solid fa-rotate me-1"></i> إعادة التحميل</button></div>
+                <div class="toolbar-group"><button class="btn btn-soft" onclick="refreshProjectsSection('report')"><i class="fa-solid fa-rotate me-1"></i> إعادة التحميل</button></div>
               </div>
 
               <div class="card-list hidden-desktop" id="projectReportCards"></div>
@@ -287,7 +308,7 @@
 
           <div class="toolbar"><div class="toolbar-group"><button class="btn btn-success" onclick="openTargetModal()"><i class="fa-solid fa-plus me-1"></i> إضافة مستهدف</button></div></div>
 
-          <ul class="nav nav-pills gap-2 mb-3" role="tablist">
+          <ul class="nav nav-pills targets-subtabs" role="tablist">
             <li class="nav-item"><button class="nav-link active" data-bs-toggle="tab" data-bs-target="#targets-yearly" type="button"><i class="fa-solid fa-chart-column me-1"></i> المستهدفات السنوية</button></li>
             <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#targets-monthly" type="button"><i class="fa-solid fa-bullseye me-1"></i> المستهدفات الشهرية</button></li>
           </ul>
@@ -591,7 +612,7 @@
       if (!rows.length){ cards.innerHTML = '<div class="empty">لا توجد بيانات.</div>'; tbody.innerHTML = '<tr><td colspan="7" class="text-center py-4 text-muted">لا توجد بيانات</td></tr>'; return; }
       rows.forEach(r => {
         const badge = badgeClass(r.status);
-        const bookingLabel = [r.bookingName, r.bookingType].filter(Boolean).join(' — ') || r.bookingId || 'حجز';
+        const bookingLabel = r.bookingName || r.name || 'حجز';
         cards.insertAdjacentHTML('beforeend', `<div class="mobile-card"><div class="head"><div><div class="title">${esc(bookingLabel)}</div><div class="meta"><span>${esc(r.date||'')}</span><span>${esc(r.type||'—')}</span></div></div><span class="chip ${badge}">${esc(r.status||'معلق')}</span></div><div class="line"><strong>السبب:</strong> ${esc(r.reason||'')}</div><div class="line"><strong>القيمة:</strong> <span class="text-num">${fmt(r.value,2)}</span></div><div class="mobile-actions"><button class="btn btn-sm btn-outline-success" onclick="setBookingExpenseStatusUI(${r.bookingRow}, ${r.reasonIndex}, 'مسدد', '${esc(r.status||'')}')">مسدد</button><button class="btn btn-sm btn-outline-secondary" onclick="setBookingExpenseStatusUI(${r.bookingRow}, ${r.reasonIndex}, 'معلق', '${esc(r.status||'')}')">معلق</button></div></div>`);
         tbody.insertAdjacentHTML('beforeend', `<tr><td>${esc(bookingLabel)}</td><td>${esc(r.reason||'')}</td><td>${esc(r.type||'')}</td><td class="text-num">${fmt(r.value,2)}</td><td>${esc(r.date||'')}</td><td><span class="chip ${badge}">${esc(r.status||'معلق')}</span></td><td><div class="table-actions"><button class="btn btn-sm btn-outline-success" onclick="setBookingExpenseStatusUI(${r.bookingRow}, ${r.reasonIndex}, 'مسدد', '${esc(r.status||'')}')">مسدد</button><button class="btn btn-sm btn-outline-secondary" onclick="setBookingExpenseStatusUI(${r.bookingRow}, ${r.reasonIndex}, 'معلق', '${esc(r.status||'')}')">معلق</button></div></td></tr>`);
       });
@@ -706,6 +727,23 @@
     function getProjectStatus(project){ const settings = JSON.parse(localStorage.getItem(APP_CONFIG.STORAGE.systemCfg || 'media_systemConfig') || '{}'); const steps = Array.isArray(settings.projectSteps) ? settings.projectSteps : []; const ended = boolVal(project?.['إنهاء_المشروع']) || boolVal(project?.['إنهاء المشروع']); if (ended) return 'مكتمل'; if (!steps.length) return 'قيد التنفيذ'; const doneCount = steps.filter(step => boolVal(project?.[step])).length; if (doneCount === 0) return 'جديد'; if (doneCount === steps.length) return 'مكتمل'; return 'قيد التنفيذ'; }
     function getProjectValue(project){ const keys = ['قيمة_المشروع','قيمة المشروع','المبلغ','قيمة_العقد','قيمة العقد','سعر_المشروع','سعر المشروع']; for (const k of keys){ if (project && project[k] !== undefined && project[k] !== null && String(project[k]).trim() !== '') return num(project[k]); } return null; }
 
+
+    async function refreshProjectsSection(target = 'all'){
+      busy('جاري تحديث بيانات المشاريع...');
+      try {
+        await loadProjects();
+        await loadProjectExpensesDetailedData();
+        if (target === 'report' || target === 'all') {
+          await loadProjectReport();
+        }
+        done();
+        toast('success','تم تحديث بيانات المشاريع');
+      } catch (e) {
+        done();
+        Swal.fire('خطأ','تعذر تحديث بيانات المشاريع','error');
+      }
+    }
+
     async function loadProjects(){
       _projects = await safeApi('getProjects');
       const sel = document.getElementById('projectExpenseProjectFilter');
@@ -770,6 +808,7 @@
       document.getElementById('projectReportExpenses').textContent = fmt(_projectReport.reduce((a,b)=>a+b.totalExpenses,0),2);
       document.getElementById('projectReportValues').textContent = fmt(_projectReport.reduce((a,b)=>a+(b.projectValue||0),0),2);
       document.getElementById('projectReportRemaining').textContent = fmt(_projectReport.reduce((a,b)=>a+(b.remaining||0),0),2);
+      _financeSectionsLoaded.report = true;
       renderProjectReport();
     }
 
