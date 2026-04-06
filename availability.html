@@ -1,0 +1,348 @@
+
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>التحقق من التوفر</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.rtl.min.css" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;800;900&display=swap" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js"></script>
+  <script src="config-fixed.js"></script>
+  <style>
+    :root{
+      --p:#014979; --p-dk:#013560; --p-lt:#e8f4fd;
+      --gold:#c6a43f; --gold-dk:#a68a2e; --gold-lt:#fdf6e3;
+      --ok:#059669; --ok-lt:#d1fae5;
+      --warn:#d97706; --warn-lt:#ffedd5;
+      --err:#dc2626; --err-lt:#fee2e2;
+      --bg:#f1f5f9; --card:#fff; --txt:#0f172a; --muted:#64748b;
+      --border:rgba(15,23,42,.08); --sh:0 10px 30px rgba(15,23,42,.09);
+    }
+    *{box-sizing:border-box}
+    html,body{margin:0;padding:0;background:var(--bg);font-family:'Tajawal',sans-serif;color:var(--txt)}
+    body{padding:1rem}
+    @media (max-width:768px){body{padding:.75rem}}
+    .hero{background:linear-gradient(135deg,#00243f 0%,#014979 52%,#026aa7 100%);color:#fff;border-radius:1.6rem;padding:1.3rem 1.35rem;box-shadow:0 16px 36px rgba(1,73,121,.22);margin-bottom:1rem;position:relative;overflow:hidden}
+    .hero:before{content:"";position:absolute;inset-inline-end:-55px;top:-45px;width:180px;height:180px;border-radius:50%;background:radial-gradient(circle,rgba(255,255,255,.16),transparent 68%)}
+    .hero h1{margin:0 0 .35rem;font-size:1.55rem;font-weight:900}
+    .hero p{margin:0;color:rgba(255,255,255,.9)}
+    .hero-meta{display:flex;gap:.45rem;flex-wrap:wrap;margin-top:.85rem}
+    .hero-chip{display:inline-flex;align-items:center;gap:.35rem;padding:.38rem .75rem;border-radius:999px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.18);font-size:.83rem;font-weight:700}
+    .section-card{background:var(--card);border:1px solid var(--border);border-radius:1.35rem;box-shadow:var(--sh);overflow:hidden;margin-bottom:1rem}
+    .section-head{padding:1rem 1.1rem;border-bottom:1px solid var(--border);background:linear-gradient(180deg,#fff 0%,#f8fafc 100%);display:flex;justify-content:space-between;align-items:center;gap:.75rem;flex-wrap:wrap}
+    .section-title{margin:0;font-weight:900;color:var(--p);font-size:1rem}
+    .section-body{padding:1rem}
+    .filters{display:grid;grid-template-columns:1.2fr .9fr .8fr auto;gap:.65rem}
+    @media (max-width:992px){.filters{grid-template-columns:1fr 1fr}}
+    @media (max-width:560px){.filters{grid-template-columns:1fr}}
+    .form-control,.form-select{border-radius:1rem;padding:.8rem .95rem;border-color:#dbe4ee;font-family:'Tajawal',sans-serif}
+    .form-control:focus,.form-select:focus{border-color:rgba(1,73,121,.35);box-shadow:0 0 0 .2rem rgba(1,73,121,.12)}
+    .btn{border-radius:1rem;font-weight:800;padding:.8rem 1rem}
+    .btn-main{background:var(--p);color:#fff;border:none}.btn-main:hover{background:var(--p-dk);color:#fff}
+    .btn-gold{background:var(--gold);color:#fff;border:none}.btn-gold:hover{background:var(--gold-dk);color:#fff}
+    .kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:.7rem}
+    @media (max-width:992px){.kpis{grid-template-columns:repeat(2,minmax(0,1fr))}}
+    .kpi{background:#fff;border:1px solid var(--border);border-radius:1rem;padding:.9rem 1rem;position:relative;overflow:hidden}
+    .kpi .l{font-size:.78rem;color:var(--muted);font-weight:700}
+    .kpi .v{font-size:1.35rem;font-weight:900;margin-top:.22rem}
+    .kpi .s{font-size:.72rem;color:var(--muted);margin-top:.12rem}
+    .kpi i{position:absolute;left:-8px;bottom:-10px;font-size:3.25rem;opacity:.06}
+    #calendarWrap{padding:.85rem}
+    #calendar{background:#fff;border-radius:1.15rem}
+    .fc{font-family:'Tajawal',sans-serif}
+    .fc .fc-toolbar-title{font-size:1.1rem;font-weight:900;color:var(--p)}
+    .fc .fc-button-primary{background:var(--p)!important;border-color:var(--p)!important;border-radius:.8rem!important;font-weight:800}
+    .fc .fc-daygrid-day.fc-day-today{background-color:rgba(1,73,121,.05)!important}
+    .fc .fc-event{border:none;border-radius:.6rem;padding:2px 6px;font-size:.74rem;font-weight:700}
+    .legend{display:flex;gap:.55rem;flex-wrap:wrap}
+    .legend-item{display:inline-flex;align-items:center;gap:.4rem;padding:.35rem .7rem;border-radius:999px;background:#fff;border:1px solid var(--border);font-size:.78rem;font-weight:700}
+    .dot{width:11px;height:11px;border-radius:50%}
+    .status-box{display:grid;grid-template-columns:1.15fr .85fr;gap:1rem}
+    @media (max-width:992px){.status-box{grid-template-columns:1fr}}
+    .status-panel{background:#fff;border:1px solid var(--border);border-radius:1.1rem;padding:1rem}
+    .status-badge{display:inline-flex;align-items:center;gap:.35rem;padding:.35rem .8rem;border-radius:999px;font-weight:800;font-size:.82rem}
+    .st-free{background:var(--ok-lt);color:var(--ok)} .st-busy{background:var(--err-lt);color:var(--err)} .st-partial{background:var(--warn-lt);color:var(--warn)}
+    .line{display:flex;justify-content:space-between;gap:.75rem;padding:.5rem 0;border-bottom:1px dashed var(--border)}
+    .line:last-child{border-bottom:none}
+    .event-list{display:grid;gap:.55rem}
+    .event-item{border:1px solid var(--border);border-radius:.9rem;padding:.75rem .85rem;background:#f8fafc}
+    .event-title{font-weight:900;color:var(--p)}
+    .event-meta{font-size:.8rem;color:var(--muted);margin-top:.2rem;display:flex;gap:.35rem;flex-wrap:wrap}
+    .footer-note{text-align:center;color:var(--muted);font-size:.82rem;padding:.3rem .2rem}
+    .loader{display:flex;align-items:center;justify-content:center;padding:2rem;color:var(--muted)}
+  </style>
+</head>
+<body>
+  <section class="hero">
+    <h1><i class="fa-solid fa-calendar-check me-2"></i>التحقق من التوفر</h1>
+    <p>اختر اليوم المناسب لك، ثم انتقل مباشرة إلى صفحة إكمال الحجز.</p>
+    <div class="hero-meta">
+      <span class="hero-chip"><i class="fa-solid fa-building"></i><span id="agencyName">وكالة ميديا</span></span>
+      <span class="hero-chip"><i class="fa-solid fa-bolt"></i>تحميل مباشر عبر Fetch/CORS</span>
+      <span class="hero-chip"><i class="fa-solid fa-phone"></i><span id="waNumberText">—</span></span>
+    </div>
+  </section>
+
+  <section class="section-card">
+    <div class="section-head">
+      <h2 class="section-title"><i class="fa-solid fa-sliders me-2"></i>بحث سريع عن يوم مناسب</h2>
+      <div class="legend">
+        <span class="legend-item"><span class="dot" style="background:#059669"></span>متاح</span>
+        <span class="legend-item"><span class="dot" style="background:#d97706"></span>جزئي</span>
+        <span class="legend-item"><span class="dot" style="background:#dc2626"></span>محجوز</span>
+      </div>
+    </div>
+    <div class="section-body">
+      <div class="filters">
+        <div>
+          <label class="form-label fw-bold">نوع الحجز</label>
+          <select id="typeFilter" class="form-select"></select>
+        </div>
+        <div>
+          <label class="form-label fw-bold">المكان / الشالية / الخدمة</label>
+          <input id="placeFilter" class="form-control" placeholder="مثال: شالية النخبة أو جلسة خارجية">
+        </div>
+        <div>
+          <label class="form-label fw-bold">التاريخ المختار</label>
+          <input id="selectedDateInput" type="date" class="form-control">
+        </div>
+        <div class="d-flex align-items-end">
+          <button class="btn btn-main w-100" id="goCompleteBtn"><i class="fa-solid fa-arrow-left-long me-1"></i>إكمال الحجز</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="kpis mb-3">
+    <div class="kpi"><div class="l">أيام محجوزة هذا الشهر</div><div class="v" id="busyDays">0</div><div class="s">حسب البيانات الحالية</div><i class="fa-solid fa-calendar-xmark"></i></div>
+    <div class="kpi"><div class="l">أيام متاحة هذا الشهر</div><div class="v" id="freeDays">0</div><div class="s">تقديري حسب الشهر المعروض</div><i class="fa-solid fa-calendar-plus"></i></div>
+    <div class="kpi"><div class="l">حجوزات الشهر</div><div class="v" id="bookingsCount">0</div><div class="s">لكل الأنواع</div><i class="fa-solid fa-briefcase"></i></div>
+    <div class="kpi"><div class="l">النوع المختار</div><div class="v" id="activeTypeText">الكل</div><div class="s">يمكن تغييره فورًا</div><i class="fa-solid fa-tags"></i></div>
+  </section>
+
+  <section class="section-card">
+    <div class="section-head">
+      <h2 class="section-title"><i class="fa-solid fa-calendar-days me-2"></i>التقويم</h2>
+      <span class="text-muted small">اضغط على أي يوم لعرض حالته بالتفصيل</span>
+    </div>
+    <div id="calendarWrap">
+      <div id="calendar"></div>
+    </div>
+  </section>
+
+  <section class="status-box">
+    <div class="section-card mb-0">
+      <div class="section-head"><h2 class="section-title"><i class="fa-solid fa-circle-info me-2"></i>حالة اليوم المختار</h2></div>
+      <div class="section-body">
+        <div class="status-panel">
+          <div class="d-flex justify-content-between align-items-center gap-2 flex-wrap mb-3">
+            <div>
+              <div class="text-muted small">اليوم</div>
+              <div class="fw-bold fs-5" id="selectedDateLabel">—</div>
+            </div>
+            <span id="selectedStatusBadge" class="status-badge st-free"><i class="fa-solid fa-circle-check"></i>متاح</span>
+          </div>
+          <div class="line"><span class="text-muted">نوع الحجز المختار</span><strong id="selectedTypeLabel">الكل</strong></div>
+          <div class="line"><span class="text-muted">عدد الحجوزات في اليوم</span><strong id="selectedCount">0</strong></div>
+          <div class="line"><span class="text-muted">المكان المطلوب</span><strong id="selectedPlaceLabel">—</strong></div>
+          <div class="line"><span class="text-muted">التوصية</span><strong id="selectedAdvice">يمكنك المتابعة</strong></div>
+          <div class="mt-3 d-grid gap-2 d-md-flex">
+            <button class="btn btn-gold flex-fill" id="completeBtn"><i class="fa-solid fa-paper-plane me-1"></i>إكمال الحجز</button>
+            <button class="btn btn-outline-secondary flex-fill" id="contactBtn"><i class="fa-brands fa-whatsapp me-1"></i>تواصل سريع</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="section-card mb-0">
+      <div class="section-head"><h2 class="section-title"><i class="fa-solid fa-list me-2"></i>تفاصيل اليوم</h2></div>
+      <div class="section-body">
+        <div id="dayEvents" class="event-list"><div class="text-muted">اختر يومًا من التقويم</div></div>
+      </div>
+    </div>
+  </section>
+
+  <div class="footer-note mt-3">هذه الصفحة مخصصة للتحقق من التوفر واختيار يوم جديد، وليست للبحث عن حجز سابق.</div>
+
+<script>
+const PUBLIC_CFG = {
+  completePage: 'booking-complete-new.html',
+  whatsappFallback: '966500000000',
+  allowTypesLabel: 'كل الأنواع'
+};
+
+const state = {
+  events: [],
+  system: null,
+  selectedDate: '',
+  selectedType: '',
+  place: '',
+  calendar: null,
+  visibleMonth: null
+};
+
+function apiRun(fn, ...args){
+  if (window.API && typeof API.run === 'function') return API.run(fn, ...args);
+  const apiUrl = (window.APP_CONFIG && APP_CONFIG.API_URL) || '';
+  const params = new URLSearchParams({ fn });
+  args.forEach((a,i)=> params.append('p'+i, typeof a === 'object' ? JSON.stringify(a) : String(a ?? '')));
+  return fetch(`${apiUrl}?${params.toString()}`).then(r=>r.json());
+}
+function esc(t){return String(t ?? '').replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]));}
+function normalizePhone(raw){
+  let s = String(raw || '').replace(/\s/g,'').replace(/^\+/,'').replace(/^'/,'');
+  if (s.startsWith('966') && s.length === 12) return s;
+  if (s.startsWith('05') && s.length === 10) return '966' + s.slice(1);
+  if (s.startsWith('5') && s.length === 9) return '966' + s;
+  return s || PUBLIC_CFG.whatsappFallback;
+}
+function fmtDate(d){ if(!d) return '—'; const x = new Date(d); if(isNaN(x)) return d; return new Intl.DateTimeFormat('ar-SA',{year:'numeric',month:'long',day:'numeric'}).format(x); }
+function dayKey(date){ return typeof date === 'string' ? date.slice(0,10) : new Date(date).toISOString().slice(0,10); }
+function getFilteredEvents(){
+  const t = state.selectedType;
+  const place = state.place.trim();
+  return state.events.filter(ev => {
+    const p = ev.extendedProps || {};
+    const okType = !t || t === '__all__' || (p.type || '') === t;
+    const okPlace = !place || String(p.place || '').includes(place) || String(ev.title || '').includes(place);
+    return okType && okPlace;
+  });
+}
+function getDayEvents(dateStr){ return getFilteredEvents().filter(ev => dayKey(ev.start) === dateStr); }
+function getDayStatus(dateStr){
+  const count = getDayEvents(dateStr).length;
+  if (count === 0) return { key:'free', label:'متاح', icon:'fa-circle-check', advice:'اليوم مناسب لإكمال الحجز' };
+  if (count === 1) return { key:'partial', label:'متاح جزئيًا', icon:'fa-circle-exclamation', advice:'تحقق من التفاصيل ثم أكمل الحجز' };
+  return { key:'busy', label:'محجوز', icon:'fa-circle-xmark', advice:'يفضل اختيار يوم آخر' };
+}
+function statusClass(key){ return key === 'busy' ? 'st-busy' : key === 'partial' ? 'st-partial' : 'st-free'; }
+function eventColorByCount(count){ return count >= 2 ? '#dc2626' : count === 1 ? '#d97706' : '#059669'; }
+function fillTypeOptions(){
+  const sel = document.getElementById('typeFilter');
+  const types = (state.system?.bookingTypes || []).filter(Boolean);
+  sel.innerHTML = `<option value="__all__">${PUBLIC_CFG.allowTypesLabel}</option>` + types.map(t => `<option value="${esc(t)}">${esc(t)}</option>`).join('');
+  sel.value = '__all__';
+  state.selectedType = '__all__';
+  document.getElementById('activeTypeText').textContent = PUBLIC_CFG.allowTypesLabel;
+  document.getElementById('selectedTypeLabel').textContent = PUBLIC_CFG.allowTypesLabel;
+}
+function renderCalendar(){
+  const el = document.getElementById('calendar');
+  if (state.calendar) state.calendar.destroy();
+  state.calendar = new FullCalendar.Calendar(el, {
+    initialView:'dayGridMonth', locale:'ar', direction:'rtl', height:'auto',
+    headerToolbar:{ left:'prev,next today', center:'title', right:'dayGridMonth' },
+    buttonText:{ today:'اليوم', month:'شهر' },
+    datesSet(info){ state.visibleMonth = info.start; updateMonthStats(info.start, info.end); },
+    dateClick(info){ selectDate(info.dateStr); },
+    events(fetchInfo, successCallback){
+      const start = new Date(fetchInfo.startStr), end = new Date(fetchInfo.endStr);
+      const arr = [];
+      const seen = new Set();
+      const current = new Date(start);
+      while(current < end){
+        const k = current.toISOString().slice(0,10);
+        const st = getDayStatus(k);
+        const cnt = getDayEvents(k).length;
+        arr.push({ id:'s-'+k, start:k, allDay:true, title: st.label + (cnt ? ` (${cnt})` : ''), color:eventColorByCount(cnt), textColor:'#fff' });
+        seen.add(k); current.setDate(current.getDate()+1);
+      }
+      successCallback(arr);
+    }
+  });
+  state.calendar.render();
+}
+function updateMonthStats(start, end){
+  let busy=0, free=0, count=0;
+  const current = new Date(start);
+  while(current < end){
+    const k = current.toISOString().slice(0,10);
+    const c = getDayEvents(k).length;
+    if (c >= 2) busy++; else free++;
+    count += c;
+    current.setDate(current.getDate()+1);
+  }
+  document.getElementById('busyDays').textContent = String(busy);
+  document.getElementById('freeDays').textContent = String(free);
+  document.getElementById('bookingsCount').textContent = String(count);
+}
+function renderDayEvents(dateStr){
+  const box = document.getElementById('dayEvents');
+  const items = getDayEvents(dateStr);
+  if (!items.length){ box.innerHTML = `<div class="text-muted">لا توجد حجوزات ظاهرة في هذا اليوم حسب الفلترة الحالية.</div>`; return; }
+  box.innerHTML = items.map(ev => {
+    const p = ev.extendedProps || {};
+    return `<div class="event-item"><div class="event-title">${esc(p.type || ev.title || 'حجز')}</div><div class="event-meta"><span><i class="fa-solid fa-location-dot"></i> ${esc(p.place || '—')}</span><span><i class="fa-solid fa-clock"></i> ${esc(p.time || 'غير محدد')}</span></div></div>`;
+  }).join('');
+}
+function selectDate(dateStr){
+  state.selectedDate = dateStr;
+  document.getElementById('selectedDateInput').value = dateStr;
+  document.getElementById('selectedDateLabel').textContent = fmtDate(dateStr);
+  const st = getDayStatus(dateStr);
+  const badge = document.getElementById('selectedStatusBadge');
+  badge.className = `status-badge ${statusClass(st.key)}`;
+  badge.innerHTML = `<i class="fa-solid ${st.icon}"></i>${st.label}`;
+  document.getElementById('selectedAdvice').textContent = st.advice;
+  document.getElementById('selectedCount').textContent = String(getDayEvents(dateStr).length);
+  document.getElementById('selectedPlaceLabel').textContent = state.place.trim() || '—';
+  renderDayEvents(dateStr);
+}
+function buildCompleteUrl(){
+  const q = new URLSearchParams({ date: state.selectedDate || '', type: state.selectedType === '__all__' ? '' : state.selectedType || '', place: state.place.trim() || '' });
+  return `${PUBLIC_CFG.completePage}?${q.toString()}`;
+}
+function goComplete(){
+  if (!state.selectedDate){
+    Swal.fire({ icon:'info', title:'اختر التاريخ أولاً', text:'حدد يومًا مناسبًا من التقويم أو من حقل التاريخ.' });
+    return;
+  }
+  window.location.href = buildCompleteUrl();
+}
+function quickContact(){
+  const num = normalizePhone(state.system?.whatsappNumber || state.system?.invoiceWhatsappNumber || PUBLIC_CFG.whatsappFallback);
+  const txt = `السلام عليكم\nأرغب بالاستفسار عن التوفر${state.selectedDate ? ` بتاريخ ${state.selectedDate}` : ''}${state.selectedType && state.selectedType !== '__all__' ? ` لنوع ${state.selectedType}` : ''}${state.place ? ` في ${state.place}` : ''}.`;
+  window.open(`https://wa.me/${num}?text=${encodeURIComponent(txt)}`, '_blank');
+}
+function applyFilters(){
+  state.selectedType = document.getElementById('typeFilter').value || '__all__';
+  state.place = document.getElementById('placeFilter').value || '';
+  document.getElementById('activeTypeText').textContent = state.selectedType === '__all__' ? PUBLIC_CFG.allowTypesLabel : state.selectedType;
+  document.getElementById('selectedTypeLabel').textContent = state.selectedType === '__all__' ? PUBLIC_CFG.allowTypesLabel : state.selectedType;
+  if (state.calendar) state.calendar.refetchEvents();
+  if (state.selectedDate) selectDate(state.selectedDate);
+}
+async function loadData(){
+  document.getElementById('calendar').innerHTML = `<div class="loader">جاري تحميل البيانات...</div>`;
+  const [settings, events] = await Promise.all([
+    apiRun('getSystemSettings').catch(()=>({ success:true, agencyName:'وكالة ميديا', bookingTypes:['زواج','تغطية','إعلان'], whatsappNumber:PUBLIC_CFG.whatsappFallback })),
+    apiRun('getEvents').catch(()=>[])
+  ]);
+  state.system = settings || {};
+  state.events = Array.isArray(events) ? events : [];
+  document.getElementById('agencyName').textContent = state.system.agencyName || 'وكالة ميديا';
+  document.getElementById('waNumberText').textContent = state.system.whatsappNumber || state.system.invoiceWhatsappNumber || PUBLIC_CFG.whatsappFallback;
+  fillTypeOptions();
+  renderCalendar();
+  const today = new Date().toISOString().slice(0,10);
+  selectDate(today);
+  document.getElementById('selectedDateInput').value = today;
+}
+
+document.getElementById('typeFilter').addEventListener('change', applyFilters);
+document.getElementById('placeFilter').addEventListener('input', applyFilters);
+document.getElementById('selectedDateInput').addEventListener('change', e => { if(e.target.value) selectDate(e.target.value); });
+document.getElementById('goCompleteBtn').addEventListener('click', goComplete);
+document.getElementById('completeBtn').addEventListener('click', goComplete);
+document.getElementById('contactBtn').addEventListener('click', quickContact);
+window.addEventListener('focus', () => { if (state.calendar) state.calendar.refetchEvents(); });
+loadData().catch(err => {
+  console.error(err);
+  Swal.fire({ icon:'error', title:'تعذر تحميل الصفحة', text:'تحقق من رابط الـ API أو إعدادات النشر.' });
+});
+</script>
+</body>
+</html>
