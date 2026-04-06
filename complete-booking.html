@@ -79,7 +79,7 @@
           </div>
           <div class="col-12 d-grid gap-2 d-md-flex">
             <button type="submit" class="btn btn-main flex-fill"><i class="fa-brands fa-whatsapp me-1"></i>إرسال طلب الحجز</button>
-            <a href="public-availability-new.html" class="btn btn-gold flex-fill"><i class="fa-solid fa-arrow-right me-1"></i>العودة إلى التوفر</a>
+            <a data-back-link="1" href="availability.html" class="btn btn-gold flex-fill"><i class="fa-solid fa-arrow-right me-1"></i>العودة إلى التوفر</a>
           </div>
         </form>
       </div>
@@ -107,8 +107,24 @@
   </div>
 
 <script>
-const PAGE_CFG = { whatsappFallback:'966500000000' };
+const PAGE_CFG = {
+  whatsappFallback:'966500000000',
+  publicSettingsKeys:['media_publicPagesSettings','media_publicPagesConfig'],
+  templatesKey:'media_templates'
+};
 let systemCfg = { agencyName:'وكالة ميديا', bookingTypes:['زواج','تغطية','إعلان'], whatsappNumber:PAGE_CFG.whatsappFallback };
+let publicCfg = { availabilityUrl:'availability.html', completeUrl:'complete-booking.html', displayName:'', agencyLabel:'', contactNumber:'', bookingTypes:['__ALL__'] };
+let messageTpl = 'السلام عليكم
+أرغب بإكمال حجز جديد بالتفاصيل التالية:
+
+الاسم: {اسم_العميل}
+الجوال: {رقم_الجوال}
+التاريخ المطلوب: {التاريخ}
+نوع الحجز: {النوع}
+المكان: {المكان}
+الوقت: {الوقت}
+التفاصيل: {التفاصيل}
+اسم الجهة: {اسم_الوكالة}';
 function apiRun(fn, ...args){
   if (window.API && typeof API.run === 'function') return API.run(fn, ...args);
   const apiUrl = (window.APP_CONFIG && APP_CONFIG.API_URL) || '';
@@ -118,24 +134,55 @@ function apiRun(fn, ...args){
 }
 function qp(name){ return new URLSearchParams(location.search).get(name) || ''; }
 function normalizePhone(raw){ let s = String(raw || '').replace(/\s/g,'').replace(/^\+/,'').replace(/^'/,''); if (s.startsWith('966') && s.length===12) return s; if (s.startsWith('05') && s.length===10) return '966'+s.slice(1); if (s.startsWith('5') && s.length===9) return '966'+s; return s || PAGE_CFG.whatsappFallback; }
-function fillTypes(){ const sel = document.getElementById('reqType'); const types = (systemCfg.bookingTypes || []).filter(Boolean); sel.innerHTML = types.map(t => `<option value="${t}">${t}</option>`).join(''); if(qp('type')) sel.value = qp('type'); updateSummary(); }
+function safeJson(v){ try{return JSON.parse(v);}catch(e){return null;} }
+function getSavedPublicCfg(){
+  for(const key of PAGE_CFG.publicSettingsKeys){
+    const raw = localStorage.getItem(key);
+    const parsed = raw ? safeJson(raw) : null;
+    if(parsed && typeof parsed === 'object') return parsed;
+  }
+  return {};
+}
+function getSavedTemplates(){
+  const parsed = safeJson(localStorage.getItem(PAGE_CFG.templatesKey) || '{}');
+  return parsed && typeof parsed === 'object' ? parsed : {};
+}
+function getAllowedTypes(){
+  const list = Array.isArray(publicCfg.bookingTypes) ? publicCfg.bookingTypes : [];
+  const all = (systemCfg.bookingTypes || []).filter(Boolean);
+  if(!list.length || list.includes('__ALL__') || list.includes('all')) return all;
+  const out = all.filter(t => list.includes(t));
+  return out.length ? out : all;
+}
+function getDisplayName(){ return publicCfg.displayName || publicCfg.agencyLabel || systemCfg.agencyName || 'وكالة ميديا'; }
+function getContactNumber(){ return publicCfg.contactNumber || systemCfg.whatsappNumber || PAGE_CFG.whatsappFallback; }
+function fillTemplate(tpl, vars){ let out = String(tpl || ''); Object.entries(vars).forEach(([k,v]) => { out = out.split(`{${k}}`).join(String(v ?? '')); out = out.split(`{{${k}}}`).join(String(v ?? '')); }); return out; }
+function fillTypes(){ const sel = document.getElementById('reqType'); const types = getAllowedTypes(); sel.innerHTML = types.map(t => `<option value="${t}">${t}</option>`).join(''); if(qp('type') && types.includes(qp('type'))) sel.value = qp('type'); updateSummary(); }
 function updateSummary(){ document.getElementById('sumDate').textContent = document.getElementById('reqDate').value || '—'; document.getElementById('sumType').textContent = document.getElementById('reqType').value || '—'; document.getElementById('sumPlace').textContent = document.getElementById('reqPlace').value || '—'; document.getElementById('sumTime').textContent = document.getElementById('reqTime').value || '—'; document.getElementById('sumPhone').textContent = document.getElementById('custPhone').value || '—'; }
 function buildMessage(){
-  const name = document.getElementById('custName').value.trim();
-  const phone = document.getElementById('custPhone').value.trim();
-  const date = document.getElementById('reqDate').value;
-  const type = document.getElementById('reqType').value;
-  const place = document.getElementById('reqPlace').value.trim();
-  const time = document.getElementById('reqTime').value;
-  const details = document.getElementById('reqDetails').value.trim();
-  return `السلام عليكم\nأرغب بإكمال حجز جديد بالتفاصيل التالية:\n\nالاسم: ${name}\nالجوال: ${phone}\nالتاريخ المطلوب: ${date}\nنوع الحجز: ${type}${place ? `\nالمكان: ${place}` : ''}${time ? `\nالوقت: ${time}` : ''}${details ? `\nالتفاصيل: ${details}` : ''}`;
+  const vars = {
+    اسم_العميل: document.getElementById('custName').value.trim(),
+    رقم_الجوال: document.getElementById('custPhone').value.trim(),
+    التاريخ: document.getElementById('reqDate').value,
+    النوع: document.getElementById('reqType').value,
+    المكان: document.getElementById('reqPlace').value.trim(),
+    الوقت: document.getElementById('reqTime').value || 'غير محدد',
+    التفاصيل: document.getElementById('reqDetails').value.trim() || 'لا يوجد',
+    اسم_الوكالة: getDisplayName()
+  };
+  return fillTemplate(messageTpl, vars);
 }
 async function init(){
+  publicCfg = Object.assign(publicCfg, getSavedPublicCfg());
+  const savedTpl = getSavedTemplates();
+  if(savedTpl.booking_complete_request) messageTpl = savedTpl.booking_complete_request;
   try{ const data = await apiRun('getSystemSettings'); if(data && data.success) systemCfg = Object.assign(systemCfg, data); }catch(e){ console.warn(e); }
-  document.getElementById('agencyName').textContent = systemCfg.agencyName || 'وكالة ميديا';
-  document.getElementById('waNum').textContent = systemCfg.whatsappNumber || PAGE_CFG.whatsappFallback;
+  document.getElementById('agencyName').textContent = getDisplayName();
+  document.getElementById('waNum').textContent = getContactNumber();
   document.getElementById('reqDate').value = qp('date');
   document.getElementById('reqPlace').value = qp('place');
+  const backLink = document.querySelector('a[data-back-link]') || document.querySelector('.btn-gold');
+  if(backLink) backLink.href = publicCfg.availabilityUrl || 'availability.html';
   fillTypes();
   updateSummary();
 }
@@ -149,7 +196,7 @@ document.getElementById('bookingForm').addEventListener('submit', (e)=>{
   const ok = document.getElementById('confirmInfo').checked;
   if(!name || !phone || !date || !type){ Swal.fire({icon:'warning', title:'أكمل البيانات المطلوبة'}); return; }
   if(!ok){ Swal.fire({icon:'info', title:'أكد صحة البيانات أولاً'}); return; }
-  const wa = normalizePhone(systemCfg.whatsappNumber || PAGE_CFG.whatsappFallback);
+  const wa = normalizePhone(getContactNumber());
   window.open(`https://wa.me/${wa}?text=${encodeURIComponent(buildMessage())}`, '_blank');
 });
 init();
