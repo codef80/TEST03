@@ -1,4 +1,5 @@
 
+
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
@@ -198,6 +199,7 @@
       <ul class="nav nav-pills gap-2 mb-3" id="settingsMainTabs" role="tablist">
         <li class="nav-item"><button class="nav-link active" data-bs-toggle="tab" data-bs-target="#tab-users" type="button"><i class="fa-solid fa-users me-1"></i> المستخدمون</button></li>
         <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-system" type="button"><i class="fa-solid fa-cogs me-1"></i> إعدادات النظام</button></li>
+        <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-public-pages" type="button"><i class="fa-solid fa-globe me-1"></i> الصفحات العامة للعملاء</button></li>
         <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-templates" type="button"><i class="fa-brands fa-whatsapp me-1"></i> القوالب</button></li>
       </ul>
 
@@ -296,6 +298,113 @@
                 </div>
               </div>
             </div>
+
+            <div class="col-12">
+              <div class="box">
+                <div class="box-head"><h3 class="box-title"><i class="fa-solid fa-earth-americas me-2"></i>الصفحات العامة للعملاء</h3></div>
+                <div class="box-body">
+                  <div class="row g-3">
+                    <div class="col-lg-6">
+                      <label class="form-label fw-bold">رابط صفحة التحقق من التوفر</label>
+                      <div class="input-group">
+                        <input id="publicAvailabilityUrl" class="form-control" dir="ltr" placeholder="https://yourdomain.com/availability.html">
+                        <button class="btn btn-soft" type="button" onclick="copyFieldValue('publicAvailabilityUrl')"><i class="fa-solid fa-copy me-1"></i> نسخ</button>
+                        <button class="btn btn-main" type="button" onclick="openPublicPage('publicAvailabilityUrl')"><i class="fa-solid fa-arrow-up-right-from-square me-1"></i> فتح</button>
+                      </div>
+                      <div class="template-help">الصفحة التي يفحص منها العميل توفر التاريخ قبل إرسال الطلب.</div>
+                    </div>
+                    <div class="col-lg-6">
+                      <label class="form-label fw-bold">رابط صفحة إكمال الحجز</label>
+                      <div class="input-group">
+                        <input id="publicCompleteUrl" class="form-control" dir="ltr" placeholder="https://yourdomain.com/complete-booking.html">
+                        <button class="btn btn-soft" type="button" onclick="copyFieldValue('publicCompleteUrl')"><i class="fa-solid fa-copy me-1"></i> نسخ</button>
+                        <button class="btn btn-main" type="button" onclick="openPublicPage('publicCompleteUrl')"><i class="fa-solid fa-arrow-up-right-from-square me-1"></i> فتح</button>
+                      </div>
+                      <div class="template-help">الصفحة التي ينتقل إليها العميل لإكمال طلب الحجز.</div>
+                    </div>
+
+                    <div class="col-lg-6">
+                      <label class="form-label fw-bold">رقم التواصل للصفحات العامة</label>
+                      <input id="publicContactNumber" class="form-control" dir="ltr" placeholder="9665xxxxxxxx">
+                      <div class="template-help">يستخدم في زر التواصل مع صاحب النظام ورسائل إكمال الحجز.</div>
+                    </div>
+
+                    <div class="col-lg-6">
+                      <label class="form-label fw-bold">مسمى الجهة في الصفحات العامة</label>
+                      <input id="publicAgencyLabel" class="form-control" placeholder="مثال: شاليه النخيل أو وكالة ميديا">
+                    </div>
+
+                    <div class="col-12">
+                      <label class="form-label fw-bold mb-2">الأنواع المسموح عرضها للعملاء</label>
+                      <div id="publicBookingTypesWrap" class="perm-grid"></div>
+                      <div class="template-help">يمكنك اختيار كل الأنواع أو أنواع محددة فقط لتظهر في الصفحة العامة.</div>
+                    </div>
+
+                    <div class="col-12">
+                      <div class="d-flex gap-2 flex-wrap">
+                        <button class="btn btn-main" type="button" onclick="savePublicPagesSettings()"><i class="fa-solid fa-floppy-disk me-1"></i> حفظ إعدادات الصفحات العامة</button>
+                        <button class="btn btn-soft" type="button" onclick="fillPublicPagesWithDefaults()"><i class="fa-solid fa-wand-magic-sparkles me-1"></i> تعبئة تلقائية</button>
+                      </div>
+                      <div class="template-help mt-2">هذه الإعدادات محفوظة محليًا داخل المتصفح حاليًا، وسنربطها لاحقًا بالحفظ الخلفي عند تطوير قسم العملاء.</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <div class="tab-pane fade" id="tab-public-pages" role="tabpanel">
+          <div class="row g-3">
+            <div class="col-12">
+              <div class="box">
+                <div class="box-head"><h3 class="box-title"><i class="fa-solid fa-globe me-2"></i>الصفحات العامة للعملاء</h3></div>
+                <div class="box-body">
+                  <div class="mb-3 p-3" style="background:#f8fafc;border:1px solid var(--border);border-radius:1rem">
+                    <div class="fw-bold mb-2">التعبئة التلقائية للروابط</div>
+                    <div class="text-muted" style="font-size:.84rem">نعم، حقلا الرابطين يتعبآن تلقائيًا بالمسارين <span class="text-num">availability.html</span> و<span class="text-num">complete-booking.html</span> بناءً على رابط الموقع الحالي. ويمكنك استبدالهما يدويًا بأي روابط مخصصة.</div>
+                  </div>
+
+                  <div class="row g-3">
+                    <div class="col-lg-6">
+                      <label class="form-label fw-bold">رابط صفحة التحقق من التوفر</label>
+                      <div class="input-group">
+                        <input id="publicAvailabilityUrl" class="form-control" dir="ltr" placeholder="https://example.github.io/availability.html">
+                        <button type="button" class="btn btn-soft" onclick="openPublicPageLink('publicAvailabilityUrl')"><i class="fa-solid fa-up-right-from-square"></i></button>
+                        <button type="button" class="btn btn-soft" onclick="copyPublicPageLink('publicAvailabilityUrl')"><i class="fa-regular fa-copy"></i></button>
+                      </div>
+                    </div>
+                    <div class="col-lg-6">
+                      <label class="form-label fw-bold">رابط صفحة إكمال الحجز</label>
+                      <div class="input-group">
+                        <input id="publicCompleteUrl" class="form-control" dir="ltr" placeholder="https://example.github.io/complete-booking.html">
+                        <button type="button" class="btn btn-soft" onclick="openPublicPageLink('publicCompleteUrl')"><i class="fa-solid fa-up-right-from-square"></i></button>
+                        <button type="button" class="btn btn-soft" onclick="copyPublicPageLink('publicCompleteUrl')"><i class="fa-regular fa-copy"></i></button>
+                      </div>
+                    </div>
+                    <div class="col-lg-6">
+                      <label class="form-label fw-bold">اسم الجهة الظاهر للعملاء</label>
+                      <input id="publicDisplayName" class="form-control" placeholder="مثال: شاليه النخبة أو وكالة ميديا">
+                    </div>
+                    <div class="col-lg-6">
+                      <label class="form-label fw-bold">رقم التواصل الظاهر للعملاء</label>
+                      <input id="publicContactNumber" class="form-control" dir="ltr" placeholder="9665xxxxxxxx">
+                    </div>
+                    <div class="col-12">
+                      <label class="form-label fw-bold">أنواع الحجوزات المعروضة للعميل</label>
+                      <div id="publicBookingTypesContainer" class="perm-grid"></div>
+                      <div class="template-help">يمكنك اختيار كل الأنواع أو أنواع محددة لتظهر في الصفحات العامة للعملاء.</div>
+                    </div>
+                  </div>
+
+                  <div class="d-flex gap-2 flex-wrap mt-3">
+                    <button class="btn btn-main" onclick="savePublicPagesSettings()"><i class="fa-solid fa-floppy-disk me-1"></i> حفظ إعدادات الصفحات العامة</button>
+                    <button class="btn btn-soft" onclick="fillPublicPageDefaults()"><i class="fa-solid fa-wand-magic-sparkles me-1"></i> تعبئة تلقائية</button>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
 
@@ -315,6 +424,12 @@
                 <label class="form-label fw-bold">قالب إرسال الفاتورة</label>
                 <textarea id="tplBookingInvoiceSend" class="form-control" rows="5"></textarea>
                 <div class="template-help">المتاحات المقترحة: {{اسم_العميل}} - {{النوع}} - {{التاريخ}} - {{رابط_الفاتورة}}</div>
+              </div>
+
+              <div class="mb-3">
+                <label class="form-label fw-bold">قالب رسالة إكمال الحجز</label>
+                <textarea id="tplBookingCompleteRequest" class="form-control" rows="5"></textarea>
+                <div class="template-help">المتاحات المقترحة: {{اسم_العميل}} - {{النوع}} - {{التاريخ}} - {{الوقت}} - {{المكان}} - {{رقم_التواصل}} - {{اسم_الوكالة}}</div>
               </div>
 
               <div class="mb-0">
@@ -700,6 +815,8 @@
       }catch(e){}
       _systemLoaded = true;
       bindSystemAutosave();
+      renderPublicBookingTypes();
+      loadPublicPagesSettings();
       renderUsersSummary();
     }
 
@@ -726,6 +843,7 @@
       const container = document.getElementById(containerId);
       container.insertAdjacentHTML('beforeend', createSimpleRowHtml('', placeholder));
       bindSystemAutosave();
+      if (containerId === 'bookingTypesContainer') renderPublicBookingTypes(collectPublicBookingTypes());
       scheduleSystemSettingsSave();
     }
 
@@ -741,6 +859,86 @@
 التاريخ: {{التاريخ}}
 رابط الفاتورة:
 {{رابط_الفاتورة}}`;
+    }
+
+    function getPublicPagesStorageKey(){ return 'media_publicPagesConfig'; }
+
+    function defaultPublicPagesSettings(){
+      const origin = window.location.origin || '';
+      const base = window.location.pathname ? window.location.pathname.replace(/\/[^\/]*$/, '/') : '/';
+      const join = (name) => origin ? new URL(name, origin + base).toString() : name;
+      return {
+        availabilityUrl: join('availability.html'),
+        completeUrl: join('complete-booking.html'),
+        contactNumber: (_systemCfg && (_systemCfg.invoiceWhatsappNumber || _systemCfg.whatsappNumber)) || '',
+        agencyLabel: (_systemCfg && _systemCfg.agencyName) || 'وكالة ميديا',
+        allowedBookingTypes: Array.isArray(_systemCfg?.bookingTypes) ? [..._systemCfg.bookingTypes] : ['زواج','تغطية','إعلان']
+      };
+    }
+
+    function loadPublicPagesSettings(){
+      let cfg = {};
+      try{
+        cfg = JSON.parse(localStorage.getItem(getPublicPagesStorageKey()) || '{}');
+      }catch(e){ cfg = {}; }
+      const defs = defaultPublicPagesSettings();
+      const merged = { ...defs, ...cfg };
+      document.getElementById('publicAvailabilityUrl').value = merged.availabilityUrl || '';
+      document.getElementById('publicCompleteUrl').value = merged.completeUrl || '';
+      document.getElementById('publicContactNumber').value = merged.contactNumber || '';
+      document.getElementById('publicAgencyLabel').value = merged.agencyLabel || '';
+      renderPublicBookingTypes(merged.allowedBookingTypes || defs.allowedBookingTypes || []);
+    }
+
+    function renderPublicBookingTypes(selected = []){
+      const wrap = document.getElementById('publicBookingTypesWrap');
+      if (!wrap) return;
+      const types = collectSimpleList('bookingTypesContainer');
+      const html = (types.length ? types : ['زواج','تغطية','إعلان']).map(type => `
+        <label class="perm-item">
+          <input type="checkbox" class="form-check-input me-1 public-booking-type" value="${esc(type)}" ${selected.includes(type) ? 'checked' : ''}>
+          <span>${esc(type)}</span>
+        </label>
+      `).join('');
+      wrap.innerHTML = html || '<div class="empty">أضف أنواع الحجوزات أولًا</div>';
+    }
+
+    function collectPublicBookingTypes(){
+      return Array.from(document.querySelectorAll('.public-booking-type:checked')).map(el => el.value);
+    }
+
+    function savePublicPagesSettings(){
+      const payload = {
+        availabilityUrl: document.getElementById('publicAvailabilityUrl').value.trim(),
+        completeUrl: document.getElementById('publicCompleteUrl').value.trim(),
+        contactNumber: document.getElementById('publicContactNumber').value.trim(),
+        agencyLabel: document.getElementById('publicAgencyLabel').value.trim(),
+        allowedBookingTypes: collectPublicBookingTypes()
+      };
+      localStorage.setItem(getPublicPagesStorageKey(), JSON.stringify(payload));
+      Toast.success('تم حفظ إعدادات الصفحات العامة محليًا');
+    }
+
+    function fillPublicPagesWithDefaults(){
+      const defs = defaultPublicPagesSettings();
+      document.getElementById('publicAvailabilityUrl').value = defs.availabilityUrl || '';
+      document.getElementById('publicCompleteUrl').value = defs.completeUrl || '';
+      document.getElementById('publicContactNumber').value = defs.contactNumber || '';
+      document.getElementById('publicAgencyLabel').value = defs.agencyLabel || '';
+      renderPublicBookingTypes(defs.allowedBookingTypes || []);
+      savePublicPagesSettings();
+    }
+
+    function copyFieldValue(id){
+      const val = document.getElementById(id)?.value || '';
+      if (!val) return Toast.warning('لا يوجد رابط لنسخه');
+      navigator.clipboard.writeText(val).then(() => Toast.success('تم نسخ الرابط'));
+    }
+
+    function openPublicPage(id){
+      const val = document.getElementById(id)?.value || '';
+      if (!val) return Toast.warning('أدخل الرابط أولًا');
+      window.open(val, '_blank');
     }
 
     function bindSystemAutosave(){
@@ -760,7 +958,10 @@
       document.querySelectorAll('.remove-setting-row').forEach(btn => {
         if (btn.dataset.boundAutosave === '1') return;
         btn.addEventListener('click', () => {
-          btn.parentElement.remove();
+          const parent = btn.parentElement;
+          const isBookingTypeRow = !!parent.closest('#bookingTypesContainer');
+          parent.remove();
+          if (isBookingTypeRow) renderPublicBookingTypes(collectPublicBookingTypes());
           scheduleSystemSettingsSave();
         });
         btn.dataset.boundAutosave = '1';
@@ -823,6 +1024,7 @@
           localStorage.setItem(APP_CONFIG.STORAGE.systemCfg || 'media_systemConfig', JSON.stringify(_systemCfg));
         }catch(e){}
 
+        renderPublicBookingTypes(collectPublicBookingTypes());
         if (!isAuto) Toast.success(res.message || 'تم حفظ إعدادات النظام');
       }catch(err){
         if (!isAuto) throw err;
@@ -848,6 +1050,16 @@
 رابط الفاتورة:
 {{رابط_الفاتورة}}`,
 
+        booking_complete_request:
+`السلام عليكم {{اسم_الوكالة}}
+أرغب في إكمال حجز جديد
+الاسم: {{اسم_العميل}}
+النوع: {{النوع}}
+التاريخ: {{التاريخ}}
+الوقت: {{الوقت}}
+المكان: {{المكان}}
+رقم التواصل: {{رقم_التواصل}}`,
+
         assigned_task_reminder:
 `مرحبًا {{اسم_المسند_إليه}}
 تذكير بوجود عمل مسند لكم
@@ -866,6 +1078,7 @@
       const defs = defaultTemplates();
       document.getElementById('tplBookingPaymentReminder').value = t.booking_payment_reminder || defs.booking_payment_reminder;
       document.getElementById('tplBookingInvoiceSend').value = t.booking_invoice_send || defs.booking_invoice_send;
+      document.getElementById('tplBookingCompleteRequest').value = t.booking_complete_request || defs.booking_complete_request;
       document.getElementById('tplAssignedTaskReminder').value = t.assigned_task_reminder || defs.assigned_task_reminder;
     }
 
@@ -873,6 +1086,7 @@
       const payload = {
         booking_payment_reminder: document.getElementById('tplBookingPaymentReminder').value.trim(),
         booking_invoice_send: document.getElementById('tplBookingInvoiceSend').value.trim(),
+        booking_complete_request: document.getElementById('tplBookingCompleteRequest').value.trim(),
         assigned_task_reminder: document.getElementById('tplAssignedTaskReminder').value.trim()
       };
       localStorage.setItem(APP_CONFIG.STORAGE.templates || 'media_templates', JSON.stringify(payload));
@@ -883,6 +1097,7 @@
       const defs = defaultTemplates();
       document.getElementById('tplBookingPaymentReminder').value = defs.booking_payment_reminder;
       document.getElementById('tplBookingInvoiceSend').value = defs.booking_invoice_send;
+      document.getElementById('tplBookingCompleteRequest').value = defs.booking_complete_request;
       document.getElementById('tplAssignedTaskReminder').value = defs.assigned_task_reminder;
     }
 
@@ -901,6 +1116,10 @@
     window.addProjectStepItem = addProjectStepItem;
     window.saveTemplates = saveTemplates;
     window.resetTemplatesToDefault = resetTemplatesToDefault;
+    window.copyFieldValue = copyFieldValue;
+    window.openPublicPage = openPublicPage;
+    window.savePublicPagesSettings = savePublicPagesSettings;
+    window.fillPublicPagesWithDefaults = fillPublicPagesWithDefaults;
     window.toggleUserPagesMode = toggleUserPagesMode;
 
     document.addEventListener('DOMContentLoaded', async () => {
@@ -912,6 +1131,96 @@
       await loadAll();
       loadTemplates();
     });
-  </script>
+  
+
+    const PUBLIC_PAGES_STORAGE_KEY = 'media_publicPagesSettings';
+
+    function getDefaultPublicPageUrls(){
+      const originPath = window.location.href.split('#')[0].split('?')[0];
+      const base = originPath.substring(0, originPath.lastIndexOf('/') + 1);
+      return {
+        availabilityUrl: base + 'availability.html',
+        completeUrl: base + 'complete-booking.html'
+      };
+    }
+
+    function fillPublicBookingTypesOptions(selectedValues){
+      const wrap = document.getElementById('publicBookingTypesContainer');
+      if(!wrap) return;
+      const cfgTypes = Array.isArray(window.__systemBookingTypes) ? window.__systemBookingTypes : [];
+      const selectedSet = new Set(Array.isArray(selectedValues) ? selectedValues : ['__ALL__']);
+      const items = ['__ALL__', ...cfgTypes.filter(Boolean)];
+      wrap.innerHTML = items.map(val => {
+        const label = val === '__ALL__' ? 'كل الأنواع' : val;
+        const checked = selectedSet.has(val) ? 'checked' : '';
+        return `<label class="perm-item"><input type="checkbox" class="form-check-input public-booking-type-check" value="${escapeHtml(label === 'كل الأنواع' ? '__ALL__' : val)}" ${checked}> <span>${escapeHtml(label)}</span></label>`;
+      }).join('');
+      const allBox = wrap.querySelector('input[value="__ALL__"]');
+      wrap.querySelectorAll('.public-booking-type-check').forEach(chk => {
+        chk.addEventListener('change', () => {
+          if(chk.value === '__ALL__' && chk.checked){
+            wrap.querySelectorAll('.public-booking-type-check').forEach(x => { if(x.value !== '__ALL__') x.checked = false; });
+          } else if(chk.value !== '__ALL__' && chk.checked && allBox){
+            allBox.checked = false;
+          }
+          const anySpecific = [...wrap.querySelectorAll('.public-booking-type-check')].some(x => x.value !== '__ALL__' && x.checked);
+          if(!anySpecific && allBox) allBox.checked = true;
+        });
+      });
+    }
+
+    function getSelectedPublicBookingTypes(){
+      const checks = [...document.querySelectorAll('.public-booking-type-check:checked')].map(x => x.value);
+      return checks.length ? checks : ['__ALL__'];
+    }
+
+    function fillPublicPageDefaults(force = true){
+      const d = getDefaultPublicPageUrls();
+      const a = document.getElementById('publicAvailabilityUrl');
+      const c = document.getElementById('publicCompleteUrl');
+      if(a && (force || !a.value.trim())) a.value = d.availabilityUrl;
+      if(c && (force || !c.value.trim())) c.value = d.completeUrl;
+    }
+
+    function loadPublicPagesSettings(){
+      fillPublicPageDefaults(false);
+      const raw = localStorage.getItem(PUBLIC_PAGES_STORAGE_KEY);
+      const saved = raw ? JSON.parse(raw) : {};
+      document.getElementById('publicAvailabilityUrl').value = saved.availabilityUrl || document.getElementById('publicAvailabilityUrl').value || getDefaultPublicPageUrls().availabilityUrl;
+      document.getElementById('publicCompleteUrl').value = saved.completeUrl || document.getElementById('publicCompleteUrl').value || getDefaultPublicPageUrls().completeUrl;
+      document.getElementById('publicDisplayName').value = saved.displayName || (document.getElementById('agencyNameHero')?.textContent || '');
+      document.getElementById('publicContactNumber').value = saved.contactNumber || '';
+      fillPublicBookingTypesOptions(saved.bookingTypes || ['__ALL__']);
+    }
+
+    function savePublicPagesSettings(){
+      const payload = {
+        availabilityUrl: document.getElementById('publicAvailabilityUrl').value.trim() || getDefaultPublicPageUrls().availabilityUrl,
+        completeUrl: document.getElementById('publicCompleteUrl').value.trim() || getDefaultPublicPageUrls().completeUrl,
+        displayName: document.getElementById('publicDisplayName').value.trim(),
+        contactNumber: document.getElementById('publicContactNumber').value.trim(),
+        bookingTypes: getSelectedPublicBookingTypes()
+      };
+      localStorage.setItem(PUBLIC_PAGES_STORAGE_KEY, JSON.stringify(payload));
+      Swal.fire({icon:'success',title:'تم الحفظ',text:'تم حفظ إعدادات الصفحات العامة للعملاء'});
+    }
+
+    function openPublicPageLink(inputId){
+      const val = document.getElementById(inputId)?.value?.trim();
+      if(!val) return;
+      window.open(val, '_blank');
+    }
+
+    async function copyPublicPageLink(inputId){
+      const val = document.getElementById(inputId)?.value?.trim();
+      if(!val) return;
+      try{
+        await navigator.clipboard.writeText(val);
+        Swal.fire({icon:'success',title:'تم النسخ',timer:1200,showConfirmButton:false});
+      }catch(e){
+        Swal.fire({icon:'error',title:'تعذر النسخ'});
+      }
+    }
+</script>
 </body>
 </html>
