@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
@@ -29,6 +30,9 @@
     html,body{margin:0;padding:0;font-family:'Tajawal',sans-serif;background:var(--bg);color:var(--txt)}
     body{padding:1rem}
     @media (max-width:768px){ body{padding:.75rem} }
+
+    #bgBar{position:fixed;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--p),var(--gold));background-size:200% 100%;animation:bgBarAnim 1.4s linear infinite;z-index:3000;display:none}
+    @keyframes bgBarAnim{0%{background-position:100% 0}100%{background-position:-100% 0}}
 
     .top-nav{
       position:sticky;top:0;z-index:1000;background:rgba(241,245,249,.92);
@@ -62,7 +66,7 @@
 
     .summary-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:.75rem;margin-bottom:1rem}
     @media(max-width:992px){ .summary-grid{grid-template-columns:repeat(2,minmax(0,1fr))} }
-    @media(max-width:560px){ .summary-grid{grid-template-columns:1fr} }
+    @media(max-width:560px){ .summary-grid{grid-template-columns:repeat(3,minmax(0,1fr));gap:.45rem} .summary-card{padding:.7rem .6rem;border-radius:1rem} .summary-value{font-size:1.05rem} .summary-label{font-size:.68rem} .summary-note{font-size:.62rem} .summary-icon{font-size:2.2rem}}
     .summary-card{
       background:var(--card);border:1px solid var(--border);border-radius:1.25rem;box-shadow:var(--sh);padding:1rem;position:relative;overflow:hidden
     }
@@ -105,12 +109,14 @@
     .chip.base{background:var(--p-lt);color:var(--p);border-color:rgba(1,73,121,.14)}
     .chip.gray{background:#f1f5f9;color:#475569;border-color:#e2e8f0}
 
-    .card-list{display:grid;gap:.75rem}
-    .mobile-card{border:1px solid var(--border);border-radius:1rem;background:#fff;padding:.9rem;box-shadow:var(--sh)}
+    .card-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:.65rem}
+    @media(max-width:420px){.card-list{grid-template-columns:1fr 1fr;gap:.5rem}}
+    .mobile-card{border:1px solid var(--border);border-radius:1rem;background:#fff;padding:.75rem;box-shadow:var(--sh);min-height:100%}
     .mobile-card .head{display:flex;justify-content:space-between;gap:.75rem;align-items:flex-start;margin-bottom:.45rem}
-    .mobile-card .title{font-weight:900;color:var(--p)}
-    .mobile-card .line{font-size:.83rem;margin-top:.25rem}
-    .mobile-actions{display:flex;gap:.4rem;flex-wrap:wrap;margin-top:.75rem}
+    .mobile-card .title{font-weight:900;color:var(--p);font-size:.86rem;line-height:1.35}
+    .mobile-card .line{font-size:.75rem;margin-top:.22rem;line-height:1.5}
+    .mobile-actions{display:flex;gap:.35rem;flex-wrap:wrap;margin-top:.65rem}
+    .current-step{font-weight:800;color:var(--gold-dk)}
 
     .table-wrap{width:100%;overflow:auto;border-radius:1rem;border:1px solid var(--border)}
     .table{margin-bottom:0}
@@ -135,16 +141,8 @@
   </style>
 </head>
 <body>
-
-  <section class="hero">
-    <h1 class="hero-title"><i class="fa-solid fa-diagram-project me-2"></i>المشاريع</h1>
-    <p class="hero-sub">إدارة المشاريع، متابعة الحالة حسب الخطوات المعرفة من الإعدادات، وإضافة وتعديل وحذف المشاريع.</p>
-    <div class="hero-meta">
-      <span class="hero-chip"><i class="fa-solid fa-building"></i> <span id="agencyNameHero">وكالة ميديا</span></span>
-      <span class="hero-chip"><i class="fa-solid fa-user"></i> <span id="currentUserHero">—</span></span>
-      <span class="hero-chip"><i class="fa-solid fa-list-check"></i> <span id="stepsCountHero">0</span> خطوة</span>
-    </div>
-  </section>
+  <div id="bgBar"></div>
+  <div class="d-none"><span id="currentUserHero"></span></div>
 
   <section class="summary-grid">
     <div class="summary-card">
@@ -165,22 +163,7 @@
       <div class="summary-note">منتهية بالكامل</div>
       <i class="fa-solid fa-circle-check summary-icon"></i>
     </div>
-    <div class="summary-card k4">
-      <div class="summary-label">الإجمالي التقديري</div>
-      <div class="summary-value text-num" id="sumValue">0</div>
-      <div class="summary-note">من قيمة المشاريع إن وجدت</div>
-      <i class="fa-solid fa-sack-dollar summary-icon"></i>
-    </div>
   </section>
-
-  <div class="box">
-    <div class="box-head">
-      <h2 class="box-title"><i class="fa-solid fa-list-check me-2"></i>خطوات المشاريع المعتمدة</h2>
-    </div>
-    <div class="box-body">
-      <div id="stepsWrap" class="steps-wrap"></div>
-    </div>
-  </div>
 
   <div class="box">
     <div class="box-head">
@@ -211,9 +194,11 @@
             <tr id="projectsHeadRow">
               <th>اسم المشروع</th>
               <th>الحالة</th>
-              <th>القيمة</th>
+              <th>اسم المشرف</th>
               <th>تاريخ البداية</th>
               <th>آخر تحديث</th>
+              <th>المنجز</th>
+              <th>الخطوة الحالية</th>
               <th>إجراءات</th>
             </tr>
           </thead>
@@ -242,8 +227,13 @@
             </div>
 
             <div class="col-md-6">
-              <label class="form-label">قيمة المشروع</label>
-              <input type="number" id="projectValue" class="form-control" min="0">
+              <label class="form-label">اسم المشرف</label>
+              <input type="text" id="projectSupervisor" class="form-control">
+            </div>
+
+            <div class="col-md-6">
+              <label class="form-label">رابط المشروع</label>
+              <input type="url" id="projectLink" class="form-control" dir="ltr" placeholder="https://...">
             </div>
 
             <div class="col-md-6">
@@ -276,13 +266,20 @@
     let _filtered = [];
     let projectModal = null;
 
-    function fmt(v){ return Number(v || 0).toLocaleString('ar-SA'); }
+    function fmt(v){ return Number(v || 0).toLocaleString('en-US'); }
     function esc(t){ return String(t ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#039;'); }
     function num(v){ return Number(v || 0) || 0; }
 
     function getProjectName(p){
       return String(p?.['اسم_المشروع'] ?? p?.['اسم المشروع'] ?? p?.name ?? '');
     }
+    function getProjectId(p){ return String(p?.id ?? p?.['id'] ?? ''); }
+    function getProjectSupervisor(p){ return String(p?.['اسم_المشرف'] ?? p?.['اسم المشرف'] ?? ''); }
+    function getProjectLink(p){ return String(p?.['رابط_المشروع'] ?? p?.['رابط المشروع'] ?? ''); }
+    function getProjectStart(p){ return String(p?.['تاريخ_البداية'] ?? p?.['تاريخ بداية المشروع'] ?? ''); }
+    function getProjectUpdated(p){ return String(p?.['تاريخ_آخر_تحديث'] ?? p?.['تاريخ آخر تحديث'] ?? ''); }
+    function getProjectExpensesTotal(projectId){ return (_projectExpenses || []).filter(x => String(x.projectId||'') === String(projectId)).reduce((a,b)=>a+num(b.value),0); }
+    function getProjectExpensesCount(projectId){ return (_projectExpenses || []).filter(x => String(x.projectId||'') === String(projectId)).length; }
     function getProjectValue(p){
       const keys = ['قيمة_المشروع','قيمة المشروع','المبلغ','قيمة_العقد','قيمة العقد','سعر_المشروع','سعر المشروع'];
       for (const k of keys){
@@ -302,10 +299,18 @@
       if (doneCount === _steps.length) return 'مكتمل';
       return 'قيد التنفيذ';
     }
+    function getCurrentStep(p){
+      if (!_steps.length) return '—';
+      const ended = boolVal(p?.['إنهاء_المشروع']) || boolVal(p?.['إنهاء المشروع']);
+      if (ended) return 'مكتمل';
+      for (const step of _steps){ if (!boolVal(p?.[step])) return step; }
+      return 'مكتمل';
+    }
+    function showBg(flag){ const el = document.getElementById('bgBar'); if(el) el.style.display = flag ? 'block' : 'none'; }
 
     async function safeApi(fn, ...args){
       try{
-        return await API.run(fn, ...args);
+        return await (API.runWithRetry ? API.runWithRetry(fn, 1, ...args) : API.run(fn, ...args));
       }catch(e){
         console.error(e);
         Toast.error(e.message || 'تعذر تنفيذ العملية');
@@ -315,41 +320,63 @@
 
     async function initPage(){
       projectModal = new bootstrap.Modal(document.getElementById('projectModal'));
-
       const session = Session.get ? Session.get() : {};
       document.getElementById('currentUserHero').textContent = session.userName || '—';
-
-      _settings = await safeApi('getSystemSettings');
-      _steps = Array.isArray(_settings?.projectSteps) ? _settings.projectSteps : [];
-      document.getElementById('stepsCountHero').textContent = _steps.length;
-      renderStepsShowcase();
-      bindEvents();
-      await loadProjects();
+      showBg(true);
+      try{
+        _settings = await safeApi('getSystemSettings');
+        _steps = Array.isArray(_settings?.projectSteps) ? _settings.projectSteps : [];
+        bindEvents();
+        const projectPromise = loadProjects({silent:true});
+        preloadProjectExpenses();
+        await projectPromise;
+      } finally {
+        showBg(false);
+      }
     }
 
-    function renderStepsShowcase(){
-      const wrap = document.getElementById('stepsWrap');
-      if (!_steps.length){
-        wrap.innerHTML = '<div class="empty">لا توجد خطوات معرفة حاليًا في الإعدادات.</div>';
-        return;
+    async function preloadProjectExpenses(){
+      try {
+        let page = 1, items = [], total = 0;
+        do {
+          const res = await safeApi('getProjectsExpensesList', { page, pageSize: 200 });
+          const batch = Array.isArray(res?.items) ? res.items : [];
+          total = Number(res?.total || batch.length || 0);
+          items = items.concat(batch);
+          if (items.length >= total || batch.length === 0) break;
+          page++;
+        } while(true);
+        _projectExpenses = items;
+        applyFilters();
+      } catch(e) {
+        console.warn('project expenses preload failed', e);
       }
-      wrap.innerHTML = _steps.map(s => `
-        <div class="step-item"><i class="fa-solid fa-check-double" style="color:var(--ok)"></i>${esc(s)}</div>
-      `).join('');
     }
 
     function bindEvents(){
       document.getElementById('searchInput').addEventListener('input', applyFilters);
       document.getElementById('statusFilter').addEventListener('change', applyFilters);
+      document.addEventListener('visibilitychange', () => { if (!document.hidden) refreshInBackground(); });
+      window.addEventListener('focus', refreshInBackground);
     }
 
-    async function loadProjects(){
-      Spinner.show('جاري تحميل المشاريع...');
+    async function loadProjects(opts = {}){
+      const silent = opts && opts.silent;
+      if (!silent) Spinner.show('جاري تحميل المشاريع...');
       try{
         _projects = await safeApi('getProjects');
         applyFilters();
       }finally{
-        Spinner.hide();
+        if (!silent) Spinner.hide();
+      }
+    }
+
+    async function refreshInBackground(){
+      showBg(true);
+      try{
+        await Promise.allSettled([loadProjects({silent:true}), preloadProjectExpenses()]);
+      } finally {
+        showBg(false);
       }
     }
 
@@ -373,12 +400,9 @@
       const total = _filtered.length;
       const active = _filtered.filter(p => getProjectStatus(p) === 'قيد التنفيذ').length;
       const done = _filtered.filter(p => getProjectStatus(p) === 'مكتمل').length;
-      const totalValue = _filtered.reduce((a,p) => a + getProjectValue(p), 0);
-
       document.getElementById('sumProjects').textContent = fmt(total);
       document.getElementById('sumActive').textContent = fmt(active);
       document.getElementById('sumDone').textContent = fmt(done);
-      document.getElementById('sumValue').textContent = fmt(totalValue);
     }
 
     function renderProjects(){
@@ -396,25 +420,34 @@
       empty.classList.add('d-none');
 
       _filtered.forEach(p => {
-        const id = String(p.id || p['id'] || '');
+        const id = getProjectId(p);
         const name = getProjectName(p) || '—';
         const status = getProjectStatus(p);
         const statusClass = status === 'مكتمل' ? 'ok' : (status === 'قيد التنفيذ' ? 'warn' : 'base');
-        const value = getProjectValue(p);
-        const start = p['تاريخ بداية المشروع'] || '—';
-        const updated = p['تاريخ آخر تحديث'] || '—';
-        const stepsDone = _steps.filter(step => boolVal(p[step])).length;
+        const supervisor = getProjectSupervisor(p) || '—';
+        const start = getProjectStart(p) || '—';
+        const updated = getProjectUpdated(p) || '—';
+        const stepsDone = _steps.filter(step => boolVal(p?.[step])).length;
+        const currentStep = getCurrentStep(p);
+        const link = getProjectLink(p);
+        const expCount = getProjectExpensesCount(id);
+        const expTotal = getProjectExpensesTotal(id);
 
         cards.insertAdjacentHTML('beforeend', `
           <div class="mobile-card">
             <div class="head">
-              <div class="title">${esc(name)}</div>
-              <span class="chip ${statusClass}">${esc(status)}</span>
+              <div>
+                <div class="title">${esc(name)}</div>
+                <div class="line"><span class="chip ${statusClass}">${esc(status)}</span></div>
+              </div>
             </div>
-            <div class="line"><strong>القيمة:</strong> <span class="text-num">${fmt(value)}</span></div>
+            <div class="line"><strong>اسم المشرف:</strong> ${esc(supervisor)}</div>
             <div class="line"><strong>تاريخ البداية:</strong> ${esc(start)}</div>
             <div class="line"><strong>آخر تحديث:</strong> ${esc(updated)}</div>
-            <div class="line"><strong>الخطوات المنجزة:</strong> ${fmt(stepsDone)} / ${fmt(_steps.length)}</div>
+            <div class="line"><strong>الخطوات المنجزة:</strong> <span class="text-num">${fmt(stepsDone)} / ${fmt(_steps.length)}</span></div>
+            <div class="line"><strong>الخطوة الحالية:</strong> <span class="current-step">${esc(currentStep)}</span></div>
+            <div class="line"><strong>مصروفات المشروع:</strong> <span class="text-num">${fmt(expTotal)}</span> <span class="chip gray">${fmt(expCount)} سجل</span></div>
+            ${link ? `<div class="line"><a href="${esc(link)}" target="_blank" rel="noopener noreferrer">رابط المشروع</a></div>` : ''}
             <div class="mobile-actions">
               <button class="btn btn-sm btn-outline-warning" onclick="editProject('${esc(id)}')"><i class="fa-solid fa-pen"></i> تعديل</button>
               <button class="btn btn-sm btn-outline-danger" onclick="deleteProjectUI('${esc(id)}')"><i class="fa-solid fa-trash"></i> حذف</button>
@@ -426,11 +459,14 @@
         tr.innerHTML = `
           <td>${esc(name)}</td>
           <td><span class="chip ${statusClass}">${esc(status)}</span></td>
-          <td class="text-num">${fmt(value)}</td>
+          <td>${esc(supervisor)}</td>
           <td>${esc(start)}</td>
           <td>${esc(updated)}</td>
+          <td class="text-num">${fmt(stepsDone)} / ${fmt(_steps.length)}</td>
+          <td>${esc(currentStep)}</td>
           <td>
             <div class="table-actions">
+              ${link ? `<a class="btn btn-sm btn-outline-primary" href="${esc(link)}" target="_blank" rel="noopener noreferrer"><i class="fa-solid fa-up-right-from-square"></i></a>` : ''}
               <button class="btn btn-sm btn-outline-warning" onclick="editProject('${esc(id)}')"><i class="fa-solid fa-pen"></i></button>
               <button class="btn btn-sm btn-outline-danger" onclick="deleteProjectUI('${esc(id)}')"><i class="fa-solid fa-trash"></i></button>
             </div>
@@ -445,7 +481,8 @@
       document.getElementById('projectId').value = project?.id || project?.['id'] || '';
       document.getElementById('projectModalTitle').textContent = project ? 'تعديل مشروع' : 'إضافة مشروع';
       document.getElementById('projectName').value = getProjectName(project || {});
-      document.getElementById('projectValue').value = getProjectValue(project || {}) || '';
+      document.getElementById('projectSupervisor').value = getProjectSupervisor(project || {});
+      document.getElementById('projectLink').value = getProjectLink(project || {});
       document.getElementById('projectEnded').value = (boolVal(project?.['إنهاء المشروع']) || boolVal(project?.['إنهاء_المشروع'])) ? 'true' : 'false';
 
       const stepsWrap = document.getElementById('projectStepsForm');
@@ -467,9 +504,10 @@
 
     function buildProjectPayload(){
       const payload = {
-        'اسم المشروع': document.getElementById('projectName').value.trim(),
-        'قيمة المشروع': document.getElementById('projectValue').value ? Number(document.getElementById('projectValue').value) : '',
-        'إنهاء المشروع': document.getElementById('projectEnded').value === 'true'
+        'اسم_المشروع': document.getElementById('projectName').value.trim(),
+        'اسم_المشرف': document.getElementById('projectSupervisor').value.trim(),
+        'رابط_المشروع': document.getElementById('projectLink').value.trim(),
+        'إنهاء_المشروع': document.getElementById('projectEnded').value === 'true'
       };
 
       document.querySelectorAll('.project-step-check').forEach(ch => {
@@ -483,7 +521,7 @@
       const id = document.getElementById('projectId').value.trim();
       const payload = buildProjectPayload();
 
-      if (!payload['اسم المشروع']){
+      if (!payload['اسم_المشروع']){
         Toast.warning('اسم المشروع مطلوب');
         return;
       }
