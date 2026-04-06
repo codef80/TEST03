@@ -112,17 +112,15 @@
     .card-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:.65rem}
     @media(max-width:420px){.card-list{grid-template-columns:1fr 1fr;gap:.5rem}}
     .mobile-card{border:1px solid var(--border);border-radius:1rem;background:#fff;padding:.75rem;box-shadow:var(--sh);min-height:100%}
-    .mobile-card .head{display:flex;justify-content:space-between;gap:.6rem;align-items:center;margin-bottom:.55rem}
-    .mobile-card .title{font-weight:800;color:var(--txt);font-size:.82rem;line-height:1.4;flex:1;text-align:right}
-    .mobile-card .line{font-size:.75rem;margin-top:.25rem;line-height:1.7}
-    .mobile-card .line strong{color:var(--muted);font-weight:800;display:block;margin-bottom:.05rem}
-    .mobile-actions{display:flex;gap:.35rem;flex-wrap:wrap;margin-top:.7rem}
+    .mobile-card .head{display:flex;justify-content:space-between;gap:.75rem;align-items:flex-start;margin-bottom:.45rem}
+    .mobile-card .title{font-weight:900;color:var(--p);font-size:.86rem;line-height:1.35;flex:1;text-align:right}
+    .mobile-card .line{font-size:.75rem;margin-top:.22rem;line-height:1.65}
+    .mobile-actions{display:flex;gap:.35rem;flex-wrap:wrap;margin-top:.65rem}
     .current-step{font-weight:800;color:var(--gold-dk)}
-    .date-dual{display:grid;grid-template-columns:70px 1fr;gap:.1rem .5rem;align-items:start}
-    .date-dual .date-type{color:var(--muted);font-weight:800}
-    .date-dual .date-value{font-variant-numeric:tabular-nums;direction:ltr;unicode-bidi:embed}
-    .project-link-btn{display:inline-flex;align-items:center;justify-content:center;width:30px;height:30px;border-radius:999px;border:1px solid var(--border);background:#fff;color:var(--p);text-decoration:none}
-    .project-link-btn:hover{background:var(--p-lt);color:var(--p)}
+    .date-dual{display:flex;flex-wrap:wrap;gap:.3rem .45rem;align-items:center}
+    .date-dual .sep{color:#94a3b8}
+    .dates-row{display:flex;gap:.75rem;flex-wrap:wrap;align-items:flex-start;justify-content:space-between}
+    .dates-row > span{display:inline-flex;gap:.3rem;align-items:center;flex-wrap:wrap}
     .expense-note{margin-top:.3rem;padding:.45rem .55rem;border:1px dashed var(--border);border-radius:.7rem;background:#f8fafc}
     .expense-row{display:grid;grid-template-columns:1.6fr .9fr .8fr auto;gap:.5rem;align-items:center;margin-bottom:.55rem}
     .expense-del{width:38px;height:38px;border-radius:.8rem;border:1px solid var(--border);background:var(--err-lt);color:var(--err);display:flex;align-items:center;justify-content:center;cursor:pointer}
@@ -321,13 +319,12 @@
     function getProjectId(p){ return String(p?.id ?? p?.['id'] ?? ''); }
     function getProjectSupervisor(p){ return String(p?.['اسم_المشرف'] ?? p?.['اسم المشرف'] ?? ''); }
     function getProjectLink(p){ return String(p?.['رابط_المشروع'] ?? p?.['رابط المشروع'] ?? ''); }
-    function normalizeUrl(url){ const u = String(url || '').trim(); if (!u) return ''; return /^https?:\/\//i.test(u) ? u : 'https://' + u; }
     function getProjectStart(p){ return String(p?.['تاريخ_البداية'] ?? p?.['تاريخ بداية المشروع'] ?? ''); }
     function getProjectUpdated(p){ return String(p?.['تاريخ_آخر_تحديث'] ?? p?.['تاريخ آخر تحديث'] ?? ''); }
     function toDateObj(v){ if(!v) return null; const s=String(v).trim().substring(0,10); const d=new Date(s); return isNaN(d) ? null : d; }
     function formatGregorian(v){ const d=toDateObj(v); if(!d) return '—'; return new Intl.DateTimeFormat('en-CA',{year:'numeric',month:'2-digit',day:'2-digit'}).format(d); }
-    function formatHijri(v){ const d=toDateObj(v); if(!d) return '—'; try{ return new Intl.DateTimeFormat('ar-SA-u-ca-islamic-nu-latn',{year:'numeric',month:'2-digit',day:'2-digit'}).format(d).replace(/\s*هـ\s*$/,'') + ' هـ'; }catch(e){ return '—'; } }
-    function formatDualDate(v){ const g=formatGregorian(v); if(g==='—') return '—'; const h=formatHijri(v); return `<span class="date-type">ميلادي</span><span class="date-value">${g}</span><span class="date-type">هجري</span><span class="date-value">${h}</span>`; }
+    function formatHijri(v){ const d=toDateObj(v); if(!d) return '—'; try{ return new Intl.DateTimeFormat('ar-SA-u-ca-islamic-nu-latn',{year:'numeric',month:'2-digit',day:'2-digit'}).format(d) + ' هـ'; }catch(e){ return '—'; } }
+    function formatDualDate(v){ const g=formatGregorian(v); if(g==='—') return '—'; const h=formatHijri(v); return `<span class="text-num">${g}</span> <span class="sep">|</span> <span class="text-num">${h}</span>`; }
     function getProjectExpensesTotal(projectId){ return (_projectExpenses || []).filter(x => String(x.projectId||'') === String(projectId)).reduce((a,b)=>a+num(b.value),0); }
     function getProjectExpensesCount(projectId){ return (_projectExpenses || []).filter(x => String(x.projectId||'') === String(projectId)).length; }
     function getProjectValue(p){
@@ -483,19 +480,17 @@
         const expCount = getProjectExpensesCount(id);
         const expTotal = getProjectExpensesTotal(id);
 
-        const projectLink = normalizeUrl(getProjectLink(p));
         cards.insertAdjacentHTML('beforeend', `
           <div class="mobile-card">
             <div class="head">
               <div class="title">${esc(name)}</div>
-              <div style="display:flex;align-items:center;gap:.35rem">${projectLink ? `<a class="project-link-btn" href="${esc(projectLink)}" target="_blank" rel="noopener noreferrer" title="فتح رابط المشروع"><i class="fa-solid fa-arrow-up-right-from-square"></i></a>` : ''}<span class="chip ${statusClass}">${esc(status)}</span></div>
+              <div><span class="chip ${statusClass}">${esc(status)}</span></div>
             </div>
-            <div class="line"><strong>اسم المشرف</strong><span>${esc(supervisor)}</span></div>
-            <div class="line"><strong>تاريخ البداية</strong><span class="date-dual">${start}</span></div>
-            <div class="line"><strong>آخر تحديث</strong><span class="date-dual">${updated}</span></div>
-            <div class="line"><strong>الخطوات المنجزة</strong><span class="text-num">${fmt(stepsDone)} / ${fmt(_steps.length)}</span></div>
-            <div class="line"><strong>الخطوة الحالية</strong><span class="current-step">${esc(currentStep)}</span></div>
-            <div class="line"><strong>مصروفات المشروع</strong><span><span class="text-num">${fmt(expTotal)}</span> <span class="chip gray">${fmt(expCount)} سجل</span></span></div>
+            <div class="line"><strong>اسم المشرف:</strong> ${esc(supervisor)}</div>
+            <div class="line dates-row"><span><strong>تاريخ البداية:</strong> <span class="date-dual">${start}</span></span><span><strong>آخر تحديث:</strong> <span class="date-dual">${updated}</span></span></div>
+            <div class="line"><strong>الخطوات المنجزة:</strong> <span class="text-num">${fmt(stepsDone)} / ${fmt(_steps.length)}</span></div>
+            <div class="line"><strong>الخطوة الحالية:</strong> <span class="current-step">${esc(currentStep)}</span></div>
+            <div class="line"><strong>مصروفات المشروع:</strong> <span class="text-num">${fmt(expTotal)}</span> <span class="chip gray">${fmt(expCount)} سجل</span></div>
             <div class="mobile-actions">
               <button class="btn btn-sm btn-outline-primary" onclick="openProjectExpenses('${esc(id)}')"><i class="fa-solid fa-plus"></i> إضافة مصروف</button>
               <button class="btn btn-sm btn-outline-warning" onclick="editProject('${esc(id)}')"><i class="fa-solid fa-pen"></i> تعديل</button>
@@ -506,7 +501,7 @@
 
         const tr = document.createElement('tr');
         tr.innerHTML = `
-          <td>${esc(name)} ${projectLink ? `<a class="project-link-btn ms-2" href="${esc(projectLink)}" target="_blank" rel="noopener noreferrer" title="فتح رابط المشروع"><i class="fa-solid fa-arrow-up-right-from-square"></i></a>` : ''}</td>
+          <td>${esc(name)}</td>
           <td><span class="chip ${statusClass}">${esc(status)}</span></td>
           <td>${esc(supervisor)}</td>
           <td><span class="date-dual">${start}</span></td>
@@ -577,7 +572,6 @@
 
       Spinner.show(id ? 'جاري تحديث المشروع...' : 'جاري إضافة المشروع...');
       try{
-        await safeApi('restructureProjectsSheet');
         if (id){
           payload.id = id;
           await safeApi('updateProject', payload);
